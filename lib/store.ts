@@ -5,6 +5,52 @@ import path from "node:path";
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Engagement, IntakeFields } from "./types";
 
+type StoredIntake = Partial<IntakeFields> & { effectiveDate?: string };
+
+type StoredEngagement = Omit<Engagement, "intake" | "effectiveDate" | "docusign"> & {
+  effectiveDate?: string | null;
+  intake: StoredIntake;
+  docusign?: Partial<Engagement["docusign"]>;
+};
+
+function normalizeIntake(intake: StoredIntake): IntakeFields {
+  return {
+    buyerLegalName: intake.buyerLegalName ?? "",
+    buyerAttention: intake.buyerAttention ?? "",
+    buyerEmail: intake.buyerEmail ?? "",
+    buyerStreet: intake.buyerStreet ?? "",
+    buyerCity: intake.buyerCity ?? "",
+    buyerState: intake.buyerState ?? "",
+    buyerPostalCode: intake.buyerPostalCode ?? "",
+    buyerPhone: intake.buyerPhone ?? "",
+    tortoiseCount: intake.tortoiseCount ?? 0,
+    perGtRate: intake.perGtRate ?? 0,
+    relocationCounty: intake.relocationCounty ?? "",
+    authorizedAgentName: intake.authorizedAgentName ?? "",
+    authorizedAgentCompany: intake.authorizedAgentCompany ?? "",
+    donorCompanyAffiliation: intake.donorCompanyAffiliation ?? "",
+    donorSiteName: intake.donorSiteName ?? "",
+    donorSiteDescription: intake.donorSiteDescription ?? "",
+    buyerWitnessName: intake.buyerWitnessName ?? "",
+    buyerWitnessEmail: intake.buyerWitnessEmail ?? "",
+    sellerWitnessName: intake.sellerWitnessName ?? "",
+    sellerWitnessEmail: intake.sellerWitnessEmail ?? "",
+  };
+}
+
+function normalizeEngagement(raw: StoredEngagement): Engagement {
+  const legacyDate = raw.intake.effectiveDate?.trim() || null;
+  return {
+    ...raw,
+    effectiveDate: raw.effectiveDate ?? legacyDate,
+    intake: normalizeIntake(raw.intake),
+    docusign: {
+      ...raw.docusign,
+      recipients: raw.docusign?.recipients ?? [],
+    },
+  };
+}
+
 const DATA_DIR = path.join(process.cwd(), "data");
 const STORE_PATH = path.join(DATA_DIR, "engagements.json");
 const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
@@ -19,6 +65,7 @@ function emptyDocuSign() {
     sentAt: null,
     completedAt: null,
     lastMessage: null,
+    recipients: [],
   };
 }
 
@@ -37,8 +84,8 @@ async function readAll(): Promise<Engagement[]> {
   await ensureDataDir();
   try {
     const raw = await readFile(STORE_PATH, "utf8");
-    const parsed = JSON.parse(raw) as Engagement[];
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(raw) as StoredEngagement[];
+    return Array.isArray(parsed) ? parsed.map(normalizeEngagement) : [];
   } catch (error) {
     const nodeError = error as NodeJS.ErrnoException;
     if (nodeError.code === "ENOENT") {
@@ -81,6 +128,7 @@ export async function createEngagementRecord(intake: IntakeFields) {
       id: randomUUID(),
       reference: createReference(),
       status: "draft",
+      effectiveDate: null,
       intake,
       signingMethod: null,
       signedArtifact: null,

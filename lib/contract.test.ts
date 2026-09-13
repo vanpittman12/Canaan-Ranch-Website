@@ -3,7 +3,6 @@ import { buildContract } from "./contract";
 import type { Engagement, IntakeFields } from "./types";
 
 const intake: IntakeFields = {
-  effectiveDate: "2026-04-15",
   buyerLegalName: "Suncoast Land Partners LLC",
   buyerAttention: "Morgan Hale",
   buyerEmail: "morgan@suncoast.example",
@@ -14,15 +13,24 @@ const intake: IntakeFields = {
   buyerPhone: "813-555-0190",
   tortoiseCount: 10,
   perGtRate: 6000,
+  relocationCounty: "Hillsborough",
+  authorizedAgentName: "Casey Nguyen",
+  authorizedAgentCompany: "Suncoast Permitting",
+  donorCompanyAffiliation: "Lennar",
   donorSiteName: "Harbour tract",
   donorSiteDescription: "Residential development parcel east of the county line.",
+  buyerWitnessName: "Riley Chen",
+  buyerWitnessEmail: "riley@suncoast.example",
+  sellerWitnessName: "Pat Morales",
+  sellerWitnessEmail: "pat@canaanpreserve.example",
 };
 
-function engagement(): Engagement {
+function engagement(overrides: Partial<Engagement> = {}): Engagement {
   return {
     id: "eng-gt",
     reference: "CP-2026-TEST",
     status: "draft",
+    effectiveDate: null,
     intake,
     signingMethod: null,
     signedArtifact: null,
@@ -33,6 +41,7 @@ function engagement(): Engagement {
       sentAt: null,
       completedAt: null,
       lastMessage: null,
+      recipients: [],
     },
     reviews: [],
     changeRequestNote: null,
@@ -41,6 +50,7 @@ function engagement(): Engagement {
     submittedAt: null,
     acceptedAt: null,
     executedAt: null,
+    ...overrides,
   };
 }
 
@@ -58,7 +68,24 @@ describe("gopher tortoise agreement mapping", () => {
     expect(text).not.toContain("Bio-Tech");
   });
 
-  it("fills buyer, capacity, rate, total, and expiration from intake", () => {
+  it("leaves Effective Date and Expiration open until the Buyer signs", () => {
+    const contract = buildContract(engagement());
+    const body = contract.sections.map((section) => section.paragraphs.join(" ")).join(" ");
+    expect(contract.effectiveDate).toBe("the date Buyer signs this Agreement");
+    expect(contract.expirationDate).toBe("one (1) year after the Effective Date");
+    expect(body).toContain("the date Buyer signs this Agreement");
+    expect(body).not.toContain("April 15, 2027");
+  });
+
+  it("fills expiration from the signature Effective Date once signed", () => {
+    const contract = buildContract(engagement({ effectiveDate: "2026-04-15" }));
+    const body = contract.sections.map((section) => section.paragraphs.join(" ")).join(" ");
+    expect(contract.effectiveDate).toBe("April 15, 2026");
+    expect(contract.expirationDate).toBe("April 15, 2027");
+    expect(body).toContain("April 15, 2027");
+  });
+
+  it("fills buyer, capacity, ops fields, rate, total, and one witness per party", () => {
     const contract = buildContract(engagement());
     const body = contract.sections.map((section) => section.paragraphs.join(" ")).join(" ");
     expect(contract.title).toBe("Multi-Project Gopher Tortoise Relocation Agreement");
@@ -67,8 +94,15 @@ describe("gopher tortoise agreement mapping", () => {
     expect(body).toContain("$6,000");
     expect(body).toContain("six thousand dollars");
     expect(body).toContain("$60,000");
-    expect(body).toContain("April 15, 2027");
     expect(body).toContain("Harbour tract");
+    expect(body).toContain("Lennar");
+    expect(body).toContain("Hillsborough");
+    expect(body).toContain("Casey Nguyen");
+    expect(body).toContain("Suncoast Permitting");
     expect(body).toContain("$3,000");
+    expect(body).toContain("does not require a separate initial deposit or Initial Payment");
+    expect(contract.buyerBlock.join(" ")).toContain("Riley Chen");
+    expect(contract.sellerBlock.join(" ")).toContain("Pat Morales");
+    expect(contract.signatureIntro).toContain("one (1) witness");
   });
 });

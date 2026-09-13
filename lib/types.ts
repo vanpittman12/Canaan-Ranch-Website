@@ -16,7 +16,6 @@ export type DocuSignEnvelopeStatus =
   | "voided";
 
 export interface IntakeFields {
-  effectiveDate: string;
   buyerLegalName: string;
   buyerAttention: string;
   buyerEmail: string;
@@ -27,8 +26,16 @@ export interface IntakeFields {
   buyerPhone: string;
   tortoiseCount: number;
   perGtRate: number;
+  relocationCounty: string;
+  authorizedAgentName: string;
+  authorizedAgentCompany: string;
+  donorCompanyAffiliation: string;
   donorSiteName: string;
   donorSiteDescription: string;
+  buyerWitnessName: string;
+  buyerWitnessEmail: string;
+  sellerWitnessName: string;
+  sellerWitnessEmail: string;
 }
 
 export interface SignedArtifact {
@@ -40,6 +47,12 @@ export interface SignedArtifact {
   sizeBytes: number;
 }
 
+export interface EnvelopeRecipient {
+  role: "buyer_signer" | "seller_signer" | "buyer_witness" | "seller_witness";
+  name: string;
+  email: string;
+}
+
 export interface DocuSignState {
   mode: "stub" | "live_placeholder";
   envelopeId: string | null;
@@ -47,6 +60,7 @@ export interface DocuSignState {
   sentAt: string | null;
   completedAt: string | null;
   lastMessage: string | null;
+  recipients: EnvelopeRecipient[];
 }
 
 export interface ReviewRecord {
@@ -60,6 +74,8 @@ export interface Engagement {
   id: string;
   reference: string;
   status: EngagementStatus;
+  /** YYYY-MM-DD, set when the Buyer signs. Null until signature completion. */
+  effectiveDate: string | null;
   intake: IntakeFields;
   signingMethod: SigningMethod | null;
   signedArtifact: SignedArtifact | null;

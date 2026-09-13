@@ -7,6 +7,8 @@
  * and Envelopes:create — it still does not call the network.
  */
 import { randomUUID } from "node:crypto";
+import { brand } from "./brand";
+import type { EnvelopeRecipient, IntakeFields } from "./types";
 
 export const DOCUSIGN_ENV_VARS = [
   "DOCUSIGN_ENABLED",
@@ -23,11 +25,20 @@ export const DOCUSIGN_ENV_VARS = [
 
 export type DocuSignMode = "stub" | "live_placeholder";
 
+export type { EnvelopeRecipient };
+
+export interface DocuSignSendInput {
+  engagementId: string;
+  reference: string;
+  recipients: EnvelopeRecipient[];
+}
+
 export interface DocuSignSendResult {
   mode: DocuSignMode;
   envelopeId: string;
   status: "sent";
   message: string;
+  recipients: EnvelopeRecipient[];
 }
 
 const REQUIRED_LIVE_VARS = [
@@ -64,27 +75,44 @@ export function describeDocuSignSeam() {
   };
 }
 
-export async function sendEnvelope(input: {
-  engagementId: string;
-  reference: string;
-  signerName: string;
-  signerEmail: string;
-}): Promise<DocuSignSendResult> {
+export function buildEnvelopeRecipients(intake: IntakeFields): EnvelopeRecipient[] {
+  return [
+    { role: "buyer_signer", name: intake.buyerAttention, email: intake.buyerEmail },
+    { role: "seller_signer", name: brand.signatoryName, email: brand.email },
+    {
+      role: "buyer_witness",
+      name: intake.buyerWitnessName,
+      email: intake.buyerWitnessEmail,
+    },
+    {
+      role: "seller_witness",
+      name: intake.sellerWitnessName,
+      email: intake.sellerWitnessEmail,
+    },
+  ];
+}
+
+export function formatRoutingSummary(recipients: EnvelopeRecipient[]) {
+  return recipients
+    .map((recipient) => `${recipient.role}: ${recipient.name} <${recipient.email}>`)
+    .join("; ");
+}
+
+export async function sendEnvelope(input: DocuSignSendInput): Promise<DocuSignSendResult> {
   if (isDocuSignEnabled()) {
     return sendEnvelopeLive(input);
   }
   return sendEnvelopeStub(input);
 }
 
-function sendEnvelopeStub(input: {
-  engagementId: string;
-  reference: string;
-}): DocuSignSendResult {
+function sendEnvelopeStub(input: DocuSignSendInput): DocuSignSendResult {
+  const routing = formatRoutingSummary(input.recipients);
   return {
     mode: "stub",
     envelopeId: `stub-${input.engagementId.slice(0, 8)}-${randomUUID().slice(0, 8)}`,
     status: "sent",
-    message: `DocuSign stub: envelope queued locally for ${input.reference}. No DocuSign API call was made. Set DOCUSIGN_ENABLED=true and implement sendEnvelopeLive() to go live.`,
+    message: `DocuSign stub: envelope queued locally for ${input.reference}. Routing: ${routing}. No DocuSign API call was made. Set DOCUSIGN_ENABLED=true and implement sendEnvelopeLive() to go live.`,
+    recipients: input.recipients,
   };
 }
 
@@ -100,12 +128,7 @@ function sendEnvelopeStub(input: {
  * 4. Persist the returned envelopeId and rely on DOCUSIGN_WEBHOOK_SECRET to
  *    verify Connect / webhook callbacks that mark the envelope complete.
  */
-export async function sendEnvelopeLive(input: {
-  engagementId: string;
-  reference: string;
-  signerName: string;
-  signerEmail: string;
-}): Promise<DocuSignSendResult> {
+export async function sendEnvelopeLive(input: DocuSignSendInput): Promise<DocuSignSendResult> {
   const missing = missingLiveConfigVars();
   if (missing.length > 0) {
     throw new Error(

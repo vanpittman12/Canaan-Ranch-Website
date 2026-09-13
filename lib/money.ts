@@ -98,6 +98,11 @@ export function dealEconomics(intake: IntakeFields) {
   };
 }
 
+/** Calendar date (YYYY-MM-DD) from an ISO date or timestamp. */
+export function dateOnly(isoDateTime: string) {
+  return isoDateTime.slice(0, 10);
+}
+
 export function addOneYear(isoDate: string) {
   const date = parseIsoDate(isoDate);
   if (!date) {

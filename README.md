@@ -50,33 +50,36 @@ npm run lint     # ESLint
 
 ## Intake → agreement mapping
 
-| Intake | Agreement |
+| Intake / record | Agreement |
 | --- | --- |
-| Effective Date | Preamble / term start |
 | Buyer legal name | Buyer party |
-| Buyer notice (attention, street, city/state/zip, phone, email) | Notices and signature block |
-| Number of gopher tortoises | Paragraph 2 “up to N” reserved capacity |
-| Per GT Rate (default $6,000; admin override) | Payment paragraph (words + numbers) |
+| Buyer notice (attention / signatory, street, city/state/zip, phone, email) | Notices and Buyer signature block |
+| Number of spots (tortoise count) | Paragraph 2 “up to N” reserved capacity |
+| Per GT Rate (default $6,000; admin override only) | Payment paragraph (words + numbers) |
 | Tortoise count × rate | Total Estimated Payment (words + numbers) |
-| Effective Date + 1 year | Expiration Date |
+| County of relocation | Reserved-capacity paragraph |
+| Authorized agent name + company | Parties, notices, Buyer responsibilities |
+| Donor company affiliation | Reserved-capacity paragraph |
 | Optional donor site / description | Reserved-capacity paragraph |
+| Buyer witness name + email | Buyer signature block (1 witness) + DocuSign routing |
+| Canaan Ranch LLP witness name + email | Seller signature block (1 witness) + DocuSign routing |
+| Effective Date (not on the form) | Date the Buyer signs (DocuSign completion or manual signed-copy upload) |
+| Effective Date + 1 year | Expiration Date (filled once signed) |
 
-Seller-side constants (not buyer intake): Canaan Ranch LLP; Attention Van Pittman; 1700 S. MacDill Ave., Suite 340, Tampa, FL 33629; Phone 813-390-1044; signatory Andrew V. Pittman, Jr., Manager; agent Applied Bionomics, LLC / Andrew Fuddy; juvenile additional fee $3,000; venue Pasco County, Florida.
+Seller-side constants (not buyer intake): Canaan Ranch LLP; Attention Van Pittman; 1700 S. MacDill Ave., Suite 340, Tampa, FL 33629; Phone 813-390-1044; signatory Andrew V. Pittman, Jr., Manager; agent Applied Bionomics, LLC / Andrew Fuddy; juvenile additional fee $3,000 at delivery/acceptance; venue Pasco County, Florida.
 
-Additional project-information questions that do not belong in the agreement are reserved for a later form section and are not invented here. There is no initial deposit / Initial Payment step.
+Adult vs juvenile is not collected at intake. The $3,000 juvenile additional fee stays in the agreement body. There is no initial deposit / Initial Payment step.
 
 ## Product flow
 
-1. Buyer completes intake (legal name, notice block, tortoise count).
+1. Buyer completes intake (legal name, notice / signatory, spots, project/ops fields, one witness per party).
 2. Submit generates the Multi-Project Gopher Tortoise Relocation Agreement and shows the preview.
-3. Buyer chooses:
-   - **DocuSign** — recorded as the signing method. The envelope is **not** sent until Accept.
-   - **Manual** — download the PDF, optionally upload a signed copy, then submit.
+3. Usual path is **DocuSign** after review (witness emails are recorded on the stub envelope routing). Manual PDF remains a fallback.
 4. Team reviews at `/admin`:
    - **Accept** — if DocuSign, send the stub envelope; if a signed file is already present, status becomes **Executed**.
    - **Request changes** — buyer can edit and resubmit.
    - **Decline** — closed without execution.
-5. After Accept, status becomes **Executed** only when a signed artifact is present (manual upload, or the admin “Simulate DocuSign signed” stub control).
+5. After Accept, status becomes **Executed** only when a signed artifact is present (manual upload, or the admin “Simulate DocuSign signed” stub control). The Effective Date is stamped from that signature completion.
 
 ## DocuSign seam
 

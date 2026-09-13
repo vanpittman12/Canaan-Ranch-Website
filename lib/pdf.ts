@@ -136,7 +136,7 @@ async function drawDocument(
     }
   }
 
-  ensureSpace(140);
+  ensureSpace(220);
   writeLines([contract.signatureHeading], serifBold, 12, forest, 20);
   writeLines(
     wrapText(contract.signatureIntro, serif, 10.5, maxWidth),

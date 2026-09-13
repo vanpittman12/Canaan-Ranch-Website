@@ -11,7 +11,7 @@ import {
   sessionCookieOptions,
   verifyAdminSession,
 } from "@/lib/auth";
-import { sendEnvelope, buildStubSignedFilename } from "@/lib/docusign";
+import { sendEnvelope, buildStubSignedFilename, buildEnvelopeRecipients } from "@/lib/docusign";
 import {
   applyDocuSignCompleted,
   applyDocuSignSent,
@@ -78,10 +78,15 @@ export async function reviewEngagement(
       const sent = await sendEnvelope({
         engagementId: next.id,
         reference: next.reference,
-        signerName: next.intake.buyerAttention,
-        signerEmail: next.intake.buyerEmail,
+        recipients: buildEnvelopeRecipients(next.intake),
       });
-      next = applyDocuSignSent(next, sent.envelopeId, sent.message, sent.mode);
+      next = applyDocuSignSent(
+        next,
+        sent.envelopeId,
+        sent.message,
+        sent.mode,
+        sent.recipients,
+      );
     }
     await saveEngagement(next);
   } catch (error) {

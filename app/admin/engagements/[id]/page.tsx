@@ -55,22 +55,47 @@ export default async function AdminEngagementPage({
             <section className="rounded-2xl border border-line bg-white p-6">
               <h2 className="font-serif text-2xl text-forest">Intake</h2>
               <dl className="mt-4 grid gap-3 text-sm">
-                <Row label="Effective" value={formatLongDate(engagement.intake.effectiveDate)} />
+                <Row
+                  label="Effective"
+                  value={
+                    engagement.effectiveDate
+                      ? formatLongDate(engagement.effectiveDate)
+                      : "Set when the Buyer signs"
+                  }
+                />
                 <Row
                   label="Expiration"
-                  value={formatLongDate(addOneYear(engagement.intake.effectiveDate))}
+                  value={
+                    engagement.effectiveDate
+                      ? formatLongDate(addOneYear(engagement.effectiveDate))
+                      : "Effective Date + 1 year"
+                  }
                 />
                 <Row label="Buyer" value={engagement.intake.buyerLegalName} />
                 <Row label="Attention" value={engagement.intake.buyerAttention} />
                 <Row label="Email" value={engagement.intake.buyerEmail} />
                 <Row label="Phone" value={engagement.intake.buyerPhone} />
                 <Row label="Notice" value={buyerNoticeAddress(engagement.intake)} />
-                <Row label="Capacity" value={`${engagement.intake.tortoiseCount} GT`} />
+                <Row label="Spots" value={`${engagement.intake.tortoiseCount} GT`} />
                 <Row label="Per GT rate" value={economics.rateFormatted} />
                 <Row label="Est. total" value={economics.totalFormatted} />
+                <Row label="County" value={engagement.intake.relocationCounty} />
+                <Row
+                  label="Auth. agent"
+                  value={`${engagement.intake.authorizedAgentName}, ${engagement.intake.authorizedAgentCompany}`}
+                />
+                <Row label="Donor co." value={engagement.intake.donorCompanyAffiliation} />
                 {engagement.intake.donorSiteName ? (
                   <Row label="Donor site" value={engagement.intake.donorSiteName} />
                 ) : null}
+                <Row
+                  label="Buyer witness"
+                  value={`${engagement.intake.buyerWitnessName} · ${engagement.intake.buyerWitnessEmail}`}
+                />
+                <Row
+                  label="Seller witness"
+                  value={`${engagement.intake.sellerWitnessName} · ${engagement.intake.sellerWitnessEmail}`}
+                />
               </dl>
               {engagement.intake.donorSiteDescription ? (
                 <p className="mt-4 text-sm leading-7 text-ink/80">
@@ -109,6 +134,14 @@ export default async function AdminEngagementPage({
                 <Row label="DocuSign mode" value={seam.mode} />
                 <Row label="Envelope" value={engagement.docusign.envelopeId ?? "—"} />
                 <Row label="Envelope status" value={engagement.docusign.status} />
+                {engagement.docusign.recipients.length > 0 ? (
+                  <Row
+                    label="Routing"
+                    value={engagement.docusign.recipients
+                      .map((recipient) => `${recipient.role}: ${recipient.email}`)
+                      .join(" · ")}
+                  />
+                ) : null}
               </dl>
               {engagement.docusign.lastMessage ? (
                 <p className="mt-3 text-sm leading-6 text-muted">{engagement.docusign.lastMessage}</p>
@@ -158,7 +191,7 @@ export default async function AdminEngagementPage({
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-[7.5rem_1fr] gap-3">
+    <div className="grid grid-cols-[8.25rem_1fr] gap-3">
       <dt className="text-muted">{label}</dt>
       <dd className="text-ink">{value}</dd>
     </div>

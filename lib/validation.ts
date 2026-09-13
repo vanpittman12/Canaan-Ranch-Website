@@ -2,7 +2,6 @@ import { z } from "zod";
 import { brand } from "./brand";
 
 export const intakeSchema = z.object({
-  effectiveDate: z.string().trim().min(1, "Effective date is required."),
   buyerLegalName: z.string().trim().min(2, "Buyer legal name is required."),
   buyerAttention: z.string().trim().min(2, "Attention name is required."),
   buyerEmail: z.string().trim().email("Enter a valid email address."),
@@ -19,8 +18,25 @@ export const intakeSchema = z.object({
     .number({ error: "Enter a per-tortoise rate." })
     .min(1, "Rate must be greater than zero.")
     .default(brand.defaultPerGtRate),
+  relocationCounty: z.string().trim().min(2, "County of relocation is required."),
+  authorizedAgentName: z.string().trim().min(2, "Authorized agent name is required."),
+  authorizedAgentCompany: z
+    .string()
+    .trim()
+    .min(2, "Authorized agent company affiliation is required."),
+  donorCompanyAffiliation: z
+    .string()
+    .trim()
+    .min(2, "Donor company affiliation is required."),
   donorSiteName: z.string().trim().default(""),
   donorSiteDescription: z.string().trim().default(""),
+  buyerWitnessName: z.string().trim().min(2, "Buyer witness name is required."),
+  buyerWitnessEmail: z.string().trim().email("Enter a valid Buyer witness email."),
+  sellerWitnessName: z.string().trim().min(2, "Canaan Ranch LLP witness name is required."),
+  sellerWitnessEmail: z
+    .string()
+    .trim()
+    .email("Enter a valid Canaan Ranch LLP witness email."),
 });
 
 export type IntakeInput = z.infer<typeof intakeSchema>;

@@ -80,7 +80,7 @@ export default async function AdminQueuePage({
                 <tr>
                   <th className="px-5 py-3 font-semibold">Reference</th>
                   <th className="px-5 py-3 font-semibold">Client</th>
-                  <th className="hidden px-5 py-3 font-semibold md:table-cell">Capacity</th>
+                  <th className="hidden px-5 py-3 font-semibold md:table-cell">Spots</th>
                   <th className="hidden px-5 py-3 font-semibold lg:table-cell">Signing</th>
                   <th className="px-5 py-3 font-semibold">Status</th>
                 </tr>

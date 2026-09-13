@@ -11,7 +11,6 @@ import {
 import type { Engagement, IntakeFields } from "./types";
 
 const intake: IntakeFields = {
-  effectiveDate: "2026-04-15",
   buyerLegalName: "Suncoast Land Partners LLC",
   buyerAttention: "Morgan Hale",
   buyerEmail: "morgan@suncoast.example",
@@ -22,8 +21,16 @@ const intake: IntakeFields = {
   buyerPhone: "813-555-0190",
   tortoiseCount: 10,
   perGtRate: 6000,
+  relocationCounty: "Hillsborough",
+  authorizedAgentName: "Casey Nguyen",
+  authorizedAgentCompany: "Suncoast Permitting",
+  donorCompanyAffiliation: "Lennar",
   donorSiteName: "Harbour tract",
   donorSiteDescription: "",
+  buyerWitnessName: "Riley Chen",
+  buyerWitnessEmail: "riley@suncoast.example",
+  sellerWitnessName: "Pat Morales",
+  sellerWitnessEmail: "pat@canaanpreserve.example",
 };
 
 function draft(): Engagement {
@@ -31,6 +38,7 @@ function draft(): Engagement {
     id: "eng-1",
     reference: "CP-2026-TEST",
     status: "draft",
+    effectiveDate: null,
     intake,
     signingMethod: null,
     signedArtifact: null,
@@ -41,6 +49,7 @@ function draft(): Engagement {
       sentAt: null,
       completedAt: null,
       lastMessage: null,
+      recipients: [],
     },
     reviews: [],
     changeRequestNote: null,
@@ -80,6 +89,7 @@ describe("engagement status machine", () => {
     const accepted = applyReview(pending, "accept", "");
     expect(accepted.status).toBe("accepted");
     expect(accepted.executedAt).toBeNull();
+    expect(accepted.effectiveDate).toBeNull();
     expect(nextStatusAfterAccept(false)).toBe("accepted");
   });
 
@@ -87,9 +97,11 @@ describe("engagement status machine", () => {
     const pending = applySubmit(draft(), "manual");
     const withSignature = applySignedArtifact(pending, artifact());
     expect(withSignature.status).toBe("pending_review");
+    expect(withSignature.effectiveDate).toBe(withSignature.signedArtifact?.uploadedAt.slice(0, 10));
     const executed = applyReview(withSignature, "accept", "Looks complete.");
     expect(executed.status).toBe("executed");
     expect(executed.executedAt).toBeTruthy();
+    expect(executed.effectiveDate).toBe(withSignature.effectiveDate);
   });
 
   it("does not close a signed file until the team accepts", () => {
@@ -103,6 +115,21 @@ describe("engagement status machine", () => {
     const accepted = applyReview(pending, "accept", "");
     const executed = applySignedArtifact(accepted, artifact());
     expect(executed.status).toBe("executed");
+    expect(executed.effectiveDate).toBe(executed.signedArtifact?.uploadedAt.slice(0, 10));
+  });
+
+  it("does not overwrite an Effective Date already captured at signing", () => {
+    const pending = applySubmit(draft(), "manual");
+    const signed = applySignedArtifact(pending, {
+      ...artifact(),
+      uploadedAt: "2026-04-15T18:22:00.000Z",
+    });
+    expect(signed.effectiveDate).toBe("2026-04-15");
+    const later = applySignedArtifact(signed, {
+      ...artifact(),
+      uploadedAt: "2026-05-01T12:00:00.000Z",
+    });
+    expect(later.effectiveDate).toBe("2026-04-15");
   });
 
   it("returns to customer edit after request changes", () => {
@@ -120,12 +147,17 @@ describe("engagement status machine", () => {
     expect(() => applySignedArtifact(declined, artifact())).toThrow();
   });
 
-  it("marks DocuSign complete only after accept", () => {
+  it("marks DocuSign complete only after accept and stamps the Effective Date", () => {
     const pending = applySubmit(draft(), "docusign");
     expect(() => applyDocuSignCompleted(pending, artifact())).toThrow();
     const accepted = applyReview(pending, "accept", "");
-    const executed = applyDocuSignCompleted(accepted, artifact());
+    const completedArtifact = {
+      ...artifact(),
+      uploadedAt: "2026-06-02T09:00:00.000Z",
+    };
+    const executed = applyDocuSignCompleted(accepted, completedArtifact);
     expect(executed.status).toBe("executed");
     expect(executed.docusign.status).toBe("completed");
+    expect(executed.effectiveDate).toBe("2026-06-02");
   });
 });

@@ -17,9 +17,9 @@ export function SigningPanel({ engagement }: { engagement: Engagement }) {
       <div>
         <h2 className="font-serif text-2xl text-forest">Choose how you will sign</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          The agreement is not sent or closed from this screen. Canaan Preserve reviews every
-          reservation first. Nothing is executed until the team accepts and a signed artifact is
-          on file.
+          Usual path: questions and witnesses are already collected, then DocuSign after Canaan
+          Preserve accepts. The agreement is not sent or closed from this screen. Nothing is
+          executed until the team accepts and a signed artifact is on file.
         </p>
       </div>
 
@@ -42,10 +42,13 @@ export function SigningPanel({ engagement }: { engagement: Engagement }) {
               onChange={() => setMethod("docusign")}
             />
             <span>
-              <span className="block font-medium text-ink">Send with DocuSign after review</span>
+              <span className="block font-medium text-ink">
+                DocuSign after review (usual path)
+              </span>
               <span className="mt-1 block text-sm leading-6 text-muted">
-                After Canaan Preserve accepts, the team will send this agreement through the DocuSign
-                seam. Locally this is a stub: no live DocuSign API calls are made.
+                After Canaan Preserve accepts, the stub envelope routes to the Buyer signatory,
+                Canaan Ranch LLP signatory, and the two witnesses collected on intake. No live
+                DocuSign API calls are made.
               </span>
             </span>
           </label>

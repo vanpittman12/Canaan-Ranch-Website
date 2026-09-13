@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { addOneYear, dealEconomics, numberToWords, usdInWords } from "./money";
+import { addOneYear, dateOnly, dealEconomics, numberToWords, usdInWords } from "./money";
 import type { IntakeFields } from "./types";
 
 const intake: IntakeFields = {
-  effectiveDate: "2026-04-15",
   buyerLegalName: "Example Buyer LLC",
   buyerAttention: "Jordan Lee",
   buyerEmail: "jordan@example.com",
@@ -14,8 +13,16 @@ const intake: IntakeFields = {
   buyerPhone: "813-555-0100",
   tortoiseCount: 12,
   perGtRate: 6000,
+  relocationCounty: "Pasco",
+  authorizedAgentName: "Alex Rivera",
+  authorizedAgentCompany: "Rivera Environmental",
+  donorCompanyAffiliation: "D.R. Horton",
   donorSiteName: "",
   donorSiteDescription: "",
+  buyerWitnessName: "Sam Ortiz",
+  buyerWitnessEmail: "sam@example.com",
+  sellerWitnessName: "Jordan Blake",
+  sellerWitnessEmail: "jordan.blake@canaanpreserve.example",
 };
 
 describe("deal economics", () => {
@@ -29,6 +36,7 @@ describe("deal economics", () => {
 
   it("sets expiration to one year after the effective date", () => {
     expect(addOneYear("2026-04-15")).toBe("2027-04-15");
+    expect(dateOnly("2026-04-15T18:22:00.000Z")).toBe("2026-04-15");
   });
 
   it("writes integer counts in words for paragraph 2", () => {

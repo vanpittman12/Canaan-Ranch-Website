@@ -8,7 +8,7 @@ const steps = [
   {
     n: "01",
     title: "Reserve capacity",
-    body: "Tell us the Buyer, notice address, and how many gopher tortoise spots to reserve.",
+    body: "Tell us the Buyer, notice address, spots to reserve, project county, and authorized / donor contacts. Then name one witness per party.",
   },
   {
     n: "02",
@@ -64,7 +64,7 @@ export default function Home() {
               <ul className="mt-4 space-y-3 text-sm leading-6 text-cream/80">
                 <li>Per GT rate {formatUsd(brand.defaultPerGtRate)} (generally non-negotiable)</li>
                 <li>Juvenile additional fee {formatUsd(brand.juvenileAdditionalFee)} at delivery</li>
-                <li>Expiration: Effective Date plus one year</li>
+                <li>Effective Date = Buyer signature date; expires one year later</li>
                 <li>Executed only when accepted and signed</li>
               </ul>
             </aside>

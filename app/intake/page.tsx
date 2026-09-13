@@ -19,9 +19,10 @@ export default function IntakePage() {
           Reserve recipient-site capacity.
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-muted">
-          Buyer, notice address, and the number of gopher tortoise spots to hold. On submit we
-          draft the Multi-Project Gopher Tortoise Relocation Agreement for Canaan Ranch LLP /
-          Canaan Preserve.
+          Buyer and notice block, number of spots to reserve, project contacts, and one witness
+          per party. The Effective Date is the date the Buyer signs — not a field on this form.
+          On submit we draft the Multi-Project Gopher Tortoise Relocation Agreement for Canaan
+          Ranch LLP / Canaan Preserve.
         </p>
         <div className="mt-10 rounded-[1.5rem] border border-line bg-white p-6 sm:p-8">
           <IntakeForm />

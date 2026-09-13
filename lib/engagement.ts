@@ -1,3 +1,4 @@
+import { dateOnly } from "./money";
 import type {
   ArtifactSource,
   Engagement,
@@ -6,6 +7,10 @@ import type {
   SignedArtifact,
   SigningMethod,
 } from "./types";
+
+function stampEffectiveDate(engagement: Engagement, when: string) {
+  return engagement.effectiveDate ?? dateOnly(when);
+}
 
 export class EngagementError extends Error {
   constructor(message: string) {
@@ -105,6 +110,9 @@ export function applyReview(
     status,
     acceptedAt: now,
     executedAt: status === "executed" ? now : null,
+    effectiveDate: engagement.signedArtifact
+      ? stampEffectiveDate(engagement, engagement.signedArtifact.uploadedAt)
+      : engagement.effectiveDate,
     updatedAt: now,
     changeRequestNote: null,
   };
@@ -122,6 +130,7 @@ export function applySignedArtifact(
   const next: Engagement = {
     ...engagement,
     signedArtifact: artifact,
+    effectiveDate: stampEffectiveDate(engagement, artifact.uploadedAt),
     updatedAt: now,
   };
 
@@ -138,6 +147,7 @@ export function applyDocuSignSent(
   envelopeId: string,
   message: string,
   mode: "stub" | "live_placeholder",
+  recipients = engagement.docusign.recipients,
 ): Engagement {
   const now = new Date().toISOString();
   return {
@@ -149,6 +159,7 @@ export function applyDocuSignSent(
       sentAt: now,
       completedAt: null,
       lastMessage: message,
+      recipients,
     },
     updatedAt: now,
   };
@@ -170,6 +181,7 @@ export function applyDocuSignCompleted(
     signedArtifact: artifact,
     status: "executed",
     executedAt: engagement.executedAt ?? now,
+    effectiveDate: stampEffectiveDate(engagement, artifact.uploadedAt ?? now),
     updatedAt: now,
     docusign: {
       ...engagement.docusign,
