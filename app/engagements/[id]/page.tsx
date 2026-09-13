@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ContractPreview } from "@/components/contract-preview";
 import { IntakeForm } from "@/components/intake-form";
 import { SigningPanel } from "@/components/signing-panel";
 import { SiteFooter } from "@/components/site-footer";
@@ -50,7 +49,7 @@ export default async function EngagementPage({
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8">
+      <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8">
         <div className="flex flex-col gap-4 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brass">
@@ -61,7 +60,7 @@ export default async function EngagementPage({
             </h1>
             <p className="mt-2 text-muted">
               {engagement.intake.buyerLegalName} · {engagement.intake.tortoiseCount} GT ·{" "}
-              {formatUsd(dealEconomics(engagement.intake).total)}
+              {formatUsd(dealEconomics(engagement.intake).total)} adult-rate total
             </p>
           </div>
           <StatusBadge status={engagement.status} />
@@ -69,31 +68,41 @@ export default async function EngagementPage({
 
         <StatusCopy engagement={engagement} docusignMode={seam.mode} />
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_0.95fr]">
-          <ContractPreview engagement={engagement} />
-          <aside className="space-y-6">
-            <div className="rounded-2xl border border-line bg-white p-6">
-              {editable ? (
-                <SigningPanel engagement={engagement} contractUrl={contractUrl} />
-              ) : (
-                <SubmittedPanel
-                  engagement={engagement}
-                  contractUrl={contractUrl}
-                  signedUrl={signedUrl}
-                />
-              )}
-            </div>
+        <div className="mt-8 space-y-6">
+          <section className="rounded-2xl border border-forest/20 bg-white p-6">
+            <h2 className="font-serif text-2xl text-forest">Download your agreement</h2>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              The populated Multi-Project Gopher Tortoise Relocation Agreement is available as a
+              PDF. There is no on-screen contract preview. Review the download, then choose a
+              signing path.
+            </p>
+            <a className="btn-primary mt-5" href={contractUrl}>
+              Download populated agreement PDF
+            </a>
+          </section>
+
+          <div className="rounded-2xl border border-line bg-white p-6">
             {editable ? (
-              <details className="rounded-2xl border border-line bg-white p-6">
-                <summary className="cursor-pointer font-serif text-2xl text-forest">
-                  Edit intake details
-                </summary>
-                <div className="mt-6">
-                  <IntakeForm engagementId={engagement.id} defaults={engagement.intake} />
-                </div>
-              </details>
-            ) : null}
-          </aside>
+              <SigningPanel engagement={engagement} contractUrl={contractUrl} />
+            ) : (
+              <SubmittedPanel
+                engagement={engagement}
+                contractUrl={contractUrl}
+                signedUrl={signedUrl}
+              />
+            )}
+          </div>
+
+          {editable ? (
+            <details className="rounded-2xl border border-line bg-white p-6">
+              <summary className="cursor-pointer font-serif text-2xl text-forest">
+                Edit intake details
+              </summary>
+              <div className="mt-6">
+                <IntakeForm engagementId={engagement.id} defaults={engagement.intake} />
+              </div>
+            </details>
+          ) : null}
         </div>
       </main>
       <SiteFooter />
@@ -177,9 +186,10 @@ function StatusCopy({
 
   return (
     <div className="mt-6 rounded-2xl border border-line bg-white p-5">
-      <p className="font-medium text-forest">Agreement preview</p>
+      <p className="font-medium text-forest">Agreement ready to download</p>
       <p className="mt-2 text-sm leading-6 text-muted">
-        Review the populated contract, choose a signing path, and submit when you are ready.
+        Download the populated PDF to review, choose a signing path, and submit when you are
+        ready. Canaan Preserve Accepts before DocuSign or execution.
       </p>
     </div>
   );

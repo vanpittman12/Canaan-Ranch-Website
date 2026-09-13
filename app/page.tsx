@@ -1,22 +1,28 @@
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { TemplateDownloadButton } from "@/components/template-download";
 import { brand } from "@/lib/brand";
 import { formatUsd } from "@/lib/money";
 
 const steps = [
   {
     n: "01",
-    title: "Reserve capacity",
-    body: "Tell us the Buyer, notice address, spots to reserve, project county, and authorized / donor contacts. Then name one witness per party.",
+    title: "Review the template",
+    body: "Download the blank Multi-Project Gopher Tortoise Relocation Agreement before you fill anything in.",
   },
   {
     n: "02",
-    title: "Review the agreement",
-    body: "We populate the Multi-Project Gopher Tortoise Relocation Agreement from those details.",
+    title: "Reserve capacity",
+    body: "Tell us the Buyer notice block, reserved tortoise count, county of relocation, authorized agent, and donor affiliation. Name one Buyer witness. The Canaan Ranch LLP witness is already on file.",
   },
   {
     n: "03",
+    title: "Download your agreement",
+    body: "We populate the agreement from those details. Download the PDF to review — there is no on-screen contract preview.",
+  },
+  {
+    n: "04",
     title: "We accept, then DocuSign",
     body: "Canaan Preserve reviews first. After Accept, the usual path is DocuSign to the Buyer and Canaan Ranch LLP signers plus one witness each. Manual PDF is a fallback. Nothing is executed until Accept and a signed copy are on file.",
   },
@@ -41,16 +47,20 @@ export default function Home() {
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-8 text-cream/80">
                 Canaan Preserve is a gopher tortoise relocation recipient site. {brand.legalName}{" "}
-                is the contracting party. Intake, preview, signature, and a human review before
-                anything closes.
+                is the contracting party. Intake, a downloadable agreement, signature, and a
+                human review before anything closes.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <p className="mt-4 max-w-lg rounded-xl border border-brass/40 bg-forest-deep/60 px-4 py-3 text-sm font-medium leading-6 text-cream">
+                {brand.fwcStatus}
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="/intake"
                   className="inline-flex items-center justify-center rounded-full bg-cream px-5 py-3 text-[0.95rem] font-semibold text-forest transition hover:bg-white"
                 >
                   Begin a reservation
                 </Link>
+                <TemplateDownloadButton variant="dark" />
                 <a
                   href="#how-it-works"
                   className="inline-flex items-center justify-center rounded-full border border-cream/35 px-5 py-3 text-[0.95rem] font-semibold text-cream transition hover:bg-white/10"
@@ -62,8 +72,10 @@ export default function Home() {
             <aside className="self-end rounded-2xl border border-cream/15 bg-forest-deep/50 p-6 backdrop-blur">
               <p className="text-[11px] uppercase tracking-[0.22em] text-brass">Standard terms</p>
               <ul className="mt-4 space-y-3 text-sm leading-6 text-cream/80">
-                <li>Per GT rate {formatUsd(brand.defaultPerGtRate)} (generally non-negotiable)</li>
-                <li>Juvenile additional fee {formatUsd(brand.juvenileAdditionalFee)} at delivery</li>
+                <li>{formatUsd(brand.defaultPerGtRate)} per adult</li>
+                <li>{formatUsd(brand.juvenileAdditionalFee)} per juvenile</li>
+                <li>No deposits required</li>
+                <li>{brand.fwcStatus}</li>
                 <li>Effective Date = Buyer signature date; expires one year later</li>
                 <li>Executed only when accepted and signed</li>
               </ul>
@@ -78,7 +90,7 @@ export default function Home() {
           <h2 className="mt-3 max-w-xl font-serif text-4xl text-forest">
             From reserved spots to an executed agreement.
           </h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {steps.map((step) => (
               <article key={step.n} className="rounded-2xl border border-line bg-white p-6">
                 <p className="text-sm font-semibold tracking-[0.18em] text-brass">{step.n}</p>
@@ -93,15 +105,23 @@ export default function Home() {
           <div className="rounded-[2rem] bg-forest px-8 py-14 text-cream sm:px-14">
             <h2 className="max-w-xl font-serif text-4xl">Ready to reserve capacity.</h2>
             <p className="mt-4 max-w-xl text-base leading-7 text-cream/75">
-              Start the intake. Canaan Preserve reviews and Accepts first; the usual path is
-              then DocuSign. Manual signature remains available as a fallback.
+              Review the blank agreement first if you like, then start intake. Canaan Preserve
+              reviews and Accepts first; the usual path is then DocuSign. Manual signature remains
+              available as a fallback.
             </p>
-            <Link
-              href="/intake"
-              className="mt-8 inline-flex items-center justify-center rounded-full bg-cream px-5 py-3 text-[0.95rem] font-semibold text-forest transition hover:bg-white"
-            >
-              Open the intake form
-            </Link>
+            <p className="mt-4 text-sm font-medium text-cream">
+              {formatUsd(brand.defaultPerGtRate)} per adult ·{" "}
+              {formatUsd(brand.juvenileAdditionalFee)} per juvenile · No deposits required
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/intake"
+                className="inline-flex items-center justify-center rounded-full bg-cream px-5 py-3 text-[0.95rem] font-semibold text-forest transition hover:bg-white"
+              >
+                Open the intake form
+              </Link>
+              <TemplateDownloadButton variant="dark" />
+            </div>
           </div>
         </section>
       </main>

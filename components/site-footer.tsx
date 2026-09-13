@@ -8,6 +8,7 @@ export function SiteFooter() {
         <div>
           <p className="font-serif text-2xl">{brand.name}</p>
           <p className="mt-2 max-w-sm text-sm text-cream/75">{brand.tagline}</p>
+          <p className="mt-3 max-w-sm text-sm font-medium text-cream">{brand.fwcStatus}</p>
           <p className="mt-4 text-sm text-cream/70">{formatBrandAddress()}</p>
           <p className="text-sm text-cream/70">
             {brand.email} · {brand.phone}

@@ -31,6 +31,9 @@ export function SiteHeader({
               <Link href="/#how-it-works" className="hidden hover:text-forest sm:inline">
                 How it works
               </Link>
+              <a href="/api/agreement-template" className="hidden hover:text-forest sm:inline">
+                Blank agreement
+              </a>
               <Link href="/intake" className="btn-primary !px-4 !py-2 text-sm">
                 Begin a reservation
               </Link>
