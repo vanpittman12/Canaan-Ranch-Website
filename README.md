@@ -68,7 +68,7 @@ npm run lint     # ESLint
 
 Seller-side constants (not buyer intake): Canaan Ranch LLP; Attention Van Pittman; 1700 S. MacDill Ave., Suite 340, Tampa, FL 33629; Phone 813-390-1044; signatory Andrew V. Pittman, Jr., Manager; agent Applied Bionomics, LLC / Andrew Fuddy; juvenile additional fee $3,000 at delivery/acceptance; venue Pasco County, Florida.
 
-Adult vs juvenile is not collected at intake. The $3,000 juvenile additional fee stays in the agreement body. There is no initial deposit / Initial Payment step.
+Adult vs juvenile is not collected at intake. The $3,000 juvenile additional fee stays in the agreement body. There is no Initial Payment or deposit to collect — reservation is the signed agreement plus tortoise count, and payment is the Per GT Rate invoiced on acceptance.
 
 ## Product flow
 

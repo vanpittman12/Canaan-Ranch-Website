@@ -100,7 +100,12 @@ describe("gopher tortoise agreement mapping", () => {
     expect(body).toContain("Casey Nguyen");
     expect(body).toContain("Suncoast Permitting");
     expect(body).toContain("$3,000");
-    expect(body).toContain("does not require a separate initial deposit or Initial Payment");
+    expect(body).toContain("Payment is due as invoiced upon acceptance");
+    expect(body).toContain(
+      "Any Initial Payment or deposit requirement from a prior form is omitted and does not apply.",
+    );
+    expect(body).not.toMatch(/Initial Payment of \$/);
+    expect(body).not.toMatch(/shall pay an [Ii]nitial [Pp]ayment/);
     expect(contract.buyerBlock.join(" ")).toContain("Riley Chen");
     expect(contract.sellerBlock.join(" ")).toContain("Pat Morales");
     expect(contract.signatureIntro).toContain("one (1) witness");
