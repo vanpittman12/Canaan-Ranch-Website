@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { brand } from "./brand";
+import { brand, getSellerWitness } from "./brand";
 import type { IntakeFields } from "./types";
 
 export const intakeSchema = z.object({
@@ -16,11 +16,11 @@ export const intakeSchema = z.object({
     .int("Use a whole number.")
     .min(1, "Reserve at least one gopher tortoise."),
   relocationCounty: z.string().trim().min(2, "County of relocation is required."),
-  authorizedAgentName: z.string().trim().min(2, "Authorized agent name is required."),
+  authorizedAgentName: z.string().trim().min(2, "Buyer’s authorized agent name is required."),
   authorizedAgentCompany: z
     .string()
     .trim()
-    .min(2, "Authorized agent company affiliation is required."),
+    .min(2, "Buyer’s authorized agent company is required."),
   donorCompanyAffiliation: z
     .string()
     .trim()
@@ -29,20 +29,18 @@ export const intakeSchema = z.object({
   donorSiteDescription: z.string().trim().default(""),
   buyerWitnessName: z.string().trim().min(2, "Buyer witness name is required."),
   buyerWitnessEmail: z.string().trim().email("Enter a valid Buyer witness email."),
-  sellerWitnessName: z.string().trim().min(2, "Canaan Ranch LLP witness name is required."),
-  sellerWitnessEmail: z
-    .string()
-    .trim()
-    .email("Enter a valid Canaan Ranch LLP witness email."),
 });
 
 export type IntakeInput = z.infer<typeof intakeSchema>;
 
-/** Public create/update ignore any posted rate and lock the brand default. */
+/** Public create/update ignore posted rate and any posted Canaan witness. */
 export function publicIntakeFields(input: IntakeInput): IntakeFields {
+  const witness = getSellerWitness();
   return {
     ...input,
     perGtRate: brand.defaultPerGtRate,
+    sellerWitnessName: witness.name,
+    sellerWitnessEmail: witness.email,
   };
 }
 

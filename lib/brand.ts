@@ -3,6 +3,7 @@ export const brand = {
   legalName: "Canaan Ranch LLP",
   tagline: "Gopher tortoise relocation recipient site.",
   shortTagline: "Reserve recipient-site capacity with a clear agreement.",
+  fwcStatus: "Canaan Preserve is an FWC Approved Tier 1 Long Term Recipient site.",
   email: "engagements@canaanpreserve.com",
   phone: "813-390-1044",
   website: "https://canaanpreserve.com",
@@ -21,8 +22,14 @@ export const brand = {
   agentContact: "Andrew Fuddy",
   venue: "Pasco County, Florida",
   defaultPerGtRate: 6000,
-  juvenileAdditionalFee: 3000,
+  /** All-in juvenile price; not added on top of the adult Per GT Rate. */
+  juvenileRate: 3000,
+  /** Seller-side witness. Same every reservation; not collected on public intake. */
+  sellerWitnessName: "Andrew Fuddy",
+  sellerWitnessEmail: "witness@canaanpreserve.com",
 } as const;
+
+export const TEMPLATE_AGREEMENT_PATH = "/api/agreement-template";
 
 export function formatBrandAddress() {
   const { street, city, state, postalCode } = brand.address;
@@ -31,4 +38,17 @@ export function formatBrandAddress() {
 
 export function formatSellerNotice() {
   return `${brand.legalName}, Attention: ${brand.attention}, ${formatBrandAddress()}, Phone ${brand.phone}`;
+}
+
+/**
+ * Fixed Canaan Ranch LLP witness. Env overrides win; otherwise brand defaults.
+ * Buyer intake never supplies these values.
+ */
+export function getSellerWitness() {
+  const name = process.env.CANAAN_WITNESS_NAME?.trim();
+  const email = process.env.CANAAN_WITNESS_EMAIL?.trim();
+  return {
+    name: name || brand.sellerWitnessName,
+    email: email || brand.sellerWitnessEmail,
+  };
 }

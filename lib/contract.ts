@@ -1,4 +1,4 @@
-import { brand, formatSellerNotice } from "./brand";
+import { brand, formatSellerNotice, getSellerWitness } from "./brand";
 import {
   addOneYear,
   dealEconomics,
@@ -6,8 +6,14 @@ import {
   formatLongDate,
   formatUsd,
   numberToWords,
+  usdInWords,
 } from "./money";
-import { buyerNoticeAddress, type Engagement, type IntakeFields } from "./types";
+import {
+  formatAuthorizedAgent,
+  formatBuyerNotice,
+  type Engagement,
+  type IntakeFields,
+} from "./types";
 
 export interface ContractSection {
   heading: string;
@@ -31,6 +37,10 @@ export interface ContractDocument {
   clientBlock: string[];
 }
 
+function sellerWitnessLine(intake: IntakeFields) {
+  return intake.sellerWitnessName.trim() || getSellerWitness().name;
+}
+
 function agreementDates(engagement: Engagement) {
   if (!engagement.effectiveDate) {
     return {
@@ -47,34 +57,42 @@ function agreementDates(engagement: Engagement) {
   };
 }
 
-function authorizedAgentLine(intake: IntakeFields) {
-  return `${intake.authorizedAgentName}, ${intake.authorizedAgentCompany}`;
-}
-
 function reservedCapacityContext(intake: IntakeFields) {
-  const details: string[] = [];
-  if (intake.donorSiteName.trim()) {
-    details.push(`the donor site or project known as “${intake.donorSiteName.trim()}”`);
+  const clauses: string[] = [];
+  if (intake.relocationCounty.trim()) {
+    clauses.push(`County of relocation: ${intake.relocationCounty.trim()}`);
   }
   if (intake.donorCompanyAffiliation.trim()) {
-    details.push(`donor company affiliation ${intake.donorCompanyAffiliation.trim()}`);
+    clauses.push(`Donor company affiliation: ${intake.donorCompanyAffiliation.trim()}`);
   }
-  if (intake.relocationCounty.trim()) {
-    details.push(`county of relocation ${intake.relocationCounty.trim()}`);
+  if (intake.donorSiteName.trim()) {
+    clauses.push(`Donor site / project: ${intake.donorSiteName.trim()}`);
   }
 
-  const lead = details.length
-    ? `The Reserved Capacity is associated with ${details.join("; ")}.`
+  const lead = clauses.length
+    ? `The Reserved Capacity is associated with the following intake fields: ${clauses.join("; ")}.`
     : "This Agreement may be used for one or more donor-site relocations, up to the reserved capacity, without identifying a single donor project.";
 
-  return [lead, intake.donorSiteDescription.trim()].filter(Boolean).join(" ");
+  const description = intake.donorSiteDescription.trim();
+  return description
+    ? `${lead} Project description: ${description}`
+    : lead;
 }
 
 export function buildContract(engagement: Engagement): ContractDocument {
   const { intake } = engagement;
   const economics = dealEconomics(intake);
+  const isTemplate = engagement.id === "template";
+  const capacityCount = isTemplate
+    ? "[Reserved capacity count]"
+    : `${economics.count} (${numberToWords(economics.count)})`;
+  const estimatedTotal = isTemplate
+    ? "[Total estimated payment at the adult rate] (reserved capacity count × adult rate)"
+    : `${economics.totalFormatted} (${economics.totalWords}), calculated as ${economics.count} × ${economics.rateFormatted}`;
   const { effectiveDate, effectiveFormal, expirationDate } = agreementDates(engagement);
-  const agent = authorizedAgentLine(intake);
+  const agent = formatAuthorizedAgent(intake);
+  const buyerNotice = formatBuyerNotice(intake);
+  const sellerWitness = sellerWitnessLine(intake);
 
   const sellerBlock = [
     `${brand.legalName} (“Seller”)`,
@@ -83,7 +101,7 @@ export function buildContract(engagement: Engagement): ContractDocument {
     `Name: ${brand.signatoryName}`,
     `Title: ${brand.signatoryTitle}`,
     "Date: _____________________________________________",
-    `Witness: ${intake.sellerWitnessName}`,
+    `Witness: ${sellerWitness}`,
     "Witness signature: ________________________________",
     "Witness date: _____________________________________",
   ];
@@ -113,13 +131,13 @@ export function buildContract(engagement: Engagement): ContractDocument {
         paragraphs: [
           `This Multi-Project Gopher Tortoise Relocation Agreement (“Agreement”) is entered into as of ${effectiveFormal} (the “Effective Date”) by and between ${brand.legalName}, a Florida limited liability partnership (“Seller”), operating the Canaan Preserve gopher tortoise recipient site, and ${intake.buyerLegalName} (“Buyer”).`,
           `Seller’s notice address is ${formatSellerNotice()}. Seller’s authorized signatory is ${brand.signatoryName}, ${brand.signatoryTitle}.`,
-          `Buyer’s notice address is ${intake.buyerLegalName}, Attention: ${intake.buyerAttention}, ${buyerNoticeAddress(intake)}, Phone ${intake.buyerPhone}, Email ${intake.buyerEmail}. Buyer’s authorized agent is ${agent}.`,
+          `Buyer’s notice address is ${buyerNotice}. Buyer’s authorized agent is ${agent}.`,
         ],
       },
       {
         heading: "2. Reserved capacity",
         paragraphs: [
-          `Seller agrees to reserve recipient-site capacity at Canaan Preserve for the relocation of up to ${economics.count} (${numberToWords(economics.count)}) gopher tortoises (Gopherus polyphemus) under this Agreement (the “Reserved Capacity”). Adult versus juvenile classification is determined at delivery and acceptance, not at reservation.`,
+          `Seller agrees to reserve recipient-site capacity at Canaan Preserve for the relocation of up to ${capacityCount} gopher tortoises (Gopherus polyphemus) under this Agreement (the “Reserved Capacity”). Adult versus juvenile classification is determined at delivery and acceptance, not at reservation.`,
           reservedCapacityContext(intake),
         ],
       },
@@ -135,9 +153,9 @@ export function buildContract(engagement: Engagement): ContractDocument {
       {
         heading: "4. Payment",
         paragraphs: [
-          `Buyer shall pay Seller ${economics.rateFormatted} (${economics.rateWords}) for each gopher tortoise accepted against the Reserved Capacity (the “Per GT Rate”). The Total Estimated Payment for the Reserved Capacity is ${economics.totalFormatted} (${economics.totalWords}), calculated as ${economics.count} × ${economics.rateFormatted}.`,
-          "The Per GT Rate is generally non-negotiable. Any exception must be confirmed in writing by Seller’s Manager before execution. Payment is due as invoiced upon acceptance of tortoises at the recipient site (or as otherwise billed by Seller).",
-          `If a tortoise is classified as a juvenile at delivery and acceptance, Buyer shall pay an additional ${formatUsd(brand.juvenileAdditionalFee)} per juvenile, in addition to the Per GT Rate. Juvenile classification is not made at intake.`,
+          `Buyer shall pay Seller ${economics.rateFormatted} (${economics.rateWords}) per adult gopher tortoise accepted against the Reserved Capacity (the “Per GT Rate”). The Total Estimated Payment for the Reserved Capacity at the adult rate is ${estimatedTotal}.`,
+          `If a tortoise is classified as a juvenile at delivery and acceptance, Buyer shall pay ${formatUsd(brand.juvenileRate)} (${usdInWords(brand.juvenileRate)}) per juvenile as the total price for that tortoise, in lieu of the Per GT Rate. The juvenile price is ${formatUsd(brand.juvenileRate)} all-in and is not added to the adult Per GT Rate. Juvenile classification is not made at intake.`,
+          "No deposit or initial payment is required. Payment is due as invoiced upon acceptance of tortoises at the recipient site (or as otherwise billed by Seller).",
         ],
       },
       {
@@ -150,7 +168,7 @@ export function buildContract(engagement: Engagement): ContractDocument {
       {
         heading: "6. Seller responsibilities",
         paragraphs: [
-          `Seller shall maintain Canaan Preserve as an FWC-authorized recipient site and shall accept gopher tortoises up to the Reserved Capacity, subject to site conditions, remaining capacity, and applicable law. Seller’s agent for operational coordination is ${brand.agentName}, ${brand.agentContact}.`,
+          `${brand.fwcStatus} Seller shall maintain Canaan Preserve as an FWC Approved Tier 1 Long Term Recipient site and shall accept gopher tortoises up to the Reserved Capacity, subject to site conditions, remaining capacity, and applicable law. Seller’s agent for operational coordination is ${brand.agentName}, ${brand.agentContact}.`,
           "Seller does not warrant that a particular donor-site schedule can be met if Buyer has not reserved remaining capacity or if FWC or site conditions prevent acceptance.",
         ],
       },
@@ -164,7 +182,7 @@ export function buildContract(engagement: Engagement): ContractDocument {
         heading: "8. Notices",
         paragraphs: [
           `Notices to Seller shall be sent to ${formatSellerNotice()}, with a copy to ${brand.agentName}, Attention: ${brand.agentContact}.`,
-          `Notices to Buyer shall be sent to ${intake.buyerLegalName}, Attention: ${intake.buyerAttention}, ${buyerNoticeAddress(intake)}, Phone ${intake.buyerPhone}, Email ${intake.buyerEmail}. Buyer’s authorized agent is ${agent}.`,
+          `Notices to Buyer shall be sent to ${buyerNotice}. Buyer’s authorized agent is ${agent}.`,
         ],
       },
       {
@@ -190,5 +208,56 @@ export function buildContract(engagement: Engagement): ContractDocument {
     buyerBlock,
     providerBlock: sellerBlock,
     clientBlock: buyerBlock,
+  };
+}
+
+export function buildTemplateEngagement(): Engagement {
+  const blanks: IntakeFields = {
+    buyerLegalName: "[Buyer legal name]",
+    buyerAttention: "[Buyer signatory / attention]",
+    buyerEmail: "[Buyer signatory email]",
+    buyerStreet: "[Street address]",
+    buyerCity: "[City]",
+    buyerState: "[State]",
+    buyerPostalCode: "[Postal code]",
+    buyerPhone: "[Phone]",
+    tortoiseCount: 0,
+    perGtRate: brand.defaultPerGtRate,
+    relocationCounty: "[County of relocation]",
+    authorizedAgentName: "[Buyer’s authorized agent name]",
+    authorizedAgentCompany: "[Buyer’s authorized agent company]",
+    donorCompanyAffiliation: "[Donor company affiliation]",
+    donorSiteName: "[Donor site / project name]",
+    donorSiteDescription: "[Project description]",
+    buyerWitnessName: "[Buyer witness name]",
+    buyerWitnessEmail: "[Buyer witness email]",
+    sellerWitnessName: getSellerWitness().name,
+    sellerWitnessEmail: getSellerWitness().email,
+  };
+
+  return {
+    id: "template",
+    reference: "CP-TEMPLATE",
+    status: "draft",
+    effectiveDate: null,
+    intake: blanks,
+    signingMethod: null,
+    signedArtifact: null,
+    docusign: {
+      mode: "stub",
+      envelopeId: null,
+      status: "not_sent",
+      sentAt: null,
+      completedAt: null,
+      lastMessage: null,
+      recipients: [],
+    },
+    reviews: [],
+    changeRequestNote: null,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+    submittedAt: null,
+    acceptedAt: null,
+    executedAt: null,
   };
 }

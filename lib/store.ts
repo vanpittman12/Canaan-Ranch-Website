@@ -3,6 +3,7 @@ import "server-only";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomBytes, randomUUID } from "node:crypto";
+import { getSellerWitness } from "./brand";
 import type { Engagement, IntakeFields } from "./types";
 
 type StoredIntake = Partial<IntakeFields> & { effectiveDate?: string };
@@ -33,8 +34,8 @@ function normalizeIntake(intake: StoredIntake): IntakeFields {
     donorSiteDescription: intake.donorSiteDescription ?? "",
     buyerWitnessName: intake.buyerWitnessName ?? "",
     buyerWitnessEmail: intake.buyerWitnessEmail ?? "",
-    sellerWitnessName: intake.sellerWitnessName ?? "",
-    sellerWitnessEmail: intake.sellerWitnessEmail ?? "",
+    sellerWitnessName: intake.sellerWitnessName || getSellerWitness().name,
+    sellerWitnessEmail: intake.sellerWitnessEmail || getSellerWitness().email,
   };
 }
 
@@ -45,7 +46,12 @@ function normalizeEngagement(raw: StoredEngagement): Engagement {
     effectiveDate: raw.effectiveDate ?? legacyDate,
     intake: normalizeIntake(raw.intake),
     docusign: {
-      ...raw.docusign,
+      mode: raw.docusign?.mode ?? "stub",
+      envelopeId: raw.docusign?.envelopeId ?? null,
+      status: raw.docusign?.status ?? "not_sent",
+      sentAt: raw.docusign?.sentAt ?? null,
+      completedAt: raw.docusign?.completedAt ?? null,
+      lastMessage: raw.docusign?.lastMessage ?? null,
       recipients: raw.docusign?.recipients ?? [],
     },
   };

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { brand } from "./brand";
+import { afterEach, describe, expect, it } from "vitest";
+import { brand, getSellerWitness } from "./brand";
 import { intakeSchema, publicIntakeFields } from "./validation";
 
 const posted = {
@@ -23,7 +23,15 @@ const posted = {
   sellerWitnessEmail: "pat.morales@canaanpreserve.example",
 };
 
-describe("public intake rate lock", () => {
+const originalEnv = { ...process.env };
+
+afterEach(() => {
+  process.env = { ...originalEnv };
+  delete process.env.CANAAN_WITNESS_NAME;
+  delete process.env.CANAAN_WITNESS_EMAIL;
+});
+
+describe("public intake rate lock and seller witness", () => {
   it("strips a client-posted perGtRate and locks the brand default", () => {
     const parsed = intakeSchema.safeParse(posted);
     expect(parsed.success).toBe(true);
@@ -31,7 +39,40 @@ describe("public intake rate lock", () => {
       return;
     }
     expect(parsed.data).not.toHaveProperty("perGtRate");
+    expect(parsed.data).not.toHaveProperty("sellerWitnessName");
+    expect(parsed.data).not.toHaveProperty("sellerWitnessEmail");
     expect(publicIntakeFields(parsed.data).perGtRate).toBe(brand.defaultPerGtRate);
     expect(publicIntakeFields(parsed.data).perGtRate).toBe(6000);
+  });
+
+  it("ignores a posted Canaan witness and stamps the fixed seller-side witness", () => {
+    delete process.env.CANAAN_WITNESS_NAME;
+    delete process.env.CANAAN_WITNESS_EMAIL;
+    const parsed = intakeSchema.safeParse(posted);
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) {
+      return;
+    }
+    const fields = publicIntakeFields(parsed.data);
+    expect(fields.sellerWitnessName).toBe(brand.sellerWitnessName);
+    expect(fields.sellerWitnessEmail).toBe(brand.sellerWitnessEmail);
+    expect(fields.sellerWitnessName).not.toBe("Pat Morales");
+  });
+
+  it("honors CANAAN_WITNESS_NAME and CANAAN_WITNESS_EMAIL overrides", () => {
+    process.env.CANAAN_WITNESS_NAME = "Jordan Blake";
+    process.env.CANAAN_WITNESS_EMAIL = "jordan.blake@canaanpreserve.example";
+    expect(getSellerWitness()).toEqual({
+      name: "Jordan Blake",
+      email: "jordan.blake@canaanpreserve.example",
+    });
+    const parsed = intakeSchema.safeParse(posted);
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) {
+      return;
+    }
+    const fields = publicIntakeFields(parsed.data);
+    expect(fields.sellerWitnessName).toBe("Jordan Blake");
+    expect(fields.sellerWitnessEmail).toBe("jordan.blake@canaanpreserve.example");
   });
 });

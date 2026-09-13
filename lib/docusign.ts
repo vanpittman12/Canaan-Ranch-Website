@@ -7,7 +7,7 @@
  * and Envelopes:create — it still does not call the network.
  */
 import { randomUUID } from "node:crypto";
-import { brand } from "./brand";
+import { brand, getSellerWitness } from "./brand";
 import type { EnvelopeRecipient, IntakeFields } from "./types";
 
 export const DOCUSIGN_ENV_VARS = [
@@ -76,6 +76,7 @@ export function describeDocuSignSeam() {
 }
 
 export function buildEnvelopeRecipients(intake: IntakeFields): EnvelopeRecipient[] {
+  const sellerWitness = getSellerWitness();
   return [
     { role: "buyer_signer", name: intake.buyerAttention, email: intake.buyerEmail },
     { role: "seller_signer", name: brand.signatoryName, email: brand.email },
@@ -86,8 +87,8 @@ export function buildEnvelopeRecipients(intake: IntakeFields): EnvelopeRecipient
     },
     {
       role: "seller_witness",
-      name: intake.sellerWitnessName,
-      email: intake.sellerWitnessEmail,
+      name: sellerWitness.name,
+      email: sellerWitness.email,
     },
   ];
 }

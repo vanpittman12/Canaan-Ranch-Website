@@ -15,8 +15,8 @@ export function RateOverrideForm({ engagement }: { engagement: Engagement }) {
     <form action={formAction} className="mt-5 border-t border-line pt-5">
       <p className="text-sm font-medium text-ink">Manager rate override</p>
       <p className="mt-1 text-sm text-muted">
-        Standard rate is {brand.defaultPerGtRate.toLocaleString("en-US")} USD. Use only for rare
-        exceptions Van approves.
+        Adult rate defaults to {brand.defaultPerGtRate.toLocaleString("en-US")} USD. Use only for
+        rare exceptions Van approves. Public intake cannot change this.
       </p>
       {state.error ? <p className="mt-2 text-sm text-terracotta">{state.error}</p> : null}
       <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">

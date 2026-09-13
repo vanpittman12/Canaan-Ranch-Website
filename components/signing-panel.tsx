@@ -23,9 +23,10 @@ export function SigningPanel({
       <div>
         <h2 className="font-serif text-2xl text-forest">Choose how you will sign</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Usual path: questions and witnesses are already collected, then DocuSign after Canaan
-          Preserve accepts. The agreement is not sent or closed from this screen. Nothing is
-          executed until the team accepts and a signed artifact is on file.
+          Download the populated agreement PDF to review first. Usual path: DocuSign after Canaan
+          Preserve accepts. The Canaan Ranch LLP witness is already routed from brand config. The
+          agreement is not sent or closed from this screen. Nothing is executed until the team
+          accepts and a signed artifact is on file.
         </p>
       </div>
 
@@ -53,8 +54,8 @@ export function SigningPanel({
               </span>
               <span className="mt-1 block text-sm leading-6 text-muted">
                 After Canaan Preserve accepts, the stub envelope routes to the Buyer signatory,
-                Canaan Ranch LLP signatory, and the two witnesses collected on intake. No live
-                DocuSign API calls are made.
+                Canaan Ranch LLP signatory, the Buyer witness from intake, and the fixed Canaan
+                Ranch LLP witness. No live DocuSign API calls are made.
               </span>
             </span>
           </label>
@@ -79,7 +80,7 @@ export function SigningPanel({
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <a className="btn-secondary" href={contractUrl}>
-            Download PDF
+            Download populated agreement PDF
           </a>
           <button className="btn-primary" type="submit" disabled={pending}>
             {pending ? "Submitting…" : "Submit for Canaan Preserve review"}

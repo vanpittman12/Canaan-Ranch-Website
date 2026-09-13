@@ -64,13 +64,18 @@ export function IntakeForm({
 
       <section className="space-y-4">
         <div>
-          <h2 className="font-serif text-2xl text-forest">Buyer</h2>
+          <h2 className="font-serif text-2xl text-forest">Buyer notice block</h2>
           <p className="mt-1 text-sm text-muted">
-            Legal name, notice block, and Buyer signatory. The Effective Date is the date the
-            Buyer signs — it is not collected here.
+            These fields become the Buyer notice in Parties and Notices: legal name, Attention
+            (signatory), street, city, state, postal code, phone, and email. The Effective Date is
+            the date the Buyer signs — it is not collected here.
           </p>
         </div>
-        <Field label="Buyer legal name" error={errors.buyerLegalName}>
+        <Field
+          label="Buyer legal name"
+          hint="Buyer party name on the agreement."
+          error={errors.buyerLegalName}
+        >
           <input
             className={fieldClass}
             name="buyerLegalName"
@@ -82,7 +87,7 @@ export function IntakeForm({
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
             label="Buyer signatory / attention"
-            hint="Name that appears on notices and as the Buyer DocuSign signer."
+            hint="Appears as Attention on the notice block and as the Buyer signature name."
             error={errors.buyerAttention}
           >
             <input
@@ -93,7 +98,11 @@ export function IntakeForm({
               autoComplete="name"
             />
           </Field>
-          <Field label="Buyer signatory email" error={errors.buyerEmail}>
+          <Field
+            label="Buyer signatory email"
+            hint="Notice email and DocuSign Buyer signer."
+            error={errors.buyerEmail}
+          >
             <input
               className={fieldClass}
               name="buyerEmail"
@@ -104,7 +113,11 @@ export function IntakeForm({
             />
           </Field>
         </div>
-        <Field label="Street address" error={errors.buyerStreet}>
+        <Field
+          label="Street address"
+          hint="First line of the Buyer notice address."
+          error={errors.buyerStreet}
+        >
           <input
             className={fieldClass}
             name="buyerStreet"
@@ -142,7 +155,7 @@ export function IntakeForm({
             />
           </Field>
         </div>
-        <Field label="Phone" error={errors.buyerPhone}>
+        <Field label="Phone" hint="Included on the Buyer notice block." error={errors.buyerPhone}>
           <input
             className={fieldClass}
             name="buyerPhone"
@@ -156,16 +169,20 @@ export function IntakeForm({
 
       <section className="space-y-4">
         <div>
-          <h2 className="font-serif text-2xl text-forest">Reserved spots</h2>
+          <h2 className="font-serif text-2xl text-forest">Reserved capacity</h2>
           <p className="mt-1 text-sm text-muted">
-            Reserve recipient-site capacity as a tortoise count. Adult versus juvenile is not
-            known at intake — juveniles are classified at delivery and acceptance, with a{" "}
-            {formatUsd(brand.juvenileAdditionalFee)} additional fee per juvenile in the
-            agreement (not collected here).
+            The tortoise count becomes Paragraph 2 “up to N” reserved capacity. Adult versus
+            juvenile is classified at delivery. {formatUsd(brand.defaultPerGtRate)} per adult.{" "}
+            {formatUsd(brand.juvenileRate)} per juvenile (all-in, not added to the adult rate).
+            No deposits required.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Number of spots (tortoise count)" error={errors.tortoiseCount}>
+          <Field
+            label="Reserved capacity (gopher tortoise count)"
+            hint="Maps to “up to N” in the reserved-capacity paragraph."
+            error={errors.tortoiseCount}
+          >
             <input
               className={fieldClass}
               name="tortoiseCount"
@@ -178,7 +195,7 @@ export function IntakeForm({
             />
           </Field>
           <div>
-            <p className="text-sm font-medium text-ink">Per GT rate</p>
+            <p className="text-sm font-medium text-ink">Adult rate</p>
             {allowRateOverride ? (
               <input
                 className={fieldClass}
@@ -191,12 +208,12 @@ export function IntakeForm({
               />
             ) : (
               <p className="mt-1.5 rounded-lg border border-line bg-cream/50 px-3.5 py-2.5 text-ink">
-                {formatUsd(brand.defaultPerGtRate)} standard
+                {formatUsd(brand.defaultPerGtRate)} per adult
               </p>
             )}
             <p className="mt-1 text-sm text-muted">
-              Default {formatUsd(brand.defaultPerGtRate)}. Generally non-negotiable. Manager
-              override only for rare exceptions.
+              {formatUsd(brand.juvenileRate)} per juvenile at delivery (all-in, not added to the
+              adult rate). No deposits required.
             </p>
             {errors.perGtRate ? (
               <p className="mt-1 text-sm text-terracotta">{errors.perGtRate}</p>
@@ -204,8 +221,10 @@ export function IntakeForm({
           </div>
         </div>
         <div className="rounded-xl border border-line bg-cream/40 px-4 py-3 text-sm text-ink">
-          Total estimated payment: <strong>{formatUsd(total)}</strong> ({count || 0} ×{" "}
-          {formatUsd(rate || 0)})
+          Total estimated payment at the adult rate: <strong>{formatUsd(total)}</strong> (
+          {count || 0} × {formatUsd(rate || 0)} per adult). A juvenile classified at delivery is{" "}
+          {formatUsd(brand.juvenileRate)} total, not in addition to the adult rate. No deposits
+          required.
         </div>
       </section>
 
@@ -213,13 +232,14 @@ export function IntakeForm({
         <div>
           <h2 className="font-serif text-2xl text-forest">Project and operations</h2>
           <p className="mt-1 text-sm text-muted">
-            Stored with the deal. County, authorized agent, and donor company also appear in the
-            agreement where they belong.
+            County of relocation, donor company affiliation, and optional donor site appear in
+            the reserved-capacity paragraph. Buyer’s authorized agent appears in Parties,
+            Notices, and Buyer responsibilities.
           </p>
         </div>
         <Field
           label="County of relocation"
-          hint="Donor / project county."
+          hint="Maps to “County of relocation” in the reserved-capacity paragraph."
           error={errors.relocationCounty}
         >
           <input
@@ -230,7 +250,11 @@ export function IntakeForm({
           />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Authorized agent name" error={errors.authorizedAgentName}>
+          <Field
+            label="Buyer’s authorized agent name"
+            hint="First part of “Buyer’s authorized agent” on the agreement."
+            error={errors.authorizedAgentName}
+          >
             <input
               className={fieldClass}
               name="authorizedAgentName"
@@ -240,7 +264,8 @@ export function IntakeForm({
             />
           </Field>
           <Field
-            label="Authorized agent company affiliation"
+            label="Buyer’s authorized agent company"
+            hint="Second part of “Buyer’s authorized agent” on the agreement."
             error={errors.authorizedAgentCompany}
           >
             <input
@@ -254,7 +279,7 @@ export function IntakeForm({
         </div>
         <Field
           label="Donor company affiliation"
-          hint="For example Lennar, D.R. Horton."
+          hint="Maps to “Donor company affiliation” in the reserved-capacity paragraph. For example Lennar, D.R. Horton."
           error={errors.donorCompanyAffiliation}
         >
           <input
@@ -265,14 +290,22 @@ export function IntakeForm({
             autoComplete="organization"
           />
         </Field>
-        <Field label="Donor site / project name (optional)" error={errors.donorSiteName}>
+        <Field
+          label="Donor site / project name (optional)"
+          hint="Maps to “Donor site / project” in the reserved-capacity paragraph."
+          error={errors.donorSiteName}
+        >
           <input
             className={fieldClass}
             name="donorSiteName"
             defaultValue={defaults?.donorSiteName}
           />
         </Field>
-        <Field label="Project description (optional)" error={errors.donorSiteDescription}>
+        <Field
+          label="Project description (optional)"
+          hint="Appended as “Project description” in the reserved-capacity paragraph."
+          error={errors.donorSiteDescription}
+        >
           <textarea
             className={`${fieldClass} min-h-24`}
             name="donorSiteDescription"
@@ -283,10 +316,11 @@ export function IntakeForm({
 
       <section className="space-y-4">
         <div>
-          <h2 className="font-serif text-2xl text-forest">Witnesses</h2>
+          <h2 className="font-serif text-2xl text-forest">Buyer witness</h2>
           <p className="mt-1 text-sm text-muted">
-            One witness for the Buyer and one witness for Canaan Ranch LLP. Names appear on the
-            signature blocks; emails are used for DocuSign routing.
+            One Buyer witness. The name appears on the Buyer signature block; the email is used
+            for DocuSign routing. The Canaan Ranch LLP witness is seller-side and is not collected
+            on this form.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -310,41 +344,20 @@ export function IntakeForm({
             />
           </Field>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Canaan Ranch LLP witness name" error={errors.sellerWitnessName}>
-            <input
-              className={fieldClass}
-              name="sellerWitnessName"
-              defaultValue={defaults?.sellerWitnessName}
-              required
-              autoComplete="name"
-            />
-          </Field>
-          <Field label="Canaan Ranch LLP witness email" error={errors.sellerWitnessEmail}>
-            <input
-              className={fieldClass}
-              name="sellerWitnessEmail"
-              type="email"
-              defaultValue={defaults?.sellerWitnessEmail}
-              required
-              autoComplete="email"
-            />
-          </Field>
-        </div>
       </section>
 
       <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted">
-          Submitting drafts the Canaan Preserve / Canaan Ranch LLP relocation agreement. The
-          usual next step is DocuSign. Nothing is executed until the team accepts and a signed
-          copy is on file.
+          Submitting drafts the Canaan Preserve / Canaan Ranch LLP relocation agreement. You will
+          download the populated PDF to review. The usual next step is team Accept, then
+          DocuSign. Nothing is executed until the team accepts and a signed copy is on file.
         </p>
         <button className="btn-primary" type="submit" disabled={pending}>
           {pending
             ? "Saving…"
             : engagementId
               ? "Update agreement details"
-              : "Generate agreement preview"}
+              : "Generate agreement PDF"}
         </button>
       </div>
     </form>

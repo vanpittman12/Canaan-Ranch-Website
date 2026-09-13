@@ -76,15 +76,21 @@ export default async function AdminEngagementPage({
                 <Row label="Email" value={engagement.intake.buyerEmail} />
                 <Row label="Phone" value={engagement.intake.buyerPhone} />
                 <Row label="Notice" value={buyerNoticeAddress(engagement.intake)} />
-                <Row label="Spots" value={`${engagement.intake.tortoiseCount} GT`} />
-                <Row label="Per GT rate" value={economics.rateFormatted} />
-                <Row label="Est. total" value={economics.totalFormatted} />
-                <Row label="County" value={engagement.intake.relocationCounty} />
                 <Row
-                  label="Auth. agent"
+                  label="Reserved capacity"
+                  value={`${engagement.intake.tortoiseCount} gopher tortoises`}
+                />
+                <Row label="Adult rate" value={`${economics.rateFormatted} per adult`} />
+                <Row label="Est. adult total" value={economics.totalFormatted} />
+                <Row label="County of relocation" value={engagement.intake.relocationCounty} />
+                <Row
+                  label="Buyer’s authorized agent"
                   value={`${engagement.intake.authorizedAgentName}, ${engagement.intake.authorizedAgentCompany}`}
                 />
-                <Row label="Donor co." value={engagement.intake.donorCompanyAffiliation} />
+                <Row
+                  label="Donor company affiliation"
+                  value={engagement.intake.donorCompanyAffiliation}
+                />
                 {engagement.intake.donorSiteName ? (
                   <Row label="Donor site" value={engagement.intake.donorSiteName} />
                 ) : null}
@@ -93,7 +99,7 @@ export default async function AdminEngagementPage({
                   value={`${engagement.intake.buyerWitnessName} · ${engagement.intake.buyerWitnessEmail}`}
                 />
                 <Row
-                  label="Seller witness"
+                  label="Canaan witness (fixed)"
                   value={`${engagement.intake.sellerWitnessName} · ${engagement.intake.sellerWitnessEmail}`}
                 />
               </dl>
@@ -115,7 +121,12 @@ export default async function AdminEngagementPage({
                 <Row label="Signatory" value={`${brand.signatoryName}, ${brand.signatoryTitle}`} />
                 <Row label="Agent" value={`${brand.agentName} / ${brand.agentContact}`} />
                 <Row label="Venue" value={brand.venue} />
-                <Row label="Juvenile fee" value={formatUsd(brand.juvenileAdditionalFee)} />
+                <Row
+                  label="Juvenile rate"
+                  value={`${formatUsd(brand.juvenileRate)} per juvenile (all-in, not added to the adult rate)`}
+                />
+                <Row label="Deposits" value="None required" />
+                <Row label="FWC status" value={brand.fwcStatus} />
               </dl>
             </section>
 

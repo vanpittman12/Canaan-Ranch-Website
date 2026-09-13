@@ -108,3 +108,13 @@ export function dealTitle(intake: IntakeFields) {
 export function buyerNoticeAddress(intake: IntakeFields) {
   return `${intake.buyerStreet}, ${intake.buyerCity}, ${intake.buyerState} ${intake.buyerPostalCode}`;
 }
+
+/** Exact Buyer notice block used in Parties and Notices. */
+export function formatBuyerNotice(intake: IntakeFields) {
+  return `${intake.buyerLegalName}, Attention: ${intake.buyerAttention}, ${buyerNoticeAddress(intake)}, Phone ${intake.buyerPhone}, Email ${intake.buyerEmail}`;
+}
+
+/** Buyer authorized agent as it appears in Parties, Notices, and responsibilities. */
+export function formatAuthorizedAgent(intake: IntakeFields) {
+  return `${intake.authorizedAgentName}, ${intake.authorizedAgentCompany}`;
+}

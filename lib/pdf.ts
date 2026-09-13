@@ -1,6 +1,6 @@
 import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import { brand, formatBrandAddress } from "./brand";
-import { buildContract, type ContractDocument } from "./contract";
+import { buildContract, buildTemplateEngagement, type ContractDocument } from "./contract";
 import type { Engagement } from "./types";
 
 const PAGE_WIDTH = 612;
@@ -240,6 +240,13 @@ function drawSignatureColumn(
 
 export async function generateContractPdf(engagement: Engagement) {
   return drawDocument(buildContract(engagement));
+}
+
+export async function generateTemplateAgreementPdf() {
+  return drawDocument(buildContract(buildTemplateEngagement()), {
+    watermark: "TEMPLATE — NOT FOR SIGNATURE",
+    footerNote: `${brand.legalName}  ·  Blank relocation agreement template  ·  Review only`,
+  });
 }
 
 export async function generateStubSignedPdf(engagement: Engagement) {
