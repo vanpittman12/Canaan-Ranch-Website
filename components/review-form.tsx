@@ -34,7 +34,7 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
         <p className="mt-2 text-sm leading-6 text-muted">
           Accept is the only path to execution. If a signed copy is already uploaded, Accept will
           mark the agreement executed. If the client chose DocuSign, Accept sends the stub
-          envelope.
+          envelope to the Buyer signer, Canaan Ranch LLP signer, and one witness for each party.
         </p>
       </div>
       {state.error ? (
