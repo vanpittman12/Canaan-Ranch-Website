@@ -57,10 +57,16 @@ export default function Home() {
                 contract. Intake, preview, signature, and a human review before anything closes.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">
+                <Link
+                  href="/intake"
+                  className="inline-flex items-center justify-center rounded-full bg-cream px-5 py-3 text-[0.95rem] font-semibold text-forest transition hover:bg-white"
+                >
                   Begin an engagement
                 </Link>
-                <a href="#how-it-works" className="btn-secondary border-cream/25 text-cream hover:bg-white/5">
+                <a
+                  href="#how-it-works"
+                  className="inline-flex items-center justify-center rounded-full border border-cream/35 px-5 py-3 text-[0.95rem] font-semibold text-cream transition hover:bg-white/10"
+                >
                   How it works
                 </a>
               </div>
@@ -125,7 +131,10 @@ export default function Home() {
               Start the intake. You will see the populated agreement before you choose DocuSign
               or a manual signature.
             </p>
-            <Link href="/intake" className="btn-primary mt-8 bg-cream text-forest hover:bg-white">
+            <Link
+              href="/intake"
+              className="mt-8 inline-flex items-center justify-center rounded-full bg-cream px-5 py-3 text-[0.95rem] font-semibold text-forest transition hover:bg-white"
+            >
               Open the intake form
             </Link>
           </div>
