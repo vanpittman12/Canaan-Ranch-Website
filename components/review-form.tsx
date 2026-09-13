@@ -84,10 +84,8 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
 }
 
 function SimulateComplete({ engagementId }: { engagementId: string }) {
-  const [state, formAction, pending] = useActionState(
-    async () => simulateDocuSignComplete(engagementId),
-    initialState,
-  );
+  const action = simulateDocuSignComplete.bind(null, engagementId);
+  const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className="mt-5 rounded-xl border border-dashed border-brass/50 bg-wheat/50 p-4">

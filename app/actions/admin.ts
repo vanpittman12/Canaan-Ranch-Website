@@ -93,12 +93,16 @@ export async function reviewEngagement(
   revalidatePath("/admin");
   revalidatePath(`/admin/engagements/${engagementId}`);
   revalidatePath(`/engagements/${engagementId}`);
-  return {};
+  redirect(`/admin/engagements/${engagementId}`);
 }
 
 export async function simulateDocuSignComplete(
   engagementId: string,
+  previousState: AdminActionState,
+  formData: FormData,
 ): Promise<AdminActionState> {
+  void previousState;
+  void formData;
   await requireAdmin();
   const engagement = await getEngagement(engagementId);
   if (!engagement) {
@@ -142,5 +146,5 @@ export async function simulateDocuSignComplete(
   revalidatePath("/admin");
   revalidatePath(`/admin/engagements/${engagementId}`);
   revalidatePath(`/engagements/${engagementId}`);
-  return {};
+  redirect(`/admin/engagements/${engagementId}`);
 }

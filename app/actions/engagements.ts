@@ -67,7 +67,7 @@ export async function updateIntake(
     intake: parsed.data,
   });
   revalidatePath(`/engagements/${engagementId}`);
-  return {};
+  redirect(`/engagements/${engagementId}`);
 }
 
 export async function submitEngagement(
@@ -96,7 +96,7 @@ export async function submitEngagement(
 
   revalidatePath(`/engagements/${engagementId}`);
   revalidatePath("/admin");
-  return {};
+  redirect(`/engagements/${engagementId}`);
 }
 
 export async function uploadSignedCopy(
@@ -143,5 +143,5 @@ export async function uploadSignedCopy(
   revalidatePath(`/engagements/${engagementId}`);
   revalidatePath(`/admin/engagements/${engagementId}`);
   revalidatePath("/admin");
-  return {};
+  redirect(`/engagements/${engagementId}`);
 }
