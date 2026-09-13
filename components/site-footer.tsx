@@ -1,0 +1,30 @@
+import Link from "next/link";
+import { brand, formatBrandAddress } from "@/lib/brand";
+
+export function SiteFooter() {
+  return (
+    <footer className="mt-auto border-t border-line bg-forest text-cream">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-10 sm:flex-row sm:items-end sm:justify-between sm:px-8">
+        <div>
+          <p className="font-serif text-2xl">{brand.name}</p>
+          <p className="mt-2 max-w-sm text-sm text-cream/75">{brand.tagline}</p>
+          <p className="mt-4 text-sm text-cream/70">{formatBrandAddress()}</p>
+          <p className="text-sm text-cream/70">
+            {brand.email} · {brand.phone}
+          </p>
+        </div>
+        <div className="flex flex-col items-start gap-2 text-sm text-cream/70 sm:items-end">
+          <Link href="/intake" className="hover:text-cream">
+            Client intake
+          </Link>
+          <Link href="/admin/login" className="hover:text-cream">
+            Team sign in
+          </Link>
+          <p className="pt-2 text-xs text-cream/50">
+            Standard relocation agreement form. Not a substitute for legal counsel.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
