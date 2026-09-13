@@ -1,8 +1,7 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
-
 export const ADMIN_COOKIE = "cr_admin_session";
 const MAX_AGE_SECONDS = 60 * 60 * 12;
 const DOCUMENT_TOKEN_TTL_MS = 2 * 60 * 60 * 1000;
+const encoder = new TextEncoder();
 
 export type DocumentKind = "contract" | "signed";
 
@@ -28,16 +27,58 @@ export function adminPassword() {
   return "canaan-admin";
 }
 
-function sign(value: string) {
-  return createHmac("sha256", sessionSecret()).update(value).digest("base64url");
+function bytesToBase64Url(bytes: ArrayBuffer | Uint8Array) {
+  const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  let binary = "";
+  for (const value of view) {
+    binary += String.fromCharCode(value);
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
-export function createAdminSession() {
+function base64UrlToBytes(value: string) {
+  const padded = value.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = padded.length % 4 === 0 ? "" : "=".repeat(4 - (padded.length % 4));
+  const binary = atob(padded + pad);
+  const out = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    out[i] = binary.charCodeAt(i);
+  }
+  return out;
+}
+
+function timingSafeEqual(left: Uint8Array, right: Uint8Array) {
+  if (left.length !== right.length) {
+    return false;
+  }
+  let diff = 0;
+  for (let i = 0; i < left.length; i += 1) {
+    diff |= left[i] ^ right[i];
+  }
+  return diff === 0;
+}
+
+async function hmacKey() {
+  return crypto.subtle.importKey(
+    "raw",
+    encoder.encode(sessionSecret()),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+}
+
+async function sign(value: string) {
+  const signature = await crypto.subtle.sign("HMAC", await hmacKey(), encoder.encode(value));
+  return bytesToBase64Url(signature);
+}
+
+export async function createAdminSession() {
   const issuedAt = Date.now().toString();
-  return `${issuedAt}.${sign(issuedAt)}`;
+  return `${issuedAt}.${await sign(issuedAt)}`;
 }
 
-export function verifyAdminSession(token: string | undefined | null) {
+export async function verifyAdminSession(token: string | undefined | null) {
   if (!token) {
     return false;
   }
@@ -45,10 +86,8 @@ export function verifyAdminSession(token: string | undefined | null) {
   if (!issuedAt || !signature) {
     return false;
   }
-  const expected = sign(issuedAt);
-  const left = Buffer.from(signature);
-  const right = Buffer.from(expected);
-  if (left.length !== right.length || !timingSafeEqual(left, right)) {
+  const expected = await sign(issuedAt);
+  if (!timingSafeEqual(base64UrlToBytes(signature), base64UrlToBytes(expected))) {
     return false;
   }
   const ageMs = Date.now() - Number(issuedAt);
@@ -65,13 +104,13 @@ export function sessionCookieOptions() {
   };
 }
 
-export function createDocumentToken(engagementId: string, kind: DocumentKind) {
+export async function createDocumentToken(engagementId: string, kind: DocumentKind) {
   const expiresAt = Date.now() + DOCUMENT_TOKEN_TTL_MS;
   const payload = `${kind}:${engagementId}:${expiresAt}`;
-  return `${payload}.${sign(payload)}`;
+  return `${payload}.${await sign(payload)}`;
 }
 
-export function verifyDocumentToken(
+export async function verifyDocumentToken(
   token: string | undefined | null,
   engagementId: string,
   kind: DocumentKind,
@@ -85,10 +124,8 @@ export function verifyDocumentToken(
   }
   const payload = token.slice(0, lastDot);
   const signature = token.slice(lastDot + 1);
-  const expected = sign(payload);
-  const left = Buffer.from(signature);
-  const right = Buffer.from(expected);
-  if (left.length !== right.length || !timingSafeEqual(left, right)) {
+  const expected = await sign(payload);
+  if (!timingSafeEqual(base64UrlToBytes(signature), base64UrlToBytes(expected))) {
     return false;
   }
   const [doc, id, expiresAt] = payload.split(":");
@@ -99,27 +136,27 @@ export function verifyDocumentToken(
   return Number.isFinite(exp) && exp > Date.now();
 }
 
-export function canAccessEngagementDocument(input: {
+export async function canAccessEngagementDocument(input: {
   adminToken?: string | null;
   downloadToken?: string | null;
   engagementId: string;
   kind: DocumentKind;
 }) {
-  if (verifyAdminSession(input.adminToken)) {
+  if (await verifyAdminSession(input.adminToken)) {
     return true;
   }
   return verifyDocumentToken(input.downloadToken, input.engagementId, input.kind);
 }
 
-export function documentDownloadPath(engagementId: string, kind: DocumentKind) {
-  const token = createDocumentToken(engagementId, kind);
+export async function documentDownloadPath(engagementId: string, kind: DocumentKind) {
+  const token = await createDocumentToken(engagementId, kind);
   return `/api/engagements/${engagementId}/${kind}?token=${encodeURIComponent(token)}`;
 }
 
 export function passwordsMatch(provided: string) {
   const expected = adminPassword();
-  const left = Buffer.from(provided);
-  const right = Buffer.from(expected);
+  const left = encoder.encode(provided);
+  const right = encoder.encode(expected);
   if (left.length !== right.length) {
     return false;
   }

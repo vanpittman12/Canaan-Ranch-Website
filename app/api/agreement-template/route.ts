@@ -4,7 +4,7 @@ export const runtime = "nodejs";
 
 export async function GET() {
   const bytes = await generateTemplateAgreementPdf();
-  return new Response(Buffer.from(bytes), {
+  return new Response(bytes, {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition":

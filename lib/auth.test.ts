@@ -9,22 +9,22 @@ import {
 const engagementId = "34cb532f-d3ca-4e6b-9657-d2beef2faef3";
 
 describe("document download access", () => {
-  it("rejects a UUID-only request with no session or token", () => {
+  it("rejects a UUID-only request with no session or token", async () => {
     expect(
-      canAccessEngagementDocument({
+      await canAccessEngagementDocument({
         engagementId,
         kind: "contract",
       }),
     ).toBe(false);
   });
 
-  it("accepts a short-lived token issued for that engagement and document", () => {
-    const token = createDocumentToken(engagementId, "contract");
-    expect(verifyDocumentToken(token, engagementId, "contract")).toBe(true);
-    expect(verifyDocumentToken(token, engagementId, "signed")).toBe(false);
-    expect(verifyDocumentToken(token, "other-id", "contract")).toBe(false);
+  it("accepts a short-lived token issued for that engagement and document", async () => {
+    const token = await createDocumentToken(engagementId, "contract");
+    expect(await verifyDocumentToken(token, engagementId, "contract")).toBe(true);
+    expect(await verifyDocumentToken(token, engagementId, "signed")).toBe(false);
+    expect(await verifyDocumentToken(token, "other-id", "contract")).toBe(false);
     expect(
-      canAccessEngagementDocument({
+      await canAccessEngagementDocument({
         downloadToken: token,
         engagementId,
         kind: "contract",
@@ -32,10 +32,10 @@ describe("document download access", () => {
     ).toBe(true);
   });
 
-  it("accepts an admin session without a download token", () => {
+  it("accepts an admin session without a download token", async () => {
     expect(
-      canAccessEngagementDocument({
-        adminToken: createAdminSession(),
+      await canAccessEngagementDocument({
+        adminToken: await createAdminSession(),
         engagementId,
         kind: "signed",
       }),

@@ -1,0 +1,8 @@
+# Copy to .dev.vars for `npm run preview` (Workers runtime locally).
+# Do not commit .dev.vars.
+NEXTJS_ENV=development
+STORAGE_ADAPTER=cloudflare
+ADMIN_PASSWORD=canaan-admin
+ADMIN_SESSION_SECRET=canaan-preserve-dev-session-secret
+CANAAN_WITNESS_NAME=Andrew Fuddy
+CANAAN_WITNESS_EMAIL=witness@canaanpreserve.com
