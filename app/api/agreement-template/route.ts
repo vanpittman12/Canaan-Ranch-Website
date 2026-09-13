@@ -1,10 +1,11 @@
+import { asArrayBuffer } from "@/lib/http";
 import { generateTemplateAgreementPdf } from "@/lib/pdf";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   const bytes = await generateTemplateAgreementPdf();
-  return new Response(bytes, {
+  return new Response(asArrayBuffer(bytes), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition":

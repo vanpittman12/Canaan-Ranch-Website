@@ -16,6 +16,7 @@ function run(args, { allowFail = false } = {}) {
   const result = spawnSync("npx", ["wrangler", ...args], {
     cwd: root,
     encoding: "utf8",
+    env: { ...process.env, CI: "1" },
     stdio: ["inherit", "pipe", "pipe"],
   });
   const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, canAccessEngagementDocument } from "@/lib/auth";
+import { asArrayBuffer } from "@/lib/http";
 import { generateContractPdf } from "@/lib/pdf";
 import { getEngagement } from "@/lib/store";
 
@@ -29,7 +30,7 @@ export async function GET(
   }
 
   const bytes = await generateContractPdf(engagement);
-  return new Response(bytes, {
+  return new Response(asArrayBuffer(bytes), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${engagement.reference}-canaan-preserve-agreement.pdf"`,

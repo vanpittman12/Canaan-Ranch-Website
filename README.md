@@ -63,6 +63,7 @@ npm run lint             # ESLint
 npm run preview          # OpenNext build + local Workers runtime (D1 + R2)
 npm run deploy           # OpenNext build + deploy to Cloudflare Workers
 npm run db:migrate       # Apply D1 migrations to the remote database
+npm run db:migrate:local # Apply D1 migrations to the local preview database
 npm run cf:provision     # Create D1 + R2 and write the database id into wrangler.jsonc
 ```
 
@@ -169,13 +170,8 @@ npx wrangler r2 bucket create canaan-preserve-uploads
 Copy the printed `database_id` into [`wrangler.jsonc`](wrangler.jsonc) (`d1_databases[0].database_id`). Then apply the schema:
 
 ```bash
-npm run db:migrate
-```
-
-Local Workers preview uses a local D1 file:
-
-```bash
-npm run db:migrate:local
+npm run db:migrate          # remote D1 (CI=1 skips the confirm prompt)
+npm run db:migrate:local    # local D1 for `npm run preview`
 cp .dev.vars.example .dev.vars
 ```
 
