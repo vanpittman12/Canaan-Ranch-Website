@@ -62,7 +62,7 @@ export function applyReview(
   engagement: Engagement,
   decision: ReviewDecision,
   note: string,
-  reviewer = "Canaan Ranch team",
+  reviewer = "Canaan Preserve team",
 ): Engagement {
   if (!canReview(engagement.status)) {
     throw new EngagementError(

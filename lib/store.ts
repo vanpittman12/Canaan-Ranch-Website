@@ -25,7 +25,7 @@ function emptyDocuSign() {
 function createReference() {
   const year = new Date().getFullYear();
   const suffix = randomBytes(3).toString("hex").toUpperCase().slice(0, 4);
-  return `CR-${year}-${suffix}`;
+  return `CP-${year}-${suffix}`;
 }
 
 async function ensureDataDir() {

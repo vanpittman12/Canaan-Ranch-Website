@@ -17,7 +17,7 @@ export function SigningPanel({ engagement }: { engagement: Engagement }) {
       <div>
         <h2 className="font-serif text-2xl text-forest">Choose how you will sign</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          The agreement is not sent or closed from this screen. Canaan Ranch reviews every
+          The agreement is not sent or closed from this screen. Canaan Preserve reviews every
           engagement first. Nothing is executed until the team accepts and a signed artifact is
           on file.
         </p>
@@ -44,7 +44,7 @@ export function SigningPanel({ engagement }: { engagement: Engagement }) {
             <span>
               <span className="block font-medium text-ink">Send with DocuSign after review</span>
               <span className="mt-1 block text-sm leading-6 text-muted">
-                After Canaan Ranch accepts, the team will send this agreement through the DocuSign
+                After Canaan Preserve accepts, the team will send this agreement through the DocuSign
                 seam. Locally this is a stub: no live DocuSign API calls are made.
               </span>
             </span>
@@ -73,7 +73,7 @@ export function SigningPanel({ engagement }: { engagement: Engagement }) {
             Download PDF
           </a>
           <button className="btn-primary" type="submit" disabled={pending}>
-            {pending ? "Submitting…" : "Submit for Canaan Ranch review"}
+            {pending ? "Submitting…" : "Submit for Canaan Preserve review"}
           </button>
         </div>
       </form>

@@ -11,7 +11,7 @@ function sessionSecret() {
   if (process.env.NODE_ENV === "production") {
     throw new Error("ADMIN_SESSION_SECRET is required in production.");
   }
-  return "canaan-ranch-dev-session-secret";
+  return "canaan-preserve-dev-session-secret";
 }
 
 export function adminPassword() {

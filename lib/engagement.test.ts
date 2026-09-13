@@ -34,7 +34,7 @@ const intake: IntakeFields = {
 function draft(): Engagement {
   return {
     id: "eng-1",
-    reference: "CR-2026-TEST",
+    reference: "CP-2026-TEST",
     status: "draft",
     intake,
     signingMethod: null,

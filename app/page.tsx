@@ -11,7 +11,7 @@ const steps = [
   {
     n: "02",
     title: "Review the agreement",
-    body: "We populate Canaan Ranch’s standard professional-services contract from those details.",
+    body: "We populate Canaan Preserve’s standard professional-services contract from those details.",
   },
   {
     n: "03",
@@ -23,7 +23,7 @@ const steps = [
 const services = [
   {
     title: "Land stewardship",
-    body: "Grazing, pasture recovery, and seasonal land-use advisory rooted in the ranch.",
+    body: "Grazing, pasture recovery, and seasonal land-use advisory rooted in the preserve.",
   },
   {
     title: "Hospitality & events",
@@ -31,7 +31,7 @@ const services = [
   },
   {
     title: "Operations consulting",
-    body: "Hands-on counsel for ranch systems, vendors, and the work that sits between seasons.",
+    body: "Hands-on counsel for preserve systems, vendors, and the work that sits between seasons.",
   },
 ];
 
@@ -53,7 +53,7 @@ export default function Home() {
                 Begin the work with a clear agreement.
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-8 text-cream/80">
-                Canaan Ranch professional services — from first conversation to an executed
+                Canaan Preserve professional services — from first conversation to an executed
                 contract. Intake, preview, signature, and a human review before anything closes.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -110,7 +110,7 @@ export default function Home() {
               <h2 className="mt-3 font-serif text-4xl text-forest">Work we take on.</h2>
               <p className="mt-4 text-base leading-7 text-muted">
                 Every engagement uses the same intake and the same standard agreement, then a
-                Canaan Ranch review before signature is treated as final.
+                Canaan Preserve review before signature is treated as final.
               </p>
             </div>
             <div className="grid gap-4">

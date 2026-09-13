@@ -124,7 +124,7 @@ export function buildContract(engagement: Engagement): ContractDocument {
         heading: "11. General",
         paragraphs: [
           `This Agreement is governed by the laws of the State of ${brand.address.state}, without regard to conflict-of-laws rules. The parties will first attempt good-faith resolution of disputes. If litigation is required, exclusive venue lies in the state or federal courts sitting in ${brand.address.state}.`,
-          "This Agreement, together with the intake details incorporated above, is the entire agreement for the Services and supersedes prior discussions. It may be signed in counterparts, including electronic signature. A standard Canaan Ranch form is provided for operational efficiency and is not a substitute for counsel.",
+          "This Agreement, together with the intake details incorporated above, is the entire agreement for the Services and supersedes prior discussions. It may be signed in counterparts, including electronic signature. A standard Canaan Preserve form is provided for operational efficiency and is not a substitute for counsel.",
         ],
       },
     ],

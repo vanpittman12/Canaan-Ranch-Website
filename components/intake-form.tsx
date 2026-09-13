@@ -181,7 +181,7 @@ export function IntakeForm({
         <div>
           <h2 className="font-serif text-2xl text-forest">Project basics</h2>
           <p className="mt-1 text-sm text-muted">
-            These details populate Canaan Ranch’s standard professional-services agreement.
+            These details populate Canaan Preserve’s standard professional-services agreement.
           </p>
         </div>
         <Field label="Project title" name="projectTitle" error={errors.projectTitle}>
@@ -268,7 +268,7 @@ export function IntakeForm({
             name="scopeSummary"
             defaultValue={defaults?.scopeSummary}
             required
-            placeholder="What should Canaan Ranch deliver, and what does success look like?"
+            placeholder="What should Canaan Preserve deliver, and what does success look like?"
           />
         </Field>
         <Field label="Additional notes (optional)" name="notes" error={errors.notes}>
@@ -283,7 +283,7 @@ export function IntakeForm({
 
       <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted">
-          Submitting generates a Canaan Ranch agreement preview. Nothing is executed until the
+          Submitting generates a Canaan Preserve agreement preview. Nothing is executed until the
           team accepts and a signed copy is on file.
         </p>
         <button className="btn-primary" type="submit" disabled={pending}>

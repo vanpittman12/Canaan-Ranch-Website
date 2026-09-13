@@ -17,7 +17,7 @@ export async function GET(
   return new Response(Buffer.from(bytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${engagement.reference}-canaan-ranch-agreement.pdf"`,
+      "Content-Disposition": `attachment; filename="${engagement.reference}-canaan-preserve-agreement.pdf"`,
       "Cache-Control": "no-store",
     },
   });

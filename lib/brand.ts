@@ -1,11 +1,11 @@
 export const brand = {
-  name: "Canaan Ranch",
-  legalName: "Canaan Ranch LLC",
+  name: "Canaan Preserve",
+  legalName: "Canaan Preserve LLC",
   tagline: "Land, hospitality, and professional partnership.",
   shortTagline: "From first conversation to executed agreement.",
-  email: "engagements@canaanranch.com",
+  email: "engagements@canaanpreserve.com",
   phone: "+1 (304) 555-1840",
-  website: "https://canaanranch.example",
+  website: "https://canaanpreserve.example",
   address: {
     street: "1840 Ridge Line Road",
     city: "Canaan Valley",

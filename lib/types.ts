@@ -9,7 +9,7 @@ export const SERVICE_TYPES = [
   },
   {
     value: "consulting",
-    label: "Ranch operations consulting",
+    label: "Preserve operations consulting",
   },
   {
     value: "custom",

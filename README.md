@@ -1,8 +1,8 @@
-# Canaan Ranch
+# Canaan Preserve
 
-Professional-services intake, agreement preview, signature, and internal review for **Canaan Ranch**.
+Professional-services intake, agreement preview, signature, and internal review for **Canaan Preserve**. The GitHub repository name may still say Canaan Ranch; customer-facing branding is Canaan Preserve.
 
-Clients submit company and project details. The app populates a standard Canaan Ranch professional-services agreement, lets the client choose DocuSign or a manual signed PDF, and holds every engagement in a team review queue. **Nothing is executed until the team Accepts and a signed artifact is on file.**
+Clients submit company and project details. The app populates a standard Canaan Preserve professional-services agreement, lets the client choose DocuSign or a manual signed PDF, and holds every engagement in a team review queue. **Nothing is executed until the team Accepts and a signed artifact is on file.**
 
 ## Run locally
 
@@ -51,7 +51,7 @@ npm run lint     # ESLint
 ## Product flow
 
 1. Client completes intake (company, contact, project basics).
-2. Submit generates a Canaan Ranch professional-services agreement and shows the preview.
+2. Submit generates a Canaan Preserve professional-services agreement and shows the preview.
 3. Client chooses:
    - **DocuSign** — recorded as the signing method. The envelope is **not** sent until Accept.
    - **Manual** — download the PDF, optionally upload a signed copy, then submit.

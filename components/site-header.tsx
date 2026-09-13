@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { brand } from "@/lib/brand";
 import { BrandMark } from "./brand-mark";
 
 export function SiteHeader({
@@ -13,7 +14,7 @@ export function SiteHeader({
           <BrandMark className="h-11 w-11" />
           <span className="leading-tight">
             <span className="block font-serif text-xl tracking-tight text-forest">
-              Canaan Ranch
+              {brand.name}
             </span>
             <span className="block text-[11px] uppercase tracking-[0.22em] text-muted">
               {variant === "admin" ? "Internal review" : "Professional services"}

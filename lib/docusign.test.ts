@@ -17,7 +17,7 @@ describe("DocuSign seam", () => {
 
     const result = await sendEnvelope({
       engagementId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-      reference: "CR-2026-TEST",
+      reference: "CP-2026-TEST",
       signerName: "Avery Cole",
       signerEmail: "avery@ridge.example",
     });
@@ -33,7 +33,7 @@ describe("DocuSign seam", () => {
     await expect(
       sendEnvelope({
         engagementId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-        reference: "CR-2026-TEST",
+        reference: "CP-2026-TEST",
         signerName: "Avery Cole",
         signerEmail: "avery@ridge.example",
       }),

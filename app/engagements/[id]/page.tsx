@@ -100,7 +100,7 @@ function StatusCopy({
   if (engagement.status === "changes_requested") {
     return (
       <div className="mt-6 rounded-2xl border border-terracotta/25 bg-terracotta/8 p-5">
-        <p className="font-medium text-terracotta">Canaan Ranch requested changes</p>
+        <p className="font-medium text-terracotta">Canaan Preserve requested changes</p>
         <p className="mt-2 text-sm leading-6 text-ink/80">
           {engagement.changeRequestNote}
         </p>
@@ -119,7 +119,7 @@ function StatusCopy({
           The team has your {engagement.signingMethod === "docusign" ? "DocuSign" : "manual"}{" "}
           preference
           {engagement.signedArtifact ? " and a signed copy is already on file" : ""}. The
-          engagement will not close until Canaan Ranch accepts.
+          engagement will not close until Canaan Preserve accepts.
         </p>
       </div>
     );
@@ -131,7 +131,7 @@ function StatusCopy({
         <p className="font-medium text-ink">This engagement was declined</p>
         <p className="mt-2 text-sm leading-6 text-muted">
           {engagement.reviews.at(-1)?.note ||
-            "Canaan Ranch is not moving forward with this engagement."}
+            "Canaan Preserve is not moving forward with this engagement."}
         </p>
       </div>
     );
@@ -155,7 +155,7 @@ function StatusCopy({
       <div className="mt-6 rounded-2xl border border-forest/20 bg-forest text-cream p-5">
         <p className="font-medium">Agreement executed</p>
         <p className="mt-2 text-sm leading-6 text-cream/80">
-          Canaan Ranch accepted this engagement and a signed artifact is on file
+          Canaan Preserve accepted this engagement and a signed artifact is on file
           {engagement.signedArtifact
             ? ` (${engagement.signedArtifact.filename}).`
             : "."}
@@ -207,7 +207,7 @@ function SubmittedPanel({ engagement }: { engagement: Engagement }) {
       ) : null}
       <p className="text-sm text-muted">
         Questions? Write {engagement.intake.contactEmail} into your own records, or contact
-        Canaan Ranch from the footer. Team members review the queue at{" "}
+        Canaan Preserve from the footer. Team members review the queue at{" "}
         <Link className="underline" href="/admin">
           /admin
         </Link>

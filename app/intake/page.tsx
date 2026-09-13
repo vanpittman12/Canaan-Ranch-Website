@@ -19,7 +19,7 @@ export default function IntakePage() {
           Tell us about the work.
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-muted">
-          Company, contact, and project basics. On submit we draft Canaan Ranch’s standard
+          Company, contact, and project basics. On submit we draft Canaan Preserve’s standard
           professional-services agreement from these fields and show you the preview.
         </p>
         <div className="mt-10 rounded-[1.5rem] border border-line bg-white p-6 sm:p-8">

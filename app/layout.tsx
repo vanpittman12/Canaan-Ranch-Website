@@ -14,11 +14,11 @@ const sourceSans = Source_Sans_3({
 
 export const metadata: Metadata = {
   title: {
-    default: "Canaan Ranch",
-    template: "%s · Canaan Ranch",
+    default: "Canaan Preserve",
+    template: "%s · Canaan Preserve",
   },
   description:
-    "Canaan Ranch professional services intake, agreement preview, signature, and internal review.",
+    "Canaan Preserve professional services intake, agreement preview, signature, and internal review.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
