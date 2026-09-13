@@ -6,6 +6,7 @@ import {
   formatLongDate,
   formatUsd,
   numberToWords,
+  usdInWords,
 } from "./money";
 import {
   formatAuthorizedAgent,
@@ -153,7 +154,7 @@ export function buildContract(engagement: Engagement): ContractDocument {
         heading: "4. Payment",
         paragraphs: [
           `Buyer shall pay Seller ${economics.rateFormatted} (${economics.rateWords}) per adult gopher tortoise accepted against the Reserved Capacity (the “Per GT Rate”). The Total Estimated Payment for the Reserved Capacity at the adult rate is ${estimatedTotal}.`,
-          `If a tortoise is classified as a juvenile at delivery and acceptance, Buyer shall pay ${formatUsd(brand.juvenileAdditionalFee)} per juvenile, in addition to the Per GT Rate. Juvenile classification is not made at intake.`,
+          `If a tortoise is classified as a juvenile at delivery and acceptance, Buyer shall pay ${formatUsd(brand.juvenileRate)} (${usdInWords(brand.juvenileRate)}) per juvenile as the total price for that tortoise, in lieu of the Per GT Rate. The juvenile price is ${formatUsd(brand.juvenileRate)} all-in and is not added to the adult Per GT Rate. Juvenile classification is not made at intake.`,
           "No deposit or initial payment is required. Payment is due as invoiced upon acceptance of tortoises at the recipient site (or as otherwise billed by Seller).",
         ],
       },

@@ -122,8 +122,8 @@ export default async function AdminEngagementPage({
                 <Row label="Agent" value={`${brand.agentName} / ${brand.agentContact}`} />
                 <Row label="Venue" value={brand.venue} />
                 <Row
-                  label="Juvenile fee"
-                  value={`${formatUsd(brand.juvenileAdditionalFee)} per juvenile`}
+                  label="Juvenile rate"
+                  value={`${formatUsd(brand.juvenileRate)} per juvenile (all-in, not added to the adult rate)`}
                 />
                 <Row label="Deposits" value="None required" />
                 <Row label="FWC status" value={brand.fwcStatus} />

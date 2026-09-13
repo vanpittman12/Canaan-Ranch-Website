@@ -115,6 +115,10 @@ describe("gopher tortoise agreement mapping", () => {
     expect(body).toContain("Project description: Residential development parcel");
     expect(body).toContain("$3,000");
     expect(body).toContain("per juvenile");
+    expect(body).toContain("three thousand dollars");
+    expect(body).toContain("total price for that tortoise, in lieu of the Per GT Rate");
+    expect(body).toContain("all-in and is not added to the adult Per GT Rate");
+    expect(body).not.toMatch(/in addition to the Per GT Rate/);
     expect(body).toContain("No deposit or initial payment is required");
     expect(body).toContain(brand.fwcStatus);
     expect(body).not.toMatch(/non-negotiable/i);
@@ -132,6 +136,8 @@ describe("gopher tortoise agreement mapping", () => {
     expect(body).toContain("[Reserved capacity count]");
     expect(body).toContain("$6,000");
     expect(body).toContain("$3,000");
+    expect(body).toContain("in lieu of the Per GT Rate");
+    expect(body).not.toMatch(/in addition to the Per GT Rate/);
     expect(contract.sellerBlock.join(" ")).toContain(brand.sellerWitnessName);
     expect(body).not.toMatch(/non-negotiable/i);
   });

@@ -32,7 +32,7 @@ export default function IntakePage() {
         </p>
         <p className="mt-3 text-sm text-muted">
           {formatUsd(brand.defaultPerGtRate)} per adult ·{" "}
-          {formatUsd(brand.juvenileAdditionalFee)} per juvenile · No deposits required
+          {formatUsd(brand.juvenileRate)} per juvenile · No deposits required
         </p>
         <div className="mt-6">
           <TemplateDownloadButton variant="primary" />

@@ -80,9 +80,9 @@ npm run lint     # ESLint
 | Effective Date (not on the form) | Date the Buyer signs (DocuSign completion or manual signed-copy upload) |
 | Effective Date + 1 year | Expiration Date (filled once signed) |
 
-Seller-side constants (not buyer intake): Canaan Ranch LLP; Attention Van Pittman; 1700 S. MacDill Ave., Suite 340, Tampa, FL 33629; Phone 813-390-1044; signatory Andrew V. Pittman, Jr., Manager; agent Applied Bionomics, LLC / Andrew Fuddy; Canaan witness (env-overridable); $6,000 per adult; $3,000 per juvenile at delivery/acceptance; no deposits; venue Pasco County, Florida.
+Seller-side constants (not buyer intake): Canaan Ranch LLP; Attention Van Pittman; 1700 S. MacDill Ave., Suite 340, Tampa, FL 33629; Phone 813-390-1044; signatory Andrew V. Pittman, Jr., Manager; agent Applied Bionomics, LLC / Andrew Fuddy; Canaan witness (env-overridable); $6,000 per adult; $3,000 per juvenile all-in (not added to the adult rate) at delivery/acceptance; no deposits; venue Pasco County, Florida.
 
-Adult vs juvenile is not collected at intake. The $3,000 juvenile fee stays in the agreement body. There is no Initial Payment or deposit — reservation is the signed agreement plus tortoise count, and payment is the adult rate invoiced on acceptance.
+Adult vs juvenile is not collected at intake. The $3,000 juvenile price stays in the agreement body as the total for a juvenile, in lieu of the $6,000 adult Per GT Rate. There is no Initial Payment or deposit — reservation is the signed agreement plus tortoise count, and payment is invoiced on acceptance.
 
 ## Product flow
 

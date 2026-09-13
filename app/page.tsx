@@ -73,7 +73,7 @@ export default function Home() {
               <p className="text-[11px] uppercase tracking-[0.22em] text-brass">Standard terms</p>
               <ul className="mt-4 space-y-3 text-sm leading-6 text-cream/80">
                 <li>{formatUsd(brand.defaultPerGtRate)} per adult</li>
-                <li>{formatUsd(brand.juvenileAdditionalFee)} per juvenile</li>
+                <li>{formatUsd(brand.juvenileRate)} per juvenile (all-in)</li>
                 <li>No deposits required</li>
                 <li>{brand.fwcStatus}</li>
                 <li>Effective Date = Buyer signature date; expires one year later</li>
@@ -111,7 +111,7 @@ export default function Home() {
             </p>
             <p className="mt-4 text-sm font-medium text-cream">
               {formatUsd(brand.defaultPerGtRate)} per adult ·{" "}
-              {formatUsd(brand.juvenileAdditionalFee)} per juvenile · No deposits required
+              {formatUsd(brand.juvenileRate)} per juvenile · No deposits required
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link

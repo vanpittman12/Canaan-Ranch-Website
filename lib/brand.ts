@@ -22,7 +22,8 @@ export const brand = {
   agentContact: "Andrew Fuddy",
   venue: "Pasco County, Florida",
   defaultPerGtRate: 6000,
-  juvenileAdditionalFee: 3000,
+  /** All-in juvenile price; not added on top of the adult Per GT Rate. */
+  juvenileRate: 3000,
   /** Seller-side witness. Same every reservation; not collected on public intake. */
   sellerWitnessName: "Andrew Fuddy",
   sellerWitnessEmail: "witness@canaanpreserve.com",

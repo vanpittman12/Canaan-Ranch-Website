@@ -173,7 +173,8 @@ export function IntakeForm({
           <p className="mt-1 text-sm text-muted">
             The tortoise count becomes Paragraph 2 “up to N” reserved capacity. Adult versus
             juvenile is classified at delivery. {formatUsd(brand.defaultPerGtRate)} per adult.{" "}
-            {formatUsd(brand.juvenileAdditionalFee)} per juvenile. No deposits required.
+            {formatUsd(brand.juvenileRate)} per juvenile (all-in, not added to the adult rate).
+            No deposits required.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -211,8 +212,8 @@ export function IntakeForm({
               </p>
             )}
             <p className="mt-1 text-sm text-muted">
-              {formatUsd(brand.juvenileAdditionalFee)} per juvenile at delivery. No deposits
-              required.
+              {formatUsd(brand.juvenileRate)} per juvenile at delivery (all-in, not added to the
+              adult rate). No deposits required.
             </p>
             {errors.perGtRate ? (
               <p className="mt-1 text-sm text-terracotta">{errors.perGtRate}</p>
@@ -221,8 +222,9 @@ export function IntakeForm({
         </div>
         <div className="rounded-xl border border-line bg-cream/40 px-4 py-3 text-sm text-ink">
           Total estimated payment at the adult rate: <strong>{formatUsd(total)}</strong> (
-          {count || 0} × {formatUsd(rate || 0)} per adult). Juvenile fees, if any, are added at
-          delivery. No deposits required.
+          {count || 0} × {formatUsd(rate || 0)} per adult). A juvenile classified at delivery is{" "}
+          {formatUsd(brand.juvenileRate)} total, not in addition to the adult rate. No deposits
+          required.
         </div>
       </section>
 
