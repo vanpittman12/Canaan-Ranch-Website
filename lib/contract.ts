@@ -136,7 +136,7 @@ export function buildContract(engagement: Engagement): ContractDocument {
         heading: "4. Payment",
         paragraphs: [
           `Buyer shall pay Seller ${economics.rateFormatted} (${economics.rateWords}) for each gopher tortoise accepted against the Reserved Capacity (the “Per GT Rate”). The Total Estimated Payment for the Reserved Capacity is ${economics.totalFormatted} (${economics.totalWords}), calculated as ${economics.count} × ${economics.rateFormatted}.`,
-          "The Per GT Rate is generally non-negotiable. Any exception must be confirmed in writing by Seller’s Manager before execution. Payment is due as invoiced upon acceptance of tortoises at the recipient site (or as otherwise billed by Seller). Any Initial Payment or deposit requirement from a prior form is omitted and does not apply.",
+          "The Per GT Rate is generally non-negotiable. Any exception must be confirmed in writing by Seller’s Manager before execution. Payment is due as invoiced upon acceptance of tortoises at the recipient site (or as otherwise billed by Seller).",
           `If a tortoise is classified as a juvenile at delivery and acceptance, Buyer shall pay an additional ${formatUsd(brand.juvenileAdditionalFee)} per juvenile, in addition to the Per GT Rate. Juvenile classification is not made at intake.`,
         ],
       },

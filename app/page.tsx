@@ -17,8 +17,8 @@ const steps = [
   },
   {
     n: "03",
-    title: "Sign, then we accept",
-    body: "Usual path is DocuSign after review — Buyer and Canaan Ranch LLP signers plus one witness each. Manual PDF is a fallback. Nothing closes until Canaan Preserve accepts and a signed copy is on file.",
+    title: "We accept, then DocuSign",
+    body: "Canaan Preserve reviews first. After Accept, the usual path is DocuSign to the Buyer and Canaan Ranch LLP signers plus one witness each. Manual PDF is a fallback. Nothing is executed until Accept and a signed copy are on file.",
   },
 ];
 
@@ -93,8 +93,8 @@ export default function Home() {
           <div className="rounded-[2rem] bg-forest px-8 py-14 text-cream sm:px-14">
             <h2 className="max-w-xl font-serif text-4xl">Ready to reserve capacity.</h2>
             <p className="mt-4 max-w-xl text-base leading-7 text-cream/75">
-              Start the intake. You will see the populated relocation agreement, then send it
-              through DocuSign after review. Manual signature remains available as a fallback.
+              Start the intake. Canaan Preserve reviews and Accepts first; the usual path is
+              then DocuSign. Manual signature remains available as a fallback.
             </p>
             <Link
               href="/intake"

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { brand } from "./brand";
+import type { IntakeFields } from "./types";
 
 export const intakeSchema = z.object({
   buyerLegalName: z.string().trim().min(2, "Buyer legal name is required."),
@@ -14,10 +15,6 @@ export const intakeSchema = z.object({
     .number({ error: "Enter the number of gopher tortoises." })
     .int("Use a whole number.")
     .min(1, "Reserve at least one gopher tortoise."),
-  perGtRate: z.coerce
-    .number({ error: "Enter a per-tortoise rate." })
-    .min(1, "Rate must be greater than zero.")
-    .default(brand.defaultPerGtRate),
   relocationCounty: z.string().trim().min(2, "County of relocation is required."),
   authorizedAgentName: z.string().trim().min(2, "Authorized agent name is required."),
   authorizedAgentCompany: z
@@ -40,6 +37,14 @@ export const intakeSchema = z.object({
 });
 
 export type IntakeInput = z.infer<typeof intakeSchema>;
+
+/** Public create/update ignore any posted rate and lock the brand default. */
+export function publicIntakeFields(input: IntakeInput): IntakeFields {
+  return {
+    ...input,
+    perGtRate: brand.defaultPerGtRate,
+  };
+}
 
 export function formDataToObject(formData: FormData) {
   const object: Record<string, string> = {};

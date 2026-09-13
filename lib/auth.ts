@@ -2,6 +2,9 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const ADMIN_COOKIE = "cr_admin_session";
 const MAX_AGE_SECONDS = 60 * 60 * 12;
+const DOCUMENT_TOKEN_TTL_MS = 2 * 60 * 60 * 1000;
+
+export type DocumentKind = "contract" | "signed";
 
 function sessionSecret() {
   const secret = process.env.ADMIN_SESSION_SECRET;
@@ -60,6 +63,57 @@ export function sessionCookieOptions() {
     path: "/",
     maxAge: MAX_AGE_SECONDS,
   };
+}
+
+export function createDocumentToken(engagementId: string, kind: DocumentKind) {
+  const expiresAt = Date.now() + DOCUMENT_TOKEN_TTL_MS;
+  const payload = `${kind}:${engagementId}:${expiresAt}`;
+  return `${payload}.${sign(payload)}`;
+}
+
+export function verifyDocumentToken(
+  token: string | undefined | null,
+  engagementId: string,
+  kind: DocumentKind,
+) {
+  if (!token) {
+    return false;
+  }
+  const lastDot = token.lastIndexOf(".");
+  if (lastDot <= 0) {
+    return false;
+  }
+  const payload = token.slice(0, lastDot);
+  const signature = token.slice(lastDot + 1);
+  const expected = sign(payload);
+  const left = Buffer.from(signature);
+  const right = Buffer.from(expected);
+  if (left.length !== right.length || !timingSafeEqual(left, right)) {
+    return false;
+  }
+  const [doc, id, expiresAt] = payload.split(":");
+  if (doc !== kind || id !== engagementId) {
+    return false;
+  }
+  const exp = Number(expiresAt);
+  return Number.isFinite(exp) && exp > Date.now();
+}
+
+export function canAccessEngagementDocument(input: {
+  adminToken?: string | null;
+  downloadToken?: string | null;
+  engagementId: string;
+  kind: DocumentKind;
+}) {
+  if (verifyAdminSession(input.adminToken)) {
+    return true;
+  }
+  return verifyDocumentToken(input.downloadToken, input.engagementId, input.kind);
+}
+
+export function documentDownloadPath(engagementId: string, kind: DocumentKind) {
+  const token = createDocumentToken(engagementId, kind);
+  return `/api/engagements/${engagementId}/${kind}?token=${encodeURIComponent(token)}`;
 }
 
 export function passwordsMatch(provided: string) {

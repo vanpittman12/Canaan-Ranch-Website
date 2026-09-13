@@ -55,7 +55,7 @@ npm run lint     # ESLint
 | Buyer legal name | Buyer party |
 | Buyer notice (attention / signatory, street, city/state/zip, phone, email) | Notices and Buyer signature block |
 | Number of spots (tortoise count) | Paragraph 2 “up to N” reserved capacity |
-| Per GT Rate (default $6,000; admin override only) | Payment paragraph (words + numbers) |
+| Per GT Rate (locked to $6,000 on public intake; admin override only) | Payment paragraph (words + numbers) |
 | Tortoise count × rate | Total Estimated Payment (words + numbers) |
 | County of relocation | Reserved-capacity paragraph |
 | Authorized agent name + company | Parties, notices, Buyer responsibilities |
@@ -74,7 +74,7 @@ Adult vs juvenile is not collected at intake. The $3,000 juvenile additional fee
 
 1. Buyer completes intake (legal name, notice / signatory, spots, project/ops fields, one witness per party).
 2. Submit generates the Multi-Project Gopher Tortoise Relocation Agreement and shows the preview.
-3. Usual path is **DocuSign** after review (witness emails are recorded on the stub envelope routing). Manual PDF remains a fallback.
+3. Usual path is **Accept, then DocuSign** (witness emails are recorded on the stub envelope routing). Manual PDF remains a fallback. Contract and signed PDFs require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
 4. Team reviews at `/admin`:
    - **Accept** — if DocuSign, send the stub envelope; if a signed file is already present, status becomes **Executed**.
    - **Request changes** — buyer can edit and resubmit.

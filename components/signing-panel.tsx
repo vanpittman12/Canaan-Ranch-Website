@@ -7,7 +7,13 @@ import { UploadSigned } from "./upload-signed";
 
 const initialState: ActionState = {};
 
-export function SigningPanel({ engagement }: { engagement: Engagement }) {
+export function SigningPanel({
+  engagement,
+  contractUrl,
+}: {
+  engagement: Engagement;
+  contractUrl: string;
+}) {
   const action = submitEngagement.bind(null, engagement.id);
   const [state, formAction, pending] = useActionState(action, initialState);
   const [method, setMethod] = useState(engagement.signingMethod ?? "docusign");
@@ -72,7 +78,7 @@ export function SigningPanel({ engagement }: { engagement: Engagement }) {
         </fieldset>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <a className="btn-secondary" href={`/api/engagements/${engagement.id}/contract`}>
+          <a className="btn-secondary" href={contractUrl}>
             Download PDF
           </a>
           <button className="btn-primary" type="submit" disabled={pending}>

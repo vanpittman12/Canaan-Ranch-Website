@@ -17,7 +17,12 @@ import {
   getStoredUploadPath,
   saveEngagement,
 } from "@/lib/store";
-import { flattenZodErrors, formDataToObject, intakeSchema } from "@/lib/validation";
+import {
+  flattenZodErrors,
+  formDataToObject,
+  intakeSchema,
+  publicIntakeFields,
+} from "@/lib/validation";
 import type { SigningMethod } from "@/lib/types";
 
 export type ActionState = {
@@ -37,7 +42,7 @@ export async function createEngagement(
     };
   }
 
-  const engagement = await createEngagementRecord(parsed.data);
+  const engagement = await createEngagementRecord(publicIntakeFields(parsed.data));
   redirect(`/engagements/${engagement.id}`);
 }
 
@@ -64,7 +69,7 @@ export async function updateIntake(
 
   await saveEngagement({
     ...engagement,
-    intake: parsed.data,
+    intake: publicIntakeFields(parsed.data),
   });
   revalidatePath(`/engagements/${engagementId}`);
   redirect(`/engagements/${engagementId}`);

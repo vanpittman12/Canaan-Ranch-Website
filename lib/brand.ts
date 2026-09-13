@@ -5,7 +5,7 @@ export const brand = {
   shortTagline: "Reserve recipient-site capacity with a clear agreement.",
   email: "engagements@canaanpreserve.com",
   phone: "813-390-1044",
-  website: "https://canaanpreserve.example",
+  website: "https://canaanpreserve.com",
   attention: "Van Pittman",
   address: {
     street: "1700 S. MacDill Ave., Suite 340",

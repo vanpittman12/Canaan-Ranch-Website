@@ -190,12 +190,9 @@ export function IntakeForm({
                 onChange={(event) => setRate(Number(event.target.value))}
               />
             ) : (
-              <>
-                <input type="hidden" name="perGtRate" value={rate} />
-                <p className="mt-1.5 rounded-lg border border-line bg-cream/50 px-3.5 py-2.5 text-ink">
-                  {formatUsd(brand.defaultPerGtRate)} standard
-                </p>
-              </>
+              <p className="mt-1.5 rounded-lg border border-line bg-cream/50 px-3.5 py-2.5 text-ink">
+                {formatUsd(brand.defaultPerGtRate)} standard
+              </p>
             )}
             <p className="mt-1 text-sm text-muted">
               Default {formatUsd(brand.defaultPerGtRate)}. Generally non-negotiable. Manager

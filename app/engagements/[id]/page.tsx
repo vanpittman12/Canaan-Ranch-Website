@@ -11,6 +11,7 @@ import { UploadSigned } from "@/components/upload-signed";
 import { describeDocuSignSeam } from "@/lib/docusign";
 import { canCustomerEdit } from "@/lib/engagement";
 import { dealEconomics, formatUsd } from "@/lib/money";
+import { documentDownloadPath } from "@/lib/auth";
 import { getEngagement } from "@/lib/store";
 import { dealTitle, type Engagement } from "@/lib/types";
 
@@ -41,6 +42,10 @@ export default async function EngagementPage({
 
   const seam = describeDocuSignSeam();
   const editable = canCustomerEdit(engagement.status);
+  const contractUrl = documentDownloadPath(engagement.id, "contract");
+  const signedUrl = engagement.signedArtifact
+    ? documentDownloadPath(engagement.id, "signed")
+    : null;
 
   return (
     <>
@@ -69,9 +74,13 @@ export default async function EngagementPage({
           <aside className="space-y-6">
             <div className="rounded-2xl border border-line bg-white p-6">
               {editable ? (
-                <SigningPanel engagement={engagement} />
+                <SigningPanel engagement={engagement} contractUrl={contractUrl} />
               ) : (
-                <SubmittedPanel engagement={engagement} />
+                <SubmittedPanel
+                  engagement={engagement}
+                  contractUrl={contractUrl}
+                  signedUrl={signedUrl}
+                />
               )}
             </div>
             {editable ? (
@@ -176,7 +185,15 @@ function StatusCopy({
   );
 }
 
-function SubmittedPanel({ engagement }: { engagement: Engagement }) {
+function SubmittedPanel({
+  engagement,
+  contractUrl,
+  signedUrl,
+}: {
+  engagement: Engagement;
+  contractUrl: string;
+  signedUrl: string | null;
+}) {
   return (
     <div className="space-y-5">
       <div>
@@ -192,11 +209,11 @@ function SubmittedPanel({ engagement }: { engagement: Engagement }) {
         </p>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row">
-        <a className="btn-secondary" href={`/api/engagements/${engagement.id}/contract`}>
+        <a className="btn-secondary" href={contractUrl}>
           Download agreement PDF
         </a>
-        {engagement.signedArtifact ? (
-          <a className="btn-secondary" href={`/api/engagements/${engagement.id}/signed`}>
+        {signedUrl ? (
+          <a className="btn-secondary" href={signedUrl}>
             Download signed copy
           </a>
         ) : null}

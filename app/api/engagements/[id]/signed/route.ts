@@ -1,24 +1,31 @@
 import { readFile } from "node:fs/promises";
 import { cookies } from "next/headers";
-import { ADMIN_COOKIE, verifyAdminSession } from "@/lib/auth";
+import { ADMIN_COOKIE, canAccessEngagementDocument } from "@/lib/auth";
 import { getEngagement, getStoredUploadPath } from "@/lib/store";
 
 export const runtime = "nodejs";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
+  const token = new URL(request.url).searchParams.get("token");
+  const jar = await cookies();
+  if (
+    !canAccessEngagementDocument({
+      adminToken: jar.get(ADMIN_COOKIE)?.value,
+      downloadToken: token,
+      engagementId: id,
+      kind: "signed",
+    })
+  ) {
+    return new Response("Authentication required.", { status: 401 });
+  }
+
   const engagement = await getEngagement(id);
   if (!engagement?.signedArtifact) {
     return new Response("No signed copy is on file.", { status: 404 });
-  }
-
-  const jar = await cookies();
-  const isAdmin = verifyAdminSession(jar.get(ADMIN_COOKIE)?.value);
-  if (!isAdmin && engagement.status === "declined") {
-    return new Response("Not available.", { status: 403 });
   }
 
   try {
