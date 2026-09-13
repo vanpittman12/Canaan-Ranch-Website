@@ -137,14 +137,9 @@ async function drawDocument(
   }
 
   ensureSpace(140);
-  writeLines(["12. Signatures"], serifBold, 12, forest, 20);
+  writeLines([contract.signatureHeading], serifBold, 12, forest, 20);
   writeLines(
-    wrapText(
-      "By signing, each party agrees to the terms of this Professional Services Agreement.",
-      serif,
-      10.5,
-      maxWidth,
-    ),
+    wrapText(contract.signatureIntro, serif, 10.5, maxWidth),
     serif,
     10.5,
   );
@@ -152,10 +147,10 @@ async function drawDocument(
 
   const columnWidth = (maxWidth - 24) / 2;
   const startY = y;
-  drawSignatureColumn(page, contract.providerBlock, MARGIN, startY, serif, sans, ink, muted);
+  drawSignatureColumn(page, contract.sellerBlock, MARGIN, startY, serif, sans, ink, muted);
   drawSignatureColumn(
     page,
-    contract.clientBlock,
+    contract.buyerBlock,
     MARGIN + columnWidth + 24,
     startY,
     serif,

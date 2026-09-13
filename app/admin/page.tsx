@@ -80,7 +80,7 @@ export default async function AdminQueuePage({
                 <tr>
                   <th className="px-5 py-3 font-semibold">Reference</th>
                   <th className="px-5 py-3 font-semibold">Client</th>
-                  <th className="hidden px-5 py-3 font-semibold md:table-cell">Project</th>
+                  <th className="hidden px-5 py-3 font-semibold md:table-cell">Capacity</th>
                   <th className="hidden px-5 py-3 font-semibold lg:table-cell">Signing</th>
                   <th className="px-5 py-3 font-semibold">Status</th>
                 </tr>
@@ -97,10 +97,12 @@ export default async function AdminQueuePage({
                       </Link>
                     </td>
                     <td className="px-5 py-4">
-                      <div>{item.intake.companyName}</div>
-                      <div className="text-muted">{item.intake.contactName}</div>
+                      <div>{item.intake.buyerLegalName}</div>
+                      <div className="text-muted">{item.intake.buyerAttention}</div>
                     </td>
-                    <td className="hidden px-5 py-4 md:table-cell">{item.intake.projectTitle}</td>
+                    <td className="hidden px-5 py-4 md:table-cell">
+                      {item.intake.tortoiseCount} GT
+                    </td>
                     <td className="hidden px-5 py-4 capitalize text-muted lg:table-cell">
                       {item.signingMethod ?? "—"}
                       {item.signedArtifact ? " · signed file" : ""}

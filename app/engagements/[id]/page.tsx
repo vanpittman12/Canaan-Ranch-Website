@@ -10,8 +10,9 @@ import { StatusBadge } from "@/components/status-badge";
 import { UploadSigned } from "@/components/upload-signed";
 import { describeDocuSignSeam } from "@/lib/docusign";
 import { canCustomerEdit } from "@/lib/engagement";
+import { dealEconomics, formatUsd } from "@/lib/money";
 import { getEngagement } from "@/lib/store";
-import { serviceTypeLabel, type Engagement } from "@/lib/types";
+import { dealTitle, type Engagement } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -51,10 +52,11 @@ export default async function EngagementPage({
               {engagement.reference}
             </p>
             <h1 className="mt-2 font-serif text-4xl text-forest">
-              {engagement.intake.projectTitle}
+              {dealTitle(engagement.intake)}
             </h1>
             <p className="mt-2 text-muted">
-              {engagement.intake.companyName} · {serviceTypeLabel(engagement.intake.serviceType)}
+              {engagement.intake.buyerLegalName} · {engagement.intake.tortoiseCount} GT ·{" "}
+              {formatUsd(dealEconomics(engagement.intake).total)}
             </p>
           </div>
           <StatusBadge status={engagement.status} />
@@ -206,7 +208,7 @@ function SubmittedPanel({ engagement }: { engagement: Engagement }) {
         <UploadSigned engagement={engagement} compact />
       ) : null}
       <p className="text-sm text-muted">
-        Questions? Write {engagement.intake.contactEmail} into your own records, or contact
+        Questions? Write {engagement.intake.buyerEmail} into your own records, or contact
         Canaan Preserve from the footer. Team members review the queue at{" "}
         <Link className="underline" href="/admin">
           /admin

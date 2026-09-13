@@ -1,40 +1,26 @@
 import { z } from "zod";
-import { BUDGET_RANGES, DURATIONS, SERVICE_TYPES } from "./types";
-
-const serviceTypeValues = SERVICE_TYPES.map((item) => item.value) as [
-  (typeof SERVICE_TYPES)[number]["value"],
-  ...(typeof SERVICE_TYPES)[number]["value"][],
-];
+import { brand } from "./brand";
 
 export const intakeSchema = z.object({
-  companyName: z.string().trim().min(2, "Company name is required."),
-  website: z
-    .string()
-    .trim()
-    .url("Enter a valid URL, including https://.")
-    .or(z.literal(""))
-    .default(""),
-  contactName: z.string().trim().min(2, "Contact name is required."),
-  contactTitle: z.string().trim().min(2, "Title is required."),
-  contactEmail: z.string().trim().email("Enter a valid email address."),
-  contactPhone: z.string().trim().min(7, "Phone number is required."),
-  billingStreet: z.string().trim().min(3, "Street address is required."),
-  billingCity: z.string().trim().min(2, "City is required."),
-  billingState: z.string().trim().min(2, "State is required."),
-  billingPostalCode: z.string().trim().min(3, "Postal code is required."),
-  projectTitle: z.string().trim().min(3, "Project title is required."),
-  serviceType: z.enum(serviceTypeValues, {
-    message: "Select a service type.",
-  }),
-  scopeSummary: z
-    .string()
-    .trim()
-    .min(20, "Please describe the scope in at least 20 characters."),
-  startDate: z.string().trim().min(1, "Start date is required."),
-  duration: z.enum(DURATIONS, { message: "Select an estimated duration." }),
-  budgetRange: z.enum(BUDGET_RANGES, { message: "Select a budget range." }),
-  serviceLocation: z.string().trim().min(2, "Service location is required."),
-  notes: z.string().trim().default(""),
+  effectiveDate: z.string().trim().min(1, "Effective date is required."),
+  buyerLegalName: z.string().trim().min(2, "Buyer legal name is required."),
+  buyerAttention: z.string().trim().min(2, "Attention name is required."),
+  buyerEmail: z.string().trim().email("Enter a valid email address."),
+  buyerStreet: z.string().trim().min(3, "Street address is required."),
+  buyerCity: z.string().trim().min(2, "City is required."),
+  buyerState: z.string().trim().min(2, "State is required."),
+  buyerPostalCode: z.string().trim().min(3, "Postal code is required."),
+  buyerPhone: z.string().trim().min(7, "Phone number is required."),
+  tortoiseCount: z.coerce
+    .number({ error: "Enter the number of gopher tortoises." })
+    .int("Use a whole number.")
+    .min(1, "Reserve at least one gopher tortoise."),
+  perGtRate: z.coerce
+    .number({ error: "Enter a per-tortoise rate." })
+    .min(1, "Rate must be greater than zero.")
+    .default(brand.defaultPerGtRate),
+  donorSiteName: z.string().trim().default(""),
+  donorSiteDescription: z.string().trim().default(""),
 });
 
 export type IntakeInput = z.infer<typeof intakeSchema>;

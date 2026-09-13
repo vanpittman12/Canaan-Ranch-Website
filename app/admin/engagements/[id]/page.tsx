@@ -2,12 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/app/actions/admin";
 import { ContractPreview } from "@/components/contract-preview";
+import { RateOverrideForm } from "@/components/rate-override-form";
 import { ReviewForm } from "@/components/review-form";
 import { SiteHeader } from "@/components/site-header";
 import { StatusBadge } from "@/components/status-badge";
+import { brand } from "@/lib/brand";
 import { describeDocuSignSeam } from "@/lib/docusign";
+import { addOneYear, dealEconomics, formatLongDate, formatUsd } from "@/lib/money";
 import { getEngagement } from "@/lib/store";
-import { serviceTypeLabel } from "@/lib/types";
+import { buyerNoticeAddress, dealTitle } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +26,7 @@ export default async function AdminEngagementPage({
     notFound();
   }
   const seam = describeDocuSignSeam();
+  const economics = dealEconomics(engagement.intake);
 
   return (
     <div className="min-h-screen bg-paper">
@@ -37,10 +41,10 @@ export default async function AdminEngagementPage({
               {engagement.reference}
             </p>
             <h1 className="mt-2 font-serif text-4xl text-forest">
-              {engagement.intake.projectTitle}
+              {dealTitle(engagement.intake)}
             </h1>
             <p className="mt-2 text-muted">
-              {engagement.intake.companyName} · {engagement.intake.contactName}
+              {engagement.intake.buyerLegalName} · {engagement.intake.buyerAttention}
             </p>
           </div>
           <StatusBadge status={engagement.status} />
@@ -51,22 +55,43 @@ export default async function AdminEngagementPage({
             <section className="rounded-2xl border border-line bg-white p-6">
               <h2 className="font-serif text-2xl text-forest">Intake</h2>
               <dl className="mt-4 grid gap-3 text-sm">
-                <Row label="Service" value={serviceTypeLabel(engagement.intake.serviceType)} />
-                <Row label="Location" value={engagement.intake.serviceLocation} />
-                <Row label="Start" value={engagement.intake.startDate} />
-                <Row label="Duration" value={engagement.intake.duration} />
-                <Row label="Budget" value={engagement.intake.budgetRange} />
-                <Row label="Email" value={engagement.intake.contactEmail} />
-                <Row label="Phone" value={engagement.intake.contactPhone} />
+                <Row label="Effective" value={formatLongDate(engagement.intake.effectiveDate)} />
                 <Row
-                  label="Address"
-                  value={`${engagement.intake.billingStreet}, ${engagement.intake.billingCity}, ${engagement.intake.billingState} ${engagement.intake.billingPostalCode}`}
+                  label="Expiration"
+                  value={formatLongDate(addOneYear(engagement.intake.effectiveDate))}
                 />
+                <Row label="Buyer" value={engagement.intake.buyerLegalName} />
+                <Row label="Attention" value={engagement.intake.buyerAttention} />
+                <Row label="Email" value={engagement.intake.buyerEmail} />
+                <Row label="Phone" value={engagement.intake.buyerPhone} />
+                <Row label="Notice" value={buyerNoticeAddress(engagement.intake)} />
+                <Row label="Capacity" value={`${engagement.intake.tortoiseCount} GT`} />
+                <Row label="Per GT rate" value={economics.rateFormatted} />
+                <Row label="Est. total" value={economics.totalFormatted} />
+                {engagement.intake.donorSiteName ? (
+                  <Row label="Donor site" value={engagement.intake.donorSiteName} />
+                ) : null}
               </dl>
-              <p className="mt-4 text-sm leading-7 text-ink/80">{engagement.intake.scopeSummary}</p>
-              {engagement.intake.notes ? (
-                <p className="mt-3 text-sm leading-7 text-muted">{engagement.intake.notes}</p>
+              {engagement.intake.donorSiteDescription ? (
+                <p className="mt-4 text-sm leading-7 text-ink/80">
+                  {engagement.intake.donorSiteDescription}
+                </p>
               ) : null}
+              <RateOverrideForm engagement={engagement} />
+            </section>
+
+            <section className="rounded-2xl border border-line bg-white p-6">
+              <h2 className="font-serif text-2xl text-forest">Seller (static)</h2>
+              <dl className="mt-4 grid gap-3 text-sm">
+                <Row label="Entity" value={brand.legalName} />
+                <Row label="Brand" value={brand.name} />
+                <Row label="Attention" value={brand.attention} />
+                <Row label="Address" value={brand.addressLine} />
+                <Row label="Signatory" value={`${brand.signatoryName}, ${brand.signatoryTitle}`} />
+                <Row label="Agent" value={`${brand.agentName} / ${brand.agentContact}`} />
+                <Row label="Venue" value={brand.venue} />
+                <Row label="Juvenile fee" value={formatUsd(brand.juvenileAdditionalFee)} />
+              </dl>
             </section>
 
             <section className="rounded-2xl border border-line bg-white p-6">

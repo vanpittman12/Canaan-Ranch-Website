@@ -17,7 +17,7 @@ export function SiteHeader({
               {brand.name}
             </span>
             <span className="block text-[11px] uppercase tracking-[0.22em] text-muted">
-              {variant === "admin" ? "Internal review" : "Professional services"}
+              {variant === "admin" ? "Internal review" : "Recipient site"}
             </span>
           </span>
         </Link>
@@ -32,7 +32,7 @@ export function SiteHeader({
                 How it works
               </Link>
               <Link href="/intake" className="btn-primary !px-4 !py-2 text-sm">
-                Begin an engagement
+                Begin a reservation
               </Link>
             </>
           )}

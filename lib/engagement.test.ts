@@ -11,24 +11,19 @@ import {
 import type { Engagement, IntakeFields } from "./types";
 
 const intake: IntakeFields = {
-  companyName: "Ridge & Hollow Co.",
-  website: "https://ridge.example",
-  contactName: "Avery Cole",
-  contactTitle: "Principal",
-  contactEmail: "avery@ridge.example",
-  contactPhone: "304-555-0100",
-  billingStreet: "12 Mill Road",
-  billingCity: "Davis",
-  billingState: "WV",
-  billingPostalCode: "26260",
-  projectTitle: "Summer grazing plan",
-  serviceType: "land_stewardship",
-  scopeSummary: "Seasonal grazing rotation and pasture recovery advisory.",
-  startDate: "2026-05-01",
-  duration: "3–6 months",
-  budgetRange: "$10,000 – $25,000",
-  serviceLocation: "Canaan Valley",
-  notes: "",
+  effectiveDate: "2026-04-15",
+  buyerLegalName: "Suncoast Land Partners LLC",
+  buyerAttention: "Morgan Hale",
+  buyerEmail: "morgan@suncoast.example",
+  buyerStreet: "400 Harbour Island Boulevard",
+  buyerCity: "Tampa",
+  buyerState: "FL",
+  buyerPostalCode: "33602",
+  buyerPhone: "813-555-0190",
+  tortoiseCount: 10,
+  perGtRate: 6000,
+  donorSiteName: "Harbour tract",
+  donorSiteDescription: "",
 };
 
 function draft(): Engagement {

@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { createEngagement, updateIntake, type ActionState } from "@/app/actions/engagements";
-import { BUDGET_RANGES, DURATIONS, SERVICE_TYPES, type IntakeFields } from "@/lib/types";
+import { brand } from "@/lib/brand";
+import { estimatedPayment, formatUsd } from "@/lib/money";
+import type { IntakeFields } from "@/lib/types";
 
 const initialState: ActionState = {};
 
@@ -15,7 +17,7 @@ function Field({
   children,
 }: {
   label: string;
-  name: string;
+  name?: string;
   error?: string;
   children: React.ReactNode;
 }) {
@@ -35,15 +37,20 @@ function Field({
 export function IntakeForm({
   engagementId,
   defaults,
+  allowRateOverride = false,
 }: {
   engagementId?: string;
   defaults?: IntakeFields;
+  allowRateOverride?: boolean;
 }) {
   const action = engagementId
     ? updateIntake.bind(null, engagementId)
     : createEngagement;
   const [state, formAction, pending] = useActionState(action, initialState);
   const errors = state.fieldErrors ?? {};
+  const [count, setCount] = useState(defaults?.tortoiseCount ?? 1);
+  const [rate, setRate] = useState(defaults?.perGtRate ?? brand.defaultPerGtRate);
+  const total = useMemo(() => estimatedPayment(count || 0, rate || 0), [count, rate]);
 
   return (
     <form action={formAction} className="space-y-10">
@@ -55,236 +62,192 @@ export function IntakeForm({
 
       <section className="space-y-4">
         <div>
-          <h2 className="font-serif text-2xl text-forest">Company</h2>
+          <h2 className="font-serif text-2xl text-forest">Agreement dates</h2>
           <p className="mt-1 text-sm text-muted">
-            The legal name and organization that will be party to the agreement.
+            Expiration is one year after the Effective Date and is filled automatically.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Legal company name" name="companyName" error={errors.companyName}>
-            <input
-              className={fieldClass}
-              name="companyName"
-              defaultValue={defaults?.companyName}
-              required
-              autoComplete="organization"
-            />
-          </Field>
-          <Field label="Website (optional)" name="website" error={errors.website}>
-            <input
-              className={fieldClass}
-              name="website"
-              type="url"
-              placeholder="https://"
-              defaultValue={defaults?.website}
-              autoComplete="url"
-            />
-          </Field>
-        </div>
+        <Field label="Effective date" error={errors.effectiveDate}>
+          <input
+            className={fieldClass}
+            name="effectiveDate"
+            type="date"
+            defaultValue={defaults?.effectiveDate}
+            required
+          />
+        </Field>
       </section>
 
       <section className="space-y-4">
         <div>
-          <h2 className="font-serif text-2xl text-forest">Primary contact</h2>
+          <h2 className="font-serif text-2xl text-forest">Buyer</h2>
           <p className="mt-1 text-sm text-muted">
-            Who we should reach for questions, review, and signature.
+            Legal name and notice block that appear on the relocation agreement.
           </p>
         </div>
+        <Field label="Buyer legal name" error={errors.buyerLegalName}>
+          <input
+            className={fieldClass}
+            name="buyerLegalName"
+            defaultValue={defaults?.buyerLegalName}
+            required
+            autoComplete="organization"
+          />
+        </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Full name" name="contactName" error={errors.contactName}>
+          <Field label="Attention" error={errors.buyerAttention}>
             <input
               className={fieldClass}
-              name="contactName"
-              defaultValue={defaults?.contactName}
+              name="buyerAttention"
+              defaultValue={defaults?.buyerAttention}
               required
               autoComplete="name"
             />
           </Field>
-          <Field label="Title" name="contactTitle" error={errors.contactTitle}>
+          <Field label="Email" error={errors.buyerEmail}>
             <input
               className={fieldClass}
-              name="contactTitle"
-              defaultValue={defaults?.contactTitle}
-              required
-              autoComplete="organization-title"
-            />
-          </Field>
-          <Field label="Email" name="contactEmail" error={errors.contactEmail}>
-            <input
-              className={fieldClass}
-              name="contactEmail"
+              name="buyerEmail"
               type="email"
-              defaultValue={defaults?.contactEmail}
+              defaultValue={defaults?.buyerEmail}
               required
               autoComplete="email"
             />
           </Field>
-          <Field label="Phone" name="contactPhone" error={errors.contactPhone}>
-            <input
-              className={fieldClass}
-              name="contactPhone"
-              type="tel"
-              defaultValue={defaults?.contactPhone}
-              required
-              autoComplete="tel"
-            />
-          </Field>
         </div>
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <h2 className="font-serif text-2xl text-forest">Billing address</h2>
-          <p className="mt-1 text-sm text-muted">Used as the client address on the agreement.</p>
-        </div>
-        <Field label="Street address" name="billingStreet" error={errors.billingStreet}>
+        <Field label="Street address" error={errors.buyerStreet}>
           <input
             className={fieldClass}
-            name="billingStreet"
-            defaultValue={defaults?.billingStreet}
+            name="buyerStreet"
+            defaultValue={defaults?.buyerStreet}
             required
             autoComplete="street-address"
           />
         </Field>
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="City" name="billingCity" error={errors.billingCity}>
+          <Field label="City" error={errors.buyerCity}>
             <input
               className={fieldClass}
-              name="billingCity"
-              defaultValue={defaults?.billingCity}
+              name="buyerCity"
+              defaultValue={defaults?.buyerCity}
               required
               autoComplete="address-level2"
             />
           </Field>
-          <Field label="State" name="billingState" error={errors.billingState}>
+          <Field label="State" error={errors.buyerState}>
             <input
               className={fieldClass}
-              name="billingState"
-              defaultValue={defaults?.billingState}
+              name="buyerState"
+              defaultValue={defaults?.buyerState ?? "FL"}
               required
               autoComplete="address-level1"
             />
           </Field>
-          <Field label="Postal code" name="billingPostalCode" error={errors.billingPostalCode}>
+          <Field label="Postal code" error={errors.buyerPostalCode}>
             <input
               className={fieldClass}
-              name="billingPostalCode"
-              defaultValue={defaults?.billingPostalCode}
+              name="buyerPostalCode"
+              defaultValue={defaults?.buyerPostalCode}
               required
               autoComplete="postal-code"
             />
           </Field>
         </div>
+        <Field label="Phone" error={errors.buyerPhone}>
+          <input
+            className={fieldClass}
+            name="buyerPhone"
+            type="tel"
+            defaultValue={defaults?.buyerPhone}
+            required
+            autoComplete="tel"
+          />
+        </Field>
       </section>
 
       <section className="space-y-4">
         <div>
-          <h2 className="font-serif text-2xl text-forest">Project basics</h2>
+          <h2 className="font-serif text-2xl text-forest">Reserved capacity</h2>
           <p className="mt-1 text-sm text-muted">
-            These details populate Canaan Preserve’s standard professional-services agreement.
+            Paragraph 2 of the agreement reserves capacity for up to this many gopher tortoises.
+            Adult versus juvenile is determined at delivery, not here.
           </p>
         </div>
-        <Field label="Project title" name="projectTitle" error={errors.projectTitle}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Number of gopher tortoises" error={errors.tortoiseCount}>
+            <input
+              className={fieldClass}
+              name="tortoiseCount"
+              type="number"
+              min={1}
+              step={1}
+              required
+              value={Number.isFinite(count) ? count : ""}
+              onChange={(event) => setCount(Number(event.target.value))}
+            />
+          </Field>
+          <div>
+            <p className="text-sm font-medium text-ink">Per GT rate</p>
+            {allowRateOverride ? (
+              <input
+                className={fieldClass}
+                name="perGtRate"
+                type="number"
+                min={1}
+                step={1}
+                value={rate}
+                onChange={(event) => setRate(Number(event.target.value))}
+              />
+            ) : (
+              <>
+                <input type="hidden" name="perGtRate" value={rate} />
+                <p className="mt-1.5 rounded-lg border border-line bg-cream/50 px-3.5 py-2.5 text-ink">
+                  {formatUsd(brand.defaultPerGtRate)} standard
+                </p>
+              </>
+            )}
+            <p className="mt-1 text-sm text-muted">
+              Generally non-negotiable. Manager can override for rare exceptions.
+            </p>
+            {errors.perGtRate ? (
+              <p className="mt-1 text-sm text-terracotta">{errors.perGtRate}</p>
+            ) : null}
+          </div>
+        </div>
+        <div className="rounded-xl border border-line bg-cream/40 px-4 py-3 text-sm text-ink">
+          Total estimated payment: <strong>{formatUsd(total)}</strong> ({count || 0} ×{" "}
+          {formatUsd(rate || 0)})
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="font-serif text-2xl text-forest">Donor site (optional)</h2>
+          <p className="mt-1 text-sm text-muted">
+            If known, this is written into the reserved-capacity paragraph. Additional project
+            information that does not belong in the agreement will be collected later.
+          </p>
+        </div>
+        <Field label="Donor site / project name" error={errors.donorSiteName}>
           <input
             className={fieldClass}
-            name="projectTitle"
-            defaultValue={defaults?.projectTitle}
-            required
+            name="donorSiteName"
+            defaultValue={defaults?.donorSiteName}
           />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Service type" name="serviceType" error={errors.serviceType}>
-            <select
-              className={fieldClass}
-              name="serviceType"
-              defaultValue={defaults?.serviceType ?? ""}
-              required
-            >
-              <option value="" disabled>
-                Select a service
-              </option>
-              {SERVICE_TYPES.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Service / site location" name="serviceLocation" error={errors.serviceLocation}>
-            <input
-              className={fieldClass}
-              name="serviceLocation"
-              defaultValue={defaults?.serviceLocation}
-              required
-            />
-          </Field>
-          <Field label="Preferred start date" name="startDate" error={errors.startDate}>
-            <input
-              className={fieldClass}
-              name="startDate"
-              type="date"
-              defaultValue={defaults?.startDate}
-              required
-            />
-          </Field>
-          <Field label="Estimated duration" name="duration" error={errors.duration}>
-            <select
-              className={fieldClass}
-              name="duration"
-              defaultValue={defaults?.duration ?? ""}
-              required
-            >
-              <option value="" disabled>
-                Select duration
-              </option>
-              {DURATIONS.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Budget range" name="budgetRange" error={errors.budgetRange}>
-            <select
-              className={fieldClass}
-              name="budgetRange"
-              defaultValue={defaults?.budgetRange ?? ""}
-              required
-            >
-              <option value="" disabled>
-                Select a range
-              </option>
-              {BUDGET_RANGES.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </Field>
-        </div>
-        <Field label="Scope summary" name="scopeSummary" error={errors.scopeSummary}>
-          <textarea
-            className={`${fieldClass} min-h-32`}
-            name="scopeSummary"
-            defaultValue={defaults?.scopeSummary}
-            required
-            placeholder="What should Canaan Preserve deliver, and what does success look like?"
-          />
-        </Field>
-        <Field label="Additional notes (optional)" name="notes" error={errors.notes}>
+        <Field label="Project description" error={errors.donorSiteDescription}>
           <textarea
             className={`${fieldClass} min-h-24`}
-            name="notes"
-            defaultValue={defaults?.notes}
-            placeholder="Constraints, stakeholders, seasonal timing, or special terms."
+            name="donorSiteDescription"
+            defaultValue={defaults?.donorSiteDescription}
           />
         </Field>
       </section>
 
       <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted">
-          Submitting generates a Canaan Preserve agreement preview. Nothing is executed until the
-          team accepts and a signed copy is on file.
+          Submitting generates the Canaan Preserve / Canaan Ranch LLP relocation agreement.
+          Nothing is executed until the team accepts and a signed copy is on file.
         </p>
         <button className="btn-primary" type="submit" disabled={pending}>
           {pending

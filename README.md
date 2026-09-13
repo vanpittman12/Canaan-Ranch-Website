@@ -1,8 +1,8 @@
 # Canaan Preserve
 
-Professional-services intake, agreement preview, signature, and internal review for **Canaan Preserve**. The GitHub repository name may still say Canaan Ranch; customer-facing branding is Canaan Preserve.
+Gopher tortoise recipient-site intake, relocation agreement preview, signature, and internal review. Customer-facing brand is **Canaan Preserve**. The contracting entity is **Canaan Ranch LLP**. The GitHub repository name may still say Canaan Ranch.
 
-Clients submit company and project details. The app populates a standard Canaan Preserve professional-services agreement, lets the client choose DocuSign or a manual signed PDF, and holds every engagement in a team review queue. **Nothing is executed until the team Accepts and a signed artifact is on file.**
+Buyer intake populates a **Multi-Project Gopher Tortoise Relocation Agreement**. The client then chooses DocuSign or a manual signed PDF. **Nothing is executed until the team Accepts and a signed artifact is on file.**
 
 ## Run locally
 
@@ -16,8 +16,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | Path | Purpose |
 | --- | --- |
 | `/` | Public landing |
-| `/intake` | Customer intake |
-| `/engagements/[id]` | Contract preview, signing choice, status |
+| `/intake` | Buyer intake |
+| `/engagements/[id]` | Agreement preview, signing choice, status |
 | `/admin/login` | Team sign-in |
 | `/admin` | Review queue |
 
@@ -36,7 +36,7 @@ The app runs in development without `.env.local`.
 | `ADMIN_PASSWORD` | `canaan-admin` | Required |
 | `ADMIN_SESSION_SECRET` | local development secret | Required |
 
-Sign in at `/admin/login`, then Accept / Request changes / Decline from the queue. Request changes returns the client to an editable preview. Decline is terminal. Accept is the only path toward execution.
+Sign in at `/admin/login`, then Accept / Request changes / Decline from the queue. Managers can override the per-GT rate for rare exceptions.
 
 ### Useful scripts
 
@@ -44,20 +44,37 @@ Sign in at `/admin/login`, then Accept / Request changes / Decline from the queu
 npm run dev      # Next.js App Router, TypeScript, Turbopack
 npm run build    # Production build
 npm run start    # Serve the production build
-npm test         # Status machine + DocuSign seam unit tests
+npm test         # Status machine, economics, and agreement mapping tests
 npm run lint     # ESLint
 ```
 
+## Intake → agreement mapping
+
+| Intake | Agreement |
+| --- | --- |
+| Effective Date | Preamble / term start |
+| Buyer legal name | Buyer party |
+| Buyer notice (attention, street, city/state/zip, phone, email) | Notices and signature block |
+| Number of gopher tortoises | Paragraph 2 “up to N” reserved capacity |
+| Per GT Rate (default $6,000; admin override) | Payment paragraph (words + numbers) |
+| Tortoise count × rate | Total Estimated Payment (words + numbers) |
+| Effective Date + 1 year | Expiration Date |
+| Optional donor site / description | Reserved-capacity paragraph |
+
+Seller-side constants (not buyer intake): Canaan Ranch LLP; Attention Van Pittman; 1700 S. MacDill Ave., Suite 340, Tampa, FL 33629; Phone 813-390-1044; signatory Andrew V. Pittman, Jr., Manager; agent Applied Bionomics, LLC / Andrew Fuddy; juvenile additional fee $3,000; venue Pasco County, Florida.
+
+Additional project-information questions that do not belong in the agreement are reserved for a later form section and are not invented here. There is no initial deposit / Initial Payment step.
+
 ## Product flow
 
-1. Client completes intake (company, contact, project basics).
-2. Submit generates a Canaan Preserve professional-services agreement and shows the preview.
-3. Client chooses:
+1. Buyer completes intake (legal name, notice block, tortoise count).
+2. Submit generates the Multi-Project Gopher Tortoise Relocation Agreement and shows the preview.
+3. Buyer chooses:
    - **DocuSign** — recorded as the signing method. The envelope is **not** sent until Accept.
    - **Manual** — download the PDF, optionally upload a signed copy, then submit.
 4. Team reviews at `/admin`:
    - **Accept** — if DocuSign, send the stub envelope; if a signed file is already present, status becomes **Executed**.
-   - **Request changes** — client can edit and resubmit.
+   - **Request changes** — buyer can edit and resubmit.
    - **Decline** — closed without execution.
 5. After Accept, status becomes **Executed** only when a signed artifact is present (manual upload, or the admin “Simulate DocuSign signed” stub control).
 
@@ -80,9 +97,7 @@ Live DocuSign API calls are **not** made. Integration lives in [`lib/docusign.ts
 
 When `DOCUSIGN_ENABLED` is not `true`, `sendEnvelope()` stores a `stub-…` envelope ID and a clear message that no API call was made.
 
-When `DOCUSIGN_ENABLED=true`, `sendEnvelopeLive()` is the insertion point for JWT auth and `Envelopes:create`. It still does **not** call DocuSign; it throws if you have not implemented that function. Implement it in `lib/docusign.ts` before pointing a real account at this app.
-
-The admin engagement page includes **Simulate DocuSign signed** so the executed path can be demonstrated without a live account.
+When `DOCUSIGN_ENABLED=true`, `sendEnvelopeLive()` is the insertion point for JWT auth and `Envelopes:create`. It still does **not** call DocuSign; it throws if you have not implemented that function.
 
 ## Data
 

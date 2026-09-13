@@ -1,37 +1,24 @@
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { brand } from "@/lib/brand";
+import { formatUsd } from "@/lib/money";
 
 const steps = [
   {
     n: "01",
-    title: "Share the work",
-    body: "Tell us about your company, contact, and project. The form is short and specific.",
+    title: "Reserve capacity",
+    body: "Tell us the Buyer, notice address, and how many gopher tortoise spots to reserve.",
   },
   {
     n: "02",
     title: "Review the agreement",
-    body: "We populate Canaan Preserve’s standard professional-services contract from those details.",
+    body: "We populate the Multi-Project Gopher Tortoise Relocation Agreement from those details.",
   },
   {
     n: "03",
     title: "Sign, then we accept",
-    body: "Choose DocuSign or a manual PDF. The engagement stays open until the team accepts and a signed copy is on file.",
-  },
-];
-
-const services = [
-  {
-    title: "Land stewardship",
-    body: "Grazing, pasture recovery, and seasonal land-use advisory rooted in the preserve.",
-  },
-  {
-    title: "Hospitality & events",
-    body: "Private gatherings and guest operations planned against the land and the calendar.",
-  },
-  {
-    title: "Operations consulting",
-    body: "Hands-on counsel for preserve systems, vendors, and the work that sits between seasons.",
+    body: "Choose DocuSign or a manual PDF. The reservation stays open until Canaan Preserve accepts and a signed copy is on file.",
   },
 ];
 
@@ -47,21 +34,22 @@ export default function Home() {
           <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[1.2fr_0.8fr] lg:py-28">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brass">
-                Canaan Valley · West Virginia
+                Pasco County · Florida
               </p>
               <h1 className="mt-5 max-w-xl font-serif text-5xl leading-[1.05] tracking-tight sm:text-6xl">
-                Begin the work with a clear agreement.
+                Reserve recipient-site capacity with a clear agreement.
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-8 text-cream/80">
-                Canaan Preserve professional services — from first conversation to an executed
-                contract. Intake, preview, signature, and a human review before anything closes.
+                Canaan Preserve is a gopher tortoise relocation recipient site. {brand.legalName}{" "}
+                is the contracting party. Intake, preview, signature, and a human review before
+                anything closes.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/intake"
                   className="inline-flex items-center justify-center rounded-full bg-cream px-5 py-3 text-[0.95rem] font-semibold text-forest transition hover:bg-white"
                 >
-                  Begin an engagement
+                  Begin a reservation
                 </Link>
                 <a
                   href="#how-it-works"
@@ -72,11 +60,11 @@ export default function Home() {
               </div>
             </div>
             <aside className="self-end rounded-2xl border border-cream/15 bg-forest-deep/50 p-6 backdrop-blur">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-brass">Current path</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-brass">Standard terms</p>
               <ul className="mt-4 space-y-3 text-sm leading-6 text-cream/80">
-                <li>Standard professional-services agreement</li>
-                <li>DocuSign seam or manual signed PDF</li>
-                <li>Internal accept / changes / decline queue</li>
+                <li>Per GT rate {formatUsd(brand.defaultPerGtRate)} (generally non-negotiable)</li>
+                <li>Juvenile additional fee {formatUsd(brand.juvenileAdditionalFee)} at delivery</li>
+                <li>Expiration: Effective Date plus one year</li>
                 <li>Executed only when accepted and signed</li>
               </ul>
             </aside>
@@ -88,7 +76,7 @@ export default function Home() {
             How it works
           </p>
           <h2 className="mt-3 max-w-xl font-serif text-4xl text-forest">
-            A finished path, not a half-built form.
+            From reserved spots to an executed agreement.
           </h2>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {steps.map((step) => (
@@ -101,35 +89,12 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="border-y border-line bg-cream/60">
-          <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[0.8fr_1.2fr]">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brass">
-                Services
-              </p>
-              <h2 className="mt-3 font-serif text-4xl text-forest">Work we take on.</h2>
-              <p className="mt-4 text-base leading-7 text-muted">
-                Every engagement uses the same intake and the same standard agreement, then a
-                Canaan Preserve review before signature is treated as final.
-              </p>
-            </div>
-            <div className="grid gap-4">
-              {services.map((service) => (
-                <article key={service.title} className="rounded-2xl border border-line bg-white p-5">
-                  <h3 className="font-serif text-2xl text-forest">{service.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-muted">{service.body}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8">
           <div className="rounded-[2rem] bg-forest px-8 py-14 text-cream sm:px-14">
-            <h2 className="max-w-xl font-serif text-4xl">Ready when you are.</h2>
+            <h2 className="max-w-xl font-serif text-4xl">Ready to reserve capacity.</h2>
             <p className="mt-4 max-w-xl text-base leading-7 text-cream/75">
-              Start the intake. You will see the populated agreement before you choose DocuSign
-              or a manual signature.
+              Start the intake. You will see the populated relocation agreement before you choose
+              DocuSign or a manual signature.
             </p>
             <Link
               href="/intake"

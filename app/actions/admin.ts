@@ -78,8 +78,8 @@ export async function reviewEngagement(
       const sent = await sendEnvelope({
         engagementId: next.id,
         reference: next.reference,
-        signerName: next.intake.contactName,
-        signerEmail: next.intake.contactEmail,
+        signerName: next.intake.buyerAttention,
+        signerEmail: next.intake.buyerEmail,
       });
       next = applyDocuSignSent(next, sent.envelopeId, sent.message, sent.mode);
     }
@@ -143,6 +143,31 @@ export async function simulateDocuSignComplete(
     };
   }
 
+  revalidatePath("/admin");
+  revalidatePath(`/admin/engagements/${engagementId}`);
+  revalidatePath(`/engagements/${engagementId}`);
+  redirect(`/admin/engagements/${engagementId}`);
+}
+
+export async function overridePerGtRate(
+  engagementId: string,
+  _prev: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  await requireAdmin();
+  const engagement = await getEngagement(engagementId);
+  if (!engagement) {
+    return { error: "Engagement not found." };
+  }
+  const rate = Number(formData.get("perGtRate"));
+  if (!Number.isFinite(rate) || rate < 1) {
+    return { error: "Enter a valid per-GT rate." };
+  }
+
+  await saveEngagement({
+    ...engagement,
+    intake: { ...engagement.intake, perGtRate: Math.round(rate) },
+  });
   revalidatePath("/admin");
   revalidatePath(`/admin/engagements/${engagementId}`);
   revalidatePath(`/engagements/${engagementId}`);

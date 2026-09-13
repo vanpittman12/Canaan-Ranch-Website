@@ -21,7 +21,7 @@ export function SiteFooter() {
             Team sign in
           </Link>
           <p className="pt-2 text-xs text-cream/50">
-            Standard professional-services form. Not a substitute for legal counsel.
+            Standard relocation agreement form. Not a substitute for legal counsel.
           </p>
         </div>
       </div>

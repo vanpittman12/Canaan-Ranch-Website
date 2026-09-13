@@ -1,40 +1,3 @@
-export const SERVICE_TYPES = [
-  {
-    value: "land_stewardship",
-    label: "Land stewardship & grazing advisory",
-  },
-  {
-    value: "hospitality_events",
-    label: "Hospitality & private events",
-  },
-  {
-    value: "consulting",
-    label: "Preserve operations consulting",
-  },
-  {
-    value: "custom",
-    label: "Custom professional services",
-  },
-] as const;
-
-export const BUDGET_RANGES = [
-  "Under $10,000",
-  "$10,000 – $25,000",
-  "$25,000 – $75,000",
-  "$75,000 – $150,000",
-  "$150,000+",
-  "To be determined",
-] as const;
-
-export const DURATIONS = [
-  "1–3 months",
-  "3–6 months",
-  "6–12 months",
-  "12+ months",
-  "Single engagement / project",
-] as const;
-
-export type ServiceType = (typeof SERVICE_TYPES)[number]["value"];
 export type SigningMethod = "docusign" | "manual";
 export type EngagementStatus =
   | "draft"
@@ -53,24 +16,19 @@ export type DocuSignEnvelopeStatus =
   | "voided";
 
 export interface IntakeFields {
-  companyName: string;
-  website: string;
-  contactName: string;
-  contactTitle: string;
-  contactEmail: string;
-  contactPhone: string;
-  billingStreet: string;
-  billingCity: string;
-  billingState: string;
-  billingPostalCode: string;
-  projectTitle: string;
-  serviceType: ServiceType;
-  scopeSummary: string;
-  startDate: string;
-  duration: string;
-  budgetRange: string;
-  serviceLocation: string;
-  notes: string;
+  effectiveDate: string;
+  buyerLegalName: string;
+  buyerAttention: string;
+  buyerEmail: string;
+  buyerStreet: string;
+  buyerCity: string;
+  buyerState: string;
+  buyerPostalCode: string;
+  buyerPhone: string;
+  tortoiseCount: number;
+  perGtRate: number;
+  donorSiteName: string;
+  donorSiteDescription: string;
 }
 
 export interface SignedArtifact {
@@ -124,6 +82,13 @@ export const STATUS_LABELS: Record<EngagementStatus, string> = {
   executed: "Executed",
 };
 
-export function serviceTypeLabel(value: ServiceType) {
-  return SERVICE_TYPES.find((item) => item.value === value)?.label ?? value;
+export function dealTitle(intake: IntakeFields) {
+  if (intake.donorSiteName.trim()) {
+    return intake.donorSiteName.trim();
+  }
+  return `Gopher tortoise relocation — ${intake.buyerLegalName}`;
+}
+
+export function buyerNoticeAddress(intake: IntakeFields) {
+  return `${intake.buyerStreet}, ${intake.buyerCity}, ${intake.buyerState} ${intake.buyerPostalCode}`;
 }

@@ -18,7 +18,7 @@ export function SigningPanel({ engagement }: { engagement: Engagement }) {
         <h2 className="font-serif text-2xl text-forest">Choose how you will sign</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
           The agreement is not sent or closed from this screen. Canaan Preserve reviews every
-          engagement first. Nothing is executed until the team accepts and a signed artifact is
+          reservation first. Nothing is executed until the team accepts and a signed artifact is
           on file.
         </p>
       </div>

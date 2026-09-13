@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s · Canaan Preserve",
   },
   description:
-    "Canaan Preserve professional services intake, agreement preview, signature, and internal review.",
+    "Canaan Preserve gopher tortoise recipient-site intake, relocation agreement preview, signature, and internal review.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

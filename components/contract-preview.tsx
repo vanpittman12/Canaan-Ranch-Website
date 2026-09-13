@@ -12,7 +12,7 @@ export function ContractPreview({ engagement }: { engagement: Engagement }) {
         </p>
         <h2 className="mt-2 font-serif text-3xl text-forest sm:text-4xl">{contract.title}</h2>
         <p className="mt-3 text-sm text-muted">
-          {contract.reference} · Effective {contract.effectiveDate}
+          {contract.reference} · Effective {contract.effectiveDate} · Expires {contract.expirationDate}
         </p>
       </header>
       <div className="mt-8 space-y-7">
@@ -27,13 +27,11 @@ export function ContractPreview({ engagement }: { engagement: Engagement }) {
           </section>
         ))}
         <section>
-          <h3 className="font-serif text-xl text-forest">12. Signatures</h3>
-          <p className="mt-2 text-[15px] leading-7 text-ink/90">
-            By signing, each party agrees to the terms of this Professional Services Agreement.
-          </p>
+          <h3 className="font-serif text-xl text-forest">{contract.signatureHeading}</h3>
+          <p className="mt-2 text-[15px] leading-7 text-ink/90">{contract.signatureIntro}</p>
           <div className="mt-6 grid gap-8 sm:grid-cols-2">
-            <SignatureBlock lines={contract.providerBlock} />
-            <SignatureBlock lines={contract.clientBlock} />
+            <SignatureBlock lines={contract.sellerBlock} />
+            <SignatureBlock lines={contract.buyerBlock} />
           </div>
         </section>
       </div>
@@ -46,7 +44,7 @@ function SignatureBlock({ lines }: { lines: string[] }) {
     <div className="rounded-xl border border-line bg-cream/50 p-4">
       {lines.map((line, index) => (
         <p
-          key={line}
+          key={`${index}-${line}`}
           className={index === 0 ? "font-serif text-lg text-forest" : "mt-3 text-sm text-muted"}
         >
           {line}
