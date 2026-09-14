@@ -56,12 +56,10 @@ export default function Home() {
                 <FwcBadge onForest />
               </div>
               <h1 className="type-h1 mt-5 max-w-xl text-cream">
-                Start relocation intake for a clear recipient-site agreement.
+                {brand.intakeInvite}
               </h1>
-              <p className="mt-6 max-w-lg text-[17px] leading-[27px] text-cream/85">
-                Canaan Preserve is a gopher tortoise relocation recipient site. {brand.legalName}{" "}
-                is the contracting party. Intake produces a downloadable Word agreement, then
-                signature and a human review before anything closes.
+              <p className="mt-6 max-w-xl text-[17px] leading-[27px] text-cream/85">
+                {brand.fwcValueProp}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">
@@ -122,7 +120,7 @@ export default function Home() {
               target="_blank"
               rel="noreferrer"
             >
-              FWC recipient-site guidance
+              {brand.fwcMitigationLinkLabel}
             </a>
           </div>
         </section>

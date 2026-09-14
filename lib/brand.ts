@@ -7,12 +7,14 @@ export const brand = {
   shortTagline: "Reserve recipient-site capacity with a clear agreement.",
   fwcStatus: "Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site.",
   fwcValueProp:
-    "Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site and therefore has the lowest mitigation requirements, saving our clients money. Review our template agreement and fill out our intake form to automatically generate a signature-ready relocation agreement to get your project moving as quickly as possible.",
+    "Canaan Preserve is an FWC Approved Tier 1 recipient site and therefore has the lowest mitigation requirements, saving our clients money. Review our template agreement and fill out our intake form to automatically generate a signature-ready relocation agreement to get your project moving as quickly as possible.",
   intakeInvite:
-    "Fill out our intake form to populate the relocation agreement. After Canaan Preserve Accepts, your capacity reservation is confirmed.",
+    "Fill out our intake form to automatically populate the relocation agreement and expedite the reservation letter process.",
   fwcBadge: "FWC Approved Tier 1",
+  /** FWC mitigation table explaining why Tier 1 recipient sites have lower requirements. */
   fwcRecipientSitesUrl:
-    "https://myfwc.com/license/wildlife/gopher-tortoise-permits/recipient-sites/",
+    "https://myfwc.com/license/wildlife/gopher-tortoise-permits/mitigation/#table",
+  fwcMitigationLinkLabel: "Why Tier 1 matters (FWC mitigation)",
   email: "vpittman@beachparkcap.com",
   phone: "813-390-1044",
   website: "https://canaanpreserve.com",
