@@ -49,6 +49,9 @@ export const MAP_OVERLAY = {
   outsideOpacity: 0.4,
   outline: "#24352a",
   cutoff: "#c4a15a",
+  cutoffHalo: "#f7f1e6",
+  cutoffWidth: 3.75,
+  cutoffHaloWidth: 7,
 } as const;
 
 export type MapLabelSide = "left" | "right" | "top" | "bottom";
@@ -70,8 +73,7 @@ export const REFERENCE_CITIES: readonly MapPlace[] = [
   { name: "Alachua", lat: ALACHUA.lat, lon: ALACHUA.lon, labelSide: "right", kind: "anchor" },
   { name: "Gainesville", lat: 29.65, lon: -82.32, labelSide: "right" },
   { name: "Orlando", lat: 28.54, lon: -81.38, labelSide: "right" },
-  { name: "Dade City", lat: 28.36, lon: -82.2, labelSide: "left" },
-  { name: "Tampa", lat: 27.95, lon: -82.46, labelSide: "left" },
+  { name: "Tampa", lat: 27.95, lon: -82.46, labelSide: "bottom" },
   { name: "Miami", lat: 25.76, lon: -80.19, labelSide: "left" },
 ];
 
@@ -197,7 +199,7 @@ export function serviceAreaBounds() {
 
 export function labelOffset(place: MapPlace) {
   if (place.kind === "site") {
-    return { dx: -16, dy: -14, anchor: "end" as const };
+    return { dx: -20, dy: -20, anchor: "end" as const };
   }
   const isEmphatic = place.kind === "anchor";
   const step = isEmphatic ? 14 : 11;

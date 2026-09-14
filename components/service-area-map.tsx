@@ -73,9 +73,20 @@ export function ServiceAreaMap() {
                 y1={CUTOFF_WEST.y}
                 x2={CUTOFF_EAST.x}
                 y2={CUTOFF_EAST.y}
+                stroke={MAP_OVERLAY.cutoffHalo}
+                strokeDasharray="12 7"
+                strokeLinecap="round"
+                strokeWidth={MAP_OVERLAY.cutoffHaloWidth}
+              />
+              <line
+                x1={CUTOFF_WEST.x}
+                y1={CUTOFF_WEST.y}
+                x2={CUTOFF_EAST.x}
+                y2={CUTOFF_EAST.y}
                 stroke={MAP_OVERLAY.cutoff}
-                strokeDasharray="7 5"
-                strokeWidth="2"
+                strokeDasharray="12 7"
+                strokeLinecap="round"
+                strokeWidth={MAP_OVERLAY.cutoffWidth}
               />
 
               {MAP_PLACES.map((place) => {
