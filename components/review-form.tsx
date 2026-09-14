@@ -21,8 +21,9 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
       <div className="surface-card">
         <h2 className="type-h2 text-forest">Review</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          This engagement is no longer in the review queue. Decisions can only be recorded while
-          the status is pending review. Nothing closes without Accept.
+          This engagement is no longer in the review queue. Decisions can only be recorded
+          while the status is pending review. Accept is not complete — the deal stays
+          awaiting seller signature until Van signs on DocuSign.
         </p>
         {engagement.status === "accepted" &&
         engagement.signingMethod === "docusign" &&
@@ -48,10 +49,10 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
       <div>
         <h2 className="type-h2 text-forest">Team decision</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Accept is the only path to execution. If a signed copy is already uploaded, Accept will
-          mark the agreement executed. If the client chose DocuSign, Accept sends the envelope
-          to the Buyer signer, Canaan Ranch LLP signer, the Buyer witness, and the fixed Canaan
-          Ranch LLP witness.
+          Accept starts DocuSign (or records a manual signed copy). It does not mark the
+          deal done. Status stays awaiting seller signature until Van/seller has signed
+          and the envelope is complete. A reservation letter draft is generated on Accept
+          and is not emailed until you approve send.
         </p>
       </div>
       {state.error ? (
@@ -127,7 +128,7 @@ function SimulateComplete({ engagementId }: { engagementId: string }) {
       <p className="text-sm font-medium text-ink">DocuSign stub control</p>
       <p className="mt-1 text-sm text-muted">
         Simulate the webhook that would fire when a signer completes the envelope. This attaches
-        a stub signed PDF and moves the status to Executed.
+        a stub signed PDF and moves the status to Executed after seller-sign is simulated.
       </p>
       {state.error ? <p className="mt-2 text-sm text-terracotta">{state.error}</p> : null}
       <button className="btn-secondary mt-3" type="submit" disabled={pending}>

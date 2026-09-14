@@ -28,6 +28,10 @@ import {
 import { generatePopulatedAgreement } from "@/lib/agreement-populate";
 import { persistExecutedAgreement } from "@/lib/executed-agreement";
 import { generateStubSignedPdf } from "@/lib/pdf";
+import {
+  approveAndSendReservationLetter,
+  persistReservationLetter,
+} from "@/lib/reservation-letter-persist";
 import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
 import type { Engagement, ReviewDecision } from "@/lib/types";
 
@@ -110,6 +114,14 @@ export async function reviewEngagement(
       };
       await saveEngagement(next);
     }
+  }
+
+  if (decision === "accept") {
+    next = await persistReservationLetter(
+      next,
+      next.status === "executed" ? "seller_sign" : "accept",
+    );
+    await saveEngagement(next);
   }
 
   revalidatePath("/admin");
@@ -226,7 +238,8 @@ export async function simulateDocuSignComplete(
       },
     };
     await persistExecutedAgreement(executed);
-    await saveEngagement(executed);
+    const withLetter = await persistReservationLetter(executed, "seller_sign");
+    await saveEngagement(withLetter);
   } catch (error) {
     return {
       error:
@@ -284,6 +297,40 @@ export async function refreshDocuSignStatus(
   revalidatePath("/admin");
   revalidatePath(`/admin/engagements/${engagementId}`);
   revalidatePath(`/engagements/${engagementId}`);
+  redirect(`/admin/engagements/${engagementId}`);
+}
+
+export async function approveReservationLetterSend(
+  engagementId: string,
+  previousState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  void previousState;
+  await requireAdmin();
+  const engagement = await getEngagement(engagementId);
+  if (!engagement) {
+    return { error: "Engagement not found." };
+  }
+  if (formData.get("sendReservationLetter") !== "on") {
+    return { error: "Check “Send reservation letter” to email the PDF." };
+  }
+  if (engagement.status !== "accepted" && engagement.status !== "executed") {
+    return { error: "Generate the letter after Accept. It is not emailed until you approve send." };
+  }
+  if (engagement.reservationLetter.status === "sent" && engagement.reservationLetter.sentAt) {
+    return {
+      error: `This letter was already sent ${new Date(engagement.reservationLetter.sentAt).toLocaleString("en-US")}.`,
+    };
+  }
+
+  const { engagement: next, result } = await approveAndSendReservationLetter(engagement);
+  await saveEngagement(next);
+  if (!result.sent) {
+    return { error: result.error ?? "Unable to send the reservation letter." };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/engagements/${engagementId}`);
   redirect(`/admin/engagements/${engagementId}`);
 }
 

@@ -9,6 +9,7 @@ import {
   usdInWords,
 } from "./money";
 import {
+  emptyReservationLetter,
   formatAuthorizedAgent,
   formatBuyerNotice,
   type Engagement,
@@ -252,6 +253,7 @@ export function buildTemplateEngagement(): Engagement {
       lastMessage: null,
       recipients: [],
     },
+    reservationLetter: emptyReservationLetter(),
     reviews: [],
     changeRequestNote: null,
     createdAt: "2026-01-01T00:00:00.000Z",

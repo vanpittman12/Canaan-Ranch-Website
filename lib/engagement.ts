@@ -37,7 +37,26 @@ export function isClosed(status: EngagementStatus) {
   return status === "executed";
 }
 
-export function nextStatusAfterAccept(hasSignedArtifact: boolean): EngagementStatus {
+export function isAwaitingSellerSignature(status: EngagementStatus) {
+  return status === "accepted";
+}
+
+/** Admin still has work: review, seller signature, or buyer changes. */
+export function isOpenEngagement(status: EngagementStatus) {
+  return (
+    status === "pending_review" ||
+    status === "accepted" ||
+    status === "changes_requested"
+  );
+}
+
+export function nextStatusAfterAccept(
+  hasSignedArtifact: boolean,
+  signingMethod: SigningMethod | null = null,
+): EngagementStatus {
+  if (signingMethod === "docusign") {
+    return "accepted";
+  }
   return hasSignedArtifact ? "executed" : "accepted";
 }
 
@@ -105,7 +124,10 @@ export function applyReview(
     };
   }
 
-  const status = nextStatusAfterAccept(Boolean(engagement.signedArtifact));
+  const status = nextStatusAfterAccept(
+    Boolean(engagement.signedArtifact),
+    engagement.signingMethod,
+  );
   return {
     ...engagement,
     reviews,

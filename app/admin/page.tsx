@@ -5,7 +5,13 @@ import { SiteHeader } from "@/components/site-header";
 import { StatusBadge } from "@/components/status-badge";
 import { describeDocuSignSeam } from "@/lib/docusign";
 import { listEngagements } from "@/lib/store";
-import { STATUS_PILL_LABELS, type Engagement, type EngagementStatus } from "@/lib/types";
+import { isAwaitingSellerSignature } from "@/lib/engagement";
+import {
+  LETTER_STATUS_LABELS,
+  STATUS_PILL_LABELS,
+  type Engagement,
+  type EngagementStatus,
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +27,9 @@ export default async function AdminQueuePage({
   const visible =
     filter === "all" ? engagements : engagements.filter((item) => item.status === filter);
   const pendingCount = engagements.filter((item) => item.status === "pending_review").length;
+  const awaitingSellerCount = engagements.filter((item) =>
+    isAwaitingSellerSignature(item.status),
+  ).length;
   const seam = describeDocuSignSeam();
 
   return (
@@ -34,8 +43,9 @@ export default async function AdminQueuePage({
             </p>
             <h1 className="type-h1 mt-2 text-forest">Review ledger</h1>
             <p className="mt-2 text-sm text-muted">
-              {pendingCount} awaiting a decision. Nothing closes without Accept. DocuSign is in{" "}
-              {seam.mode} mode
+              {pendingCount} awaiting a decision. {awaitingSellerCount} awaiting seller
+              signature. Accept is not complete — the deal stays pending until Van/seller
+              signs. DocuSign is in {seam.mode} mode
               {seam.makesNetworkCalls
                 ? " and sends live envelopes after Accept."
                 : " (local stub — no live API calls)."}
@@ -86,6 +96,7 @@ export default async function AdminQueuePage({
                       <th className="px-4 py-3 font-semibold">County</th>
                       <th className="px-4 py-3 font-semibold">GT</th>
                       <th className="px-4 py-3 font-semibold">Signing</th>
+                      <th className="px-4 py-3 font-semibold">Letter</th>
                       <th className="px-4 py-3 font-semibold">Status</th>
                     </tr>
                   </thead>
@@ -106,7 +117,8 @@ export default async function AdminQueuePage({
                           <p className="mt-1 text-sm text-ink">{item.intake.buyerLegalName}</p>
                           <p className="text-sm text-muted">
                             {item.intake.relocationCounty} · {item.intake.tortoiseCount} GT ·{" "}
-                            {item.signingMethod ?? "unsigned"}
+                            {item.signingMethod ?? "unsigned"} ·{" "}
+                            {LETTER_STATUS_LABELS[item.reservationLetter.status]}
                           </p>
                         </div>
                         <StatusBadge status={item.status} />
@@ -143,6 +155,12 @@ function LedgerRow({ item }: { item: Engagement }) {
       <td className="px-4 py-3 capitalize text-muted">
         {item.signingMethod ?? "—"}
         {item.signedArtifact ? " · file" : ""}
+      </td>
+      <td className="px-4 py-3 text-muted">
+        {LETTER_STATUS_LABELS[item.reservationLetter.status]}
+        {item.reservationLetter.sentAt
+          ? ` · ${new Date(item.reservationLetter.sentAt).toLocaleDateString("en-US")}`
+          : ""}
       </td>
       <td className="px-4 py-3">
         <StatusBadge status={item.status} />

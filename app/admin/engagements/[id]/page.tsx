@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/app/actions/admin";
 import { DocumentDesk } from "@/components/document-desk";
 import { RateOverrideForm } from "@/components/rate-override-form";
+import { ReservationLetterForm } from "@/components/reservation-letter-form";
 import { ReviewForm } from "@/components/review-form";
 import { SiteHeader } from "@/components/site-header";
 import { StatusBadge } from "@/components/status-badge";
@@ -172,6 +173,8 @@ export default async function AdminEngagementPage({
                 </Link>
               </div>
             </section>
+
+            <ReservationLetterForm engagement={engagement} />
 
             <ReviewForm engagement={engagement} />
 

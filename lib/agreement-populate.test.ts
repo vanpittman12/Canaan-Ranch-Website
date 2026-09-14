@@ -27,7 +27,7 @@ import {
 import { brand } from "./brand";
 import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
 import { addOneYear, formatLongDate } from "./money";
-import type { Engagement, IntakeFields } from "./types";
+import { emptyReservationLetter, type Engagement, type IntakeFields } from "./types";
 
 const TEMPLATE_DOCX = resolve(process.cwd(), BLANK_AGREEMENT_PUBLIC_FILE);
 const VAN_ORIGINAL_DOCX = resolve(process.cwd(), "content/agreements/van-original.docx");
@@ -75,6 +75,7 @@ function engagement(overrides: Partial<Engagement> = {}): Engagement {
       lastMessage: null,
       recipients: [],
     },
+    reservationLetter: emptyReservationLetter(),
     reviews: [],
     changeRequestNote: null,
     createdAt: "2026-04-01T00:00:00.000Z",

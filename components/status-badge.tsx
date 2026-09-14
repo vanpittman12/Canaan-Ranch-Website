@@ -5,7 +5,7 @@ const tones: Record<EngagementStatus, string> = {
   pending_review: "bg-cream text-forest border border-brass",
   changes_requested: "bg-white text-terracotta border border-terracotta/40",
   declined: "bg-cream text-muted border border-line",
-  accepted: "bg-cream text-forest border border-sage",
+  accepted: "bg-cream text-forest border border-brass",
   executed: "bg-forest text-cream",
 };
 

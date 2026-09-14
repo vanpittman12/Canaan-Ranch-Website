@@ -10,6 +10,7 @@ import {
   EngagementError,
 } from "@/lib/engagement";
 import { persistExecutedAgreement } from "@/lib/executed-agreement";
+import { persistReservationLetter } from "@/lib/reservation-letter-persist";
 import { persistAndNotifyNewEngagement } from "@/lib/notify";
 import {
   createEngagementRecord,
@@ -145,7 +146,11 @@ export async function uploadSignedCopy(
     }),
   );
   await persistExecutedAgreement(next);
-  await saveEngagement(next);
+  const withLetter =
+    next.status === "executed"
+      ? await persistReservationLetter(next, "seller_sign")
+      : next;
+  await saveEngagement(withLetter);
 
   revalidatePath(`/engagements/${engagementId}`);
   revalidatePath(`/admin/engagements/${engagementId}`);

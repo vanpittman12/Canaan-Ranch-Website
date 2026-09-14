@@ -22,6 +22,7 @@ describe("document download access", () => {
     const token = await createDocumentToken(engagementId, "contract");
     expect(await verifyDocumentToken(token, engagementId, "contract")).toBe(true);
     expect(await verifyDocumentToken(token, engagementId, "signed")).toBe(false);
+    expect(await verifyDocumentToken(token, engagementId, "letter")).toBe(false);
     expect(await verifyDocumentToken(token, "other-id", "contract")).toBe(false);
     expect(
       await canAccessEngagementDocument({

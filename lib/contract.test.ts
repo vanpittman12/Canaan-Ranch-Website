@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { brand } from "./brand";
 import { buildContract, buildTemplateEngagement } from "./contract";
-import { formatAuthorizedAgent, formatBuyerNotice } from "./types";
+import {
+  emptyReservationLetter,
+  formatAuthorizedAgent,
+  formatBuyerNotice,
+} from "./types";
 import type { Engagement, IntakeFields } from "./types";
 
 const intake: IntakeFields = {
@@ -45,6 +49,7 @@ function engagement(overrides: Partial<Engagement> = {}): Engagement {
       lastMessage: null,
       recipients: [],
     },
+    reservationLetter: emptyReservationLetter(),
     reviews: [],
     changeRequestNote: null,
     createdAt: "2026-04-01T00:00:00.000Z",

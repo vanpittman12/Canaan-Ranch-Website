@@ -19,7 +19,7 @@ const stages = [
   {
     id: "review",
     title: "Canaan Preserve review",
-    body: "Nothing is executed until the team Accepts and a signed copy is on file.",
+    body: "Accept is not complete. The engagement stays awaiting seller signature until Van signs on DocuSign (or a complete signed copy is on file).",
   },
   {
     id: "executed",

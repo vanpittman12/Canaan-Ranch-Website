@@ -1,14 +1,23 @@
 import { getSellerWitness } from "../brand";
-import type { Engagement, IntakeFields } from "../types";
+import {
+  emptyReservationLetter,
+  type Engagement,
+  type IntakeFields,
+  type ReservationLetter,
+} from "../types";
 
 export type StoredIntake = Partial<IntakeFields> & { effectiveDate?: string };
 
-export type StoredEngagement = Omit<Engagement, "intake" | "effectiveDate" | "docusign"> & {
+export type StoredEngagement = Omit<
+  Engagement,
+  "intake" | "effectiveDate" | "docusign" | "reservationLetter"
+> & {
   effectiveDate?: string | null;
   intake: StoredIntake;
   docusign?: Partial<Omit<Engagement["docusign"], "mode">> & {
     mode?: Engagement["docusign"]["mode"] | "live_placeholder";
   };
+  reservationLetter?: Partial<ReservationLetter> | null;
 };
 
 export function normalizeIntake(intake: StoredIntake): IntakeFields {
@@ -52,6 +61,29 @@ export function normalizeEngagement(raw: StoredEngagement): Engagement {
       lastMessage: raw.docusign?.lastMessage ?? null,
       recipients: raw.docusign?.recipients ?? [],
     },
+    reservationLetter: normalizeReservationLetter(raw.reservationLetter),
+  };
+}
+
+export function normalizeReservationLetter(
+  raw?: Partial<ReservationLetter> | null,
+): ReservationLetter {
+  const empty = emptyReservationLetter();
+  if (!raw) {
+    return empty;
+  }
+  return {
+    status: raw.status ?? empty.status,
+    generatedAt: raw.generatedAt ?? null,
+    refreshedAt: raw.refreshedAt ?? null,
+    sendApprovedAt: raw.sendApprovedAt ?? null,
+    sentAt: raw.sentAt ?? null,
+    storedName: raw.storedName ?? null,
+    filename: raw.filename ?? null,
+    letterDate: raw.letterDate ?? null,
+    source: raw.source ?? null,
+    notifyMode: raw.notifyMode ?? null,
+    lastError: raw.lastError ?? null,
   };
 }
 
