@@ -14,7 +14,7 @@ const stages = [
   {
     id: "signing",
     title: "Choose signing",
-    body: "DocuSign after Accept is the usual path. Manual PDF is a fallback.",
+    body: "After Accept, this demo can send the Word agreement through DocuSign. You can also download it and upload a signed copy.",
   },
   {
     id: "review",

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s · Canaan Preserve",
   },
   description:
-    "Canaan Preserve is an FWC Approved Tier 1 Long Term Recipient site. Gopher tortoise intake, downloadable relocation agreement, signature, and internal review.",
+    "Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site. Gopher tortoise intake, downloadable relocation agreement, signature, and internal review.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

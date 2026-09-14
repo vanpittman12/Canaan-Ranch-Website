@@ -8,6 +8,7 @@ import {
   REVIEW_STEP_ID,
   canSubmitIntake,
   firstStepForErrors,
+  formatGopherTortoiseCount,
   intakeValuesFromDefaults,
   nextStep,
   previousStep,
@@ -430,7 +431,7 @@ export function IntakeForm({
             )}
             <p className="mt-1 text-sm text-muted">
               {formatUsd(brand.juvenileRate)} per juvenile at delivery (all-in, not added to the
-              adult rate). No deposits required.
+              adult rate).
             </p>
             {errors.perGtRate ? (
               <p className="mt-1 text-sm text-terracotta">{errors.perGtRate}</p>
@@ -441,7 +442,7 @@ export function IntakeForm({
           Total estimated payment at the adult rate: <strong>{formatUsd(total)}</strong> (
           {Number.isFinite(count) ? count : 0} × {formatUsd(rate || 0)} per adult). A juvenile
           classified at delivery is {formatUsd(brand.juvenileRate)} total, not in addition to the
-          adult rate. No deposits required.
+          adult rate.
         </div>
       </section>
 
@@ -633,7 +634,7 @@ export function IntakeForm({
           title="Capacity"
           onEdit={() => setStep("capacity")}
           rows={[
-            ["Reserved capacity", `${values.tortoiseCount || "—"} gopher tortoises`],
+            ["Reserved capacity", formatGopherTortoiseCount(values.tortoiseCount)],
             ["Adult rate", `${formatUsd(rate)} per adult`],
             [
               "Juvenile rate",

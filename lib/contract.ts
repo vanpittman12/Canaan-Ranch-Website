@@ -168,7 +168,7 @@ export function buildContract(engagement: Engagement): ContractDocument {
       {
         heading: "6. Seller responsibilities",
         paragraphs: [
-          `${brand.fwcStatus} Seller shall maintain Canaan Preserve as an FWC Approved Tier 1 Long Term Recipient site and shall accept gopher tortoises up to the Reserved Capacity, subject to site conditions, remaining capacity, and applicable law. Seller’s agent for operational coordination is ${brand.agentName}, ${brand.agentContact}.`,
+          `${brand.fwcStatus} Seller shall maintain Canaan Preserve as an FWC Approved Tier 1 Long-Term Recipient Site and shall accept gopher tortoises up to the Reserved Capacity, subject to site conditions, remaining capacity, and applicable law. Seller’s agent for operational coordination is ${brand.agentName}, ${brand.agentContact}.`,
           "Seller does not warrant that a particular donor-site schedule can be met if Buyer has not reserved remaining capacity or if FWC or site conditions prevent acceptance.",
         ],
       },

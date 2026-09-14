@@ -224,7 +224,7 @@ function SubmittedPanel({
           {engagement.signingMethod === "docusign"
             ? "DocuSign after accept"
             : engagement.signingMethod === "manual"
-              ? "Manual PDF"
+              ? "Download and upload a signed copy"
               : "Not selected"}
           .
         </p>

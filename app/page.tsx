@@ -21,12 +21,12 @@ const steps = [
   {
     n: "03",
     title: "Download your agreement",
-    body: "We populate the agreement from those details. Download the PDF to review — there is no on-screen contract preview.",
+    body: "We populate the agreement from those details. Download the Word/DOCX file to review — there is no on-screen contract preview.",
   },
   {
     n: "04",
     title: "Canaan Preserve Accepts, then sign",
-    body: "Review happens first. After Accept, the usual path is DocuSign. Manual PDF is a fallback. Nothing is executed until Accept and a signed copy are on file.",
+    body: "Review happens first. After Accept, this demo can send the Word agreement through DocuSign, or you can download it and upload a signed copy. Production DocuSign is confirmed at go-live. Nothing is executed until Accept and a signed copy are on file.",
   },
 ];
 
@@ -34,7 +34,7 @@ const facts = [
   { label: "Status", value: "FWC Tier 1" },
   {
     label: "Pricing",
-    value: `${formatUsd(brand.defaultPerGtRate)} / ${formatUsd(brand.juvenileRate)}`,
+    value: `${formatUsd(brand.defaultPerGtRate)} adult / ${formatUsd(brand.juvenileRate)} juvenile`,
   },
   { label: "Deposits", value: "No deposits" },
   { label: "Entity", value: brand.legalName },
@@ -60,11 +60,8 @@ export default function Home() {
               </h1>
               <p className="mt-6 max-w-lg text-[17px] leading-[27px] text-cream/85">
                 Canaan Preserve is a gopher tortoise relocation recipient site. {brand.legalName}{" "}
-                is the contracting party. Intake, a downloadable agreement, signature, and a
-                human review before anything closes.
-              </p>
-              <p className="mt-4 max-w-xl text-sm font-medium leading-6 text-cream">
-                {brand.fwcValueProp}
+                is the contracting party. Intake produces a downloadable Word agreement, then
+                signature and a human review before anything closes.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">

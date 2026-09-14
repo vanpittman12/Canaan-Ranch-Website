@@ -6,6 +6,7 @@ import {
   REVIEW_STEP_ID,
   canSubmitIntake,
   firstStepForErrors,
+  formatGopherTortoiseCount,
   nextStep,
   previousStep,
   validateStepFields,
@@ -27,7 +28,14 @@ describe("intake wizard", () => {
     expect(previousStep(REVIEW_STEP_ID)).toBe("witness");
   });
 
-  it("lists existing intake items including required project name and no invented schema fields", () => {
+  it("pluralizes reserved gopher tortoise capacity", () => {
+    expect(formatGopherTortoiseCount(1)).toBe("1 gopher tortoise");
+    expect(formatGopherTortoiseCount("1")).toBe("1 gopher tortoise");
+    expect(formatGopherTortoiseCount(8)).toBe("8 gopher tortoises");
+    expect(formatGopherTortoiseCount("")).toBe("— gopher tortoises");
+  });
+
+  it("lists intake items including required project name and no invented schema fields", () => {
     expect(INTAKE_MINUTES).toBe(3);
     expect(PREPARE_ITEMS).toContain("Project name");
     expect(INTAKE_STEPS.find((step) => step.id === "project")?.fields).toContain(

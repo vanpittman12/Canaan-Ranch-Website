@@ -2,7 +2,7 @@
 
 Gopher tortoise recipient-site intake, downloadable relocation agreement, signature, and internal review. Customer-facing brand is **Canaan Preserve**. The contracting entity is **Canaan Ranch LLP**. The GitHub repository name may still say Canaan Ranch.
 
-**Canaan Preserve is an FWC Approved Tier 1 Long Term Recipient site.**
+**Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site.**
 
 Buyer intake populates Van’s **Gopher Tortoise Relocation Agreement** Word file. After intake the buyer **downloads** that same document with intake fields filled (there is no on-screen contract preview). The client then chooses DocuSign or a manual signed upload. **Nothing is executed until the team Accepts and a signed artifact is on file.**
 

@@ -47,7 +47,7 @@ export default function IntakePage() {
           </p>
           <h2 className="type-h2 mt-2 text-forest">About {INTAKE_MINUTES} minutes</h2>
           <p className="mt-2 text-sm text-muted">
-            Have these existing agreement details ready. Adult versus juvenile is not collected
+            Have these agreement details ready. Adult versus juvenile is not collected
             here.
           </p>
           <ol className="mt-4 list-decimal space-y-2 pl-5 text-[17px] leading-[27px] text-ink">
