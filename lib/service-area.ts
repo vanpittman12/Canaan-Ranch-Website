@@ -77,12 +77,12 @@ export const REFERENCE_CITIES: readonly MapPlace[] = [
   { name: "Miami", lat: 25.76, lon: -80.19, labelSide: "left" },
 ];
 
-/** Canaan Preserve — just west of Alachua. Not a surveyed parcel. */
+/** Site pin: same latitude as Alachua, slightly west of -82.5. */
 export const CANAAN_SITE: MapPlace = {
   name: "Canaan Preserve",
   lat: ALACHUA.lat,
-  lon: -82.65,
-  labelSide: "left",
+  lon: -82.58,
+  labelSide: "top",
   kind: "site",
 };
 
@@ -199,7 +199,7 @@ export function serviceAreaBounds() {
 
 export function labelOffset(place: MapPlace) {
   if (place.kind === "site") {
-    return { dx: -20, dy: -20, anchor: "end" as const };
+    return { dx: 0, dy: -22, anchor: "middle" as const };
   }
   const isEmphatic = place.kind === "anchor";
   const step = isEmphatic ? 14 : 11;

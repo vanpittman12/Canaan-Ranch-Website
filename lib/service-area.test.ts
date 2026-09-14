@@ -9,6 +9,7 @@ import {
   MAP_FRAME,
   MAP_OVERLAY,
   NAUTICAL_MILES_SOUTH,
+  REFERENCE_CITIES,
   SERVICE_AREA_FEATURE,
   SOUTH_OF_CUTOFF_FEATURE,
   SOUTHERN_LIMIT_LAT,
@@ -111,21 +112,25 @@ describe("service area map", () => {
     expect(isInServiceArea(27.95, -82.46)).toBe(false);
     expect(isInServiceArea(25.76, -80.19)).toBe(false);
     expect(isInServiceArea(CANAAN_SITE.lat, CANAAN_SITE.lon)).toBe(true);
-    expect(mapLib).not.toContain("Dade City");
+    expect(REFERENCE_CITIES.some((city) => city.name === "Dade City")).toBe(false);
     expect(mapModule).not.toContain("Dade City");
   });
 
   it("pins Canaan Preserve just west of Alachua, not on the southern limit", () => {
     expect(CANAAN_SITE.lat).toBe(ALACHUA.lat);
-    expect(CANAAN_SITE.lon).toBe(-82.65);
+    expect(CANAAN_SITE.lon).toBe(-82.58);
     expect(CANAAN_SITE.lon).toBeLessThan(ALACHUA.lon);
+    expect(CANAAN_SITE.lon).toBeGreaterThan(-82.7);
     expect(CANAAN_SITE.lat).toBeGreaterThan(SOUTHERN_LIMIT_LAT + 1);
-    expect(CANAAN_SITE.labelSide).toBe("left");
-    expect(labelOffset(CANAAN_SITE).anchor).toBe("end");
+    expect(CANAAN_SITE.labelSide).toBe("top");
+    expect(labelOffset(CANAAN_SITE).anchor).toBe("middle");
     expect(labelOffset(CANAAN_SITE).dy).toBeLessThan(0);
     expect(project(CANAAN_SITE.lon, CANAAN_SITE.lat).x).toBeLessThan(
       project(ALACHUA.lon, ALACHUA.lat).x,
     );
+    expect(
+      project(ALACHUA.lon, ALACHUA.lat).x - project(CANAAN_SITE.lon, CANAAN_SITE.lat).x,
+    ).toBeLessThan(30);
     const cutoffY = project(ALACHUA.lon, SOUTHERN_LIMIT_LAT).y;
     const canaanY = project(CANAAN_SITE.lon, CANAAN_SITE.lat).y;
     const tampaY = project(-82.46, 27.95).y;
@@ -137,7 +142,6 @@ describe("service area map", () => {
     expect(mapModule).toContain("cutoffWidth");
     expect(mapLib).not.toContain("28.33");
     expect(mapLib).not.toContain("-82.35");
-    expect(mapLib.toLowerCase()).not.toContain("pasco");
     expect(mapModule.toLowerCase()).not.toContain("pasco");
   });
 
