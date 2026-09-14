@@ -15,6 +15,8 @@ export function BrandMark({
   decorative?: boolean;
 }) {
   const image = (
+    // Van’s static SVG — do not send through next/image optimization.
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={BRAND_MARK_SRC}
       alt={decorative ? "" : "Canaan Preserve"}
