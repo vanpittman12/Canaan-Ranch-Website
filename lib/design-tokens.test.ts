@@ -146,6 +146,13 @@ describe("site builder visual lock", () => {
     expect(intakePage).toContain("Have these agreement details ready");
     expect(intakePage).not.toContain("existing agreement details");
     expect(intakePage).not.toContain("Have these existing agreement details ready");
+    expect(intakePage).toContain("The Effective Date is the date the Buyer signs");
+    expect(intakePage).toContain(
+      "The Expiration Date is one year after the Buyer Date Signed / Effective",
+    );
+    expect(intakeForm).toContain("The Expiration Date is one year");
+    expect(intakeForm).toContain("Buyer Date Signed / Effective Date.");
+    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
     expect(footer).toContain("{brand.footerLine}");
     expect(footer).not.toContain("A Canaan Ranch LLP recipient site");
     expect(footer).not.toContain("Gopher tortoise relocation recipient site.");
