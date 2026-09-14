@@ -64,7 +64,7 @@ export const REFERENCE_CITIES: readonly MapPlace[] = [
   { name: "Pensacola", lat: 30.42, lon: -87.22, labelSide: "bottom" },
   { name: "Tallahassee", lat: 30.44, lon: -84.28, labelSide: "bottom" },
   { name: "Jacksonville", lat: 30.33, lon: -81.66, labelSide: "right" },
-  { name: "Alachua", lat: ALACHUA.lat, lon: ALACHUA.lon, labelSide: "left", kind: "anchor" },
+  { name: "Alachua", lat: ALACHUA.lat, lon: ALACHUA.lon, labelSide: "right", kind: "anchor" },
   { name: "Gainesville", lat: 29.65, lon: -82.32, labelSide: "right" },
   { name: "Orlando", lat: 28.54, lon: -81.38, labelSide: "right" },
   { name: "Dade City", lat: 28.36, lon: -82.2, labelSide: "left" },
@@ -72,11 +72,11 @@ export const REFERENCE_CITIES: readonly MapPlace[] = [
   { name: "Miami", lat: 25.76, lon: -80.19, labelSide: "left" },
 ];
 
-/** Pasco County mark — not a surveyed parcel. */
+/** Canaan Preserve — just west of Alachua. Not a surveyed parcel. */
 export const CANAAN_SITE: MapPlace = {
   name: "Canaan Preserve",
-  lat: 28.33,
-  lon: -82.35,
+  lat: ALACHUA.lat,
+  lon: -82.65,
   labelSide: "left",
   kind: "site",
 };
@@ -186,7 +186,10 @@ export function serviceAreaBounds() {
 }
 
 export function labelOffset(place: MapPlace) {
-  const isEmphatic = place.kind === "anchor" || place.kind === "site";
+  if (place.kind === "site") {
+    return { dx: -16, dy: -14, anchor: "end" as const };
+  }
+  const isEmphatic = place.kind === "anchor";
   const step = isEmphatic ? 14 : 11;
   switch (place.labelSide) {
     case "left":

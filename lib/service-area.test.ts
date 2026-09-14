@@ -5,12 +5,14 @@ import { brand } from "./brand";
 import {
   ALACHUA,
   BASEMAP,
+  CANAAN_SITE,
   MAP_FRAME,
   NAUTICAL_MILES_SOUTH,
   SERVICE_AREA_FEATURE,
   SOUTHERN_LIMIT_LAT,
   SOUTHERN_LIMIT_LINE,
   isInServiceArea,
+  labelOffset,
   latitudeToNmSouthOfAlachua,
   nauticalMilesToPixels,
   project,
@@ -97,6 +99,24 @@ describe("service area map", () => {
     expect(isInServiceArea(28.36, -82.2)).toBe(true);
     expect(isInServiceArea(27.95, -82.46)).toBe(false);
     expect(isInServiceArea(25.76, -80.19)).toBe(false);
+    expect(isInServiceArea(CANAAN_SITE.lat, CANAAN_SITE.lon)).toBe(true);
+  });
+
+  it("pins Canaan Preserve just west of Alachua, not on the southern limit", () => {
+    expect(CANAAN_SITE.lat).toBe(ALACHUA.lat);
+    expect(CANAAN_SITE.lon).toBe(-82.65);
+    expect(CANAAN_SITE.lon).toBeLessThan(ALACHUA.lon);
+    expect(CANAAN_SITE.lat).toBeGreaterThan(SOUTHERN_LIMIT_LAT + 1);
+    expect(CANAAN_SITE.labelSide).toBe("left");
+    expect(labelOffset(CANAAN_SITE).anchor).toBe("end");
+    expect(labelOffset(CANAAN_SITE).dy).toBeLessThan(0);
+    expect(project(CANAAN_SITE.lon, CANAAN_SITE.lat).x).toBeLessThan(
+      project(ALACHUA.lon, ALACHUA.lat).x,
+    );
+    expect(mapLib).not.toContain("28.33");
+    expect(mapLib).not.toContain("-82.35");
+    expect(mapLib.toLowerCase()).not.toContain("pasco");
+    expect(mapModule.toLowerCase()).not.toContain("pasco");
   });
 
   it("keeps the slogan, savings module, and What we offer", () => {
