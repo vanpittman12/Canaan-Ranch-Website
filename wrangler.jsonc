@@ -13,7 +13,7 @@
   },
   "vars": {
     "STORAGE_ADAPTER": "cloudflare",
-    "DOCUSIGN_ENABLED": "false",
+    "DOCUSIGN_ENABLED": "true",
     "DOCUSIGN_ACCOUNT_BASE_URI": "https://demo.docusign.net",
     "DOCUSIGN_AUTH_SERVER": "https://account-d.docusign.com",
     "APP_URL": "https://canaanpreserve.com"
