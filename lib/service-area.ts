@@ -6,15 +6,34 @@ export const SOUTHERN_LIMIT_LAT = 28.1;
 export const serviceAreaCopy = {
   heading: "Service area",
   caption: "Service area: north of ~100 NM south of Alachua (incl. panhandle).",
+  legendService: "Service area",
+  legendAnchor: "Alachua",
+  legendSite: "Canaan Preserve",
+  scaleLabel: "Nautical miles",
 } as const;
+
+/** Schematic city dots for orientation. Canaan geography only. */
+export const REFERENCE_CITIES = [
+  { name: "Tallahassee", lat: 30.44, lon: -84.28, dx: 10, dy: -6 },
+  { name: "Jacksonville", lat: 30.33, lon: -81.66, dx: 10, dy: -4 },
+  { name: "Alachua", lat: ALACHUA.lat, lon: ALACHUA.lon, dx: 11, dy: -12, anchor: true },
+  { name: "Gainesville", lat: 29.65, lon: -82.32, dx: 10, dy: 14 },
+  { name: "Orlando", lat: 28.54, lon: -81.38, dx: 10, dy: 4 },
+  { name: "Dade City", lat: 28.36, lon: -82.2, dx: -10, dy: -8, anchorEnd: true },
+  { name: "Tampa", lat: 27.95, lon: -82.46, dx: -10, dy: 12, anchorEnd: true },
+] as const;
+
+/** Pasco County schematic mark — not a surveyed parcel. */
+export const CANAAN_SITE = { name: "Canaan Preserve", lat: 28.33, lon: -82.35 } as const;
 
 export const MAP_FRAME = {
   lonMin: -87.65,
   lonMax: -79.85,
   latMin: 24.45,
   latMax: 31.15,
-  width: 720,
-  height: 640,
+  width: 760,
+  height: 780,
+  mapHeight: 640,
 } as const;
 
 /** Original schematic outline (lon, lat), northwest corner then clockwise. */
@@ -72,11 +91,15 @@ export const FLORIDA_OUTLINE: ReadonlyArray<readonly [number, number]> = [
 ];
 
 export function project(lon: number, lat: number) {
-  const { lonMin, lonMax, latMin, latMax, width, height } = MAP_FRAME;
+  const { lonMin, lonMax, latMin, latMax, width, mapHeight } = MAP_FRAME;
   return {
     x: ((lon - lonMin) / (lonMax - lonMin)) * width,
-    y: ((latMax - lat) / (latMax - latMin)) * height,
+    y: ((latMax - lat) / (latMax - latMin)) * mapHeight,
   };
+}
+
+export function nauticalMilesToPixels(nm: number) {
+  return (nm / 60 / (MAP_FRAME.latMax - MAP_FRAME.latMin)) * MAP_FRAME.mapHeight;
 }
 
 export function latitudeToNmSouthOfAlachua(lat: number) {

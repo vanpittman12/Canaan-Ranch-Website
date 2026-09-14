@@ -24,9 +24,20 @@ describe("service area map", () => {
     expect(serviceAreaCopy.caption).toBe(
       "Service area: north of ~100 NM south of Alachua (incl. panhandle).",
     );
-    expect(mapModule).toContain("Alachua");
+    expect(mapModule).toContain("legendAnchor");
     expect(mapModule).toContain("floridaOutlinePath");
     expect(mapModule).toContain("SOUTHERN_LIMIT_LAT");
+    expect(mapModule).toContain("REFERENCE_CITIES");
+    expect(mapModule).toContain("nauticalMilesToPixels");
+    expect(mapLib).toContain("Tallahassee");
+    expect(mapLib).toContain("Jacksonville");
+    expect(mapLib).toContain("Orlando");
+    expect(mapLib).toContain("Tampa");
+    expect(mapLib).toContain("Gainesville");
+    expect(mapLib).toContain(serviceAreaCopy.legendService);
+    expect(mapLib).toContain(serviceAreaCopy.legendSite);
+    expect(mapModule).not.toContain("#7cfc00");
+    expect(mapModule).not.toContain("#8fd14f");
   });
 
   it("is an original schematic on the homepage with no Lykes art", () => {
