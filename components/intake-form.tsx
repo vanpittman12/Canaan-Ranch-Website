@@ -343,7 +343,7 @@ export function IntakeForm({
             No deposits required.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           <Field
             name="tortoiseCount"
             label="Reserved capacity (gopher tortoise count)"
@@ -364,29 +364,27 @@ export function IntakeForm({
               onChange={(event) => update("tortoiseCount", event.target.value)}
             />
           </Field>
-          <div className="flex h-full flex-col">
+          <div>
             <p className="type-label">Adult rate</p>
-            <div className="mt-auto">
-              {allowRateOverride ? (
-                <input
-                  className="field-control"
-                  name="perGtRate"
-                  type="number"
-                  min={1}
-                  step={1}
-                  defaultValue={rate}
-                />
-              ) : (
-                <p className="field-control bg-cream">{formatUsd(brand.defaultPerGtRate)} per adult</p>
-              )}
-              <p className="mt-1 text-sm text-muted">
-                {formatUsd(brand.juvenileRate)} per juvenile at delivery (all-in, not added to the
-                adult rate). No deposits required.
-              </p>
-              {errors.perGtRate ? (
-                <p className="mt-1 text-sm text-terracotta">{errors.perGtRate}</p>
-              ) : null}
-            </div>
+            {allowRateOverride ? (
+              <input
+                className="field-control"
+                name="perGtRate"
+                type="number"
+                min={1}
+                step={1}
+                defaultValue={rate}
+              />
+            ) : (
+              <p className="field-control bg-cream">{formatUsd(brand.defaultPerGtRate)} per adult</p>
+            )}
+            <p className="mt-1 text-sm text-muted">
+              {formatUsd(brand.juvenileRate)} per juvenile at delivery (all-in, not added to the
+              adult rate). No deposits required.
+            </p>
+            {errors.perGtRate ? (
+              <p className="mt-1 text-sm text-terracotta">{errors.perGtRate}</p>
+            ) : null}
           </div>
         </div>
         <div className="rounded-[12px] border border-line bg-cream px-4 py-3 text-sm text-ink">
