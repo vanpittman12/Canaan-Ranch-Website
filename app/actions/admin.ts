@@ -81,6 +81,9 @@ export async function reviewEngagement(
 
   try {
     let next = applyReview(engagement, decision, note);
+    // Persist Accept before DOCX populate + DocuSign so a Worker CPU limit on
+    // regenerate does not leave the engagement stuck in Pending.
+    await saveEngagement(next);
     if (decision === "accept" && next.signingMethod === "docusign") {
       const populated = await generatePopulatedAgreement(next);
       const sent = await sendEnvelope({
@@ -100,8 +103,8 @@ export async function reviewEngagement(
         sent.mode,
         sent.recipients,
       );
+      await saveEngagement(next);
     }
-    await saveEngagement(next);
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Unable to record the review.",

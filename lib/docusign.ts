@@ -34,12 +34,9 @@ export type { DocuSignMode, EnvelopeRecipient };
 export const DEFAULT_ACCOUNT_BASE_URI = "https://demo.docusign.net";
 export const DEFAULT_AUTH_SERVER = "https://account-d.docusign.com";
 
-export const DOCUSIGN_ANCHORS = {
-  buyer_signer: { sign: "/sn_buyer/", date: "/date_buyer/" },
-  seller_signer: { sign: "/sn_seller/", date: "/date_seller/" },
-  buyer_witness: { sign: "/wit_buyer/", date: "/date_wit_buyer/" },
-  seller_witness: { sign: "/wit_seller/", date: "/date_wit_seller/" },
-} as const;
+import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+
+export { DOCUSIGN_ANCHORS };
 
 const REQUIRED_LIVE_VARS = [
   "DOCUSIGN_INTEGRATION_KEY",

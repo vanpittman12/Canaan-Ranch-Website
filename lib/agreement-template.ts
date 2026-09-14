@@ -1,6 +1,10 @@
 /**
  * Van’s blank Word agreement. Blank download 307s to the public file.
  * Populated download + DocuSign fill a copy of these same bytes.
+ *
+ * Workers note: inflate once per isolate and reuse the unzipped parts. The
+ * contract route previously blew Cloudflare Error 1102 (exceededCpu) by
+ * unzipSync + zipSync(level 6) on every request against a 424KB document.xml.
  */
 export const BLANK_AGREEMENT_PUBLIC_PATH =
   "/agreements/Canaan-Preserve-Relocation-Agreement-template.docx";
@@ -12,7 +16,11 @@ export const BLANK_AGREEMENT_DOCX_SIZE = 66615;
 export const POPULATED_AGREEMENT_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-let cachedTemplate: Uint8Array | null = null;
+/** Store-only zip level — avoids deflate CPU on Workers (Error 1102). */
+export const POPULATED_ZIP_LEVEL = 0 as const;
+
+let cachedTemplateBytes: Uint8Array | null = null;
+let cachedUnzippedParts: Record<string, Uint8Array> | null = null;
 
 export function populatedAgreementFilename(reference: string) {
   return `${reference}-canaan-preserve-agreement.docx`;
@@ -24,17 +32,36 @@ export function populatedAgreementFilename(reference: string) {
  * route never goes through this loader — it 307s to the static asset.
  */
 export async function loadBlankAgreementTemplate(): Promise<Uint8Array> {
-  if (cachedTemplate) {
-    return cachedTemplate.slice();
+  if (cachedTemplateBytes) {
+    return cachedTemplateBytes.slice();
   }
   const fromAssets = await readFromCloudflareAssets();
   const bytes = fromAssets ?? (await readBlankAgreementFromDisk());
-  cachedTemplate = bytes;
+  cachedTemplateBytes = bytes;
   return bytes.slice();
 }
 
+/**
+ * Inflate Van’s blank DOCX once per isolate. Callers must treat returned
+ * entries other than the one they replace as immutable (shared cache).
+ */
+export async function loadBlankAgreementParts(): Promise<Record<string, Uint8Array>> {
+  if (cachedUnzippedParts) {
+    return cachedUnzippedParts;
+  }
+  const { unzipSync } = await import("fflate");
+  const bytes = cachedTemplateBytes ?? (await loadBlankAgreementTemplate());
+  // Keep the cached raw bytes without an extra slice copy when we already have it.
+  if (!cachedTemplateBytes) {
+    cachedTemplateBytes = bytes;
+  }
+  cachedUnzippedParts = unzipSync(cachedTemplateBytes);
+  return cachedUnzippedParts;
+}
+
 export function resetBlankAgreementTemplateCache() {
-  cachedTemplate = null;
+  cachedTemplateBytes = null;
+  cachedUnzippedParts = null;
 }
 
 async function readFromCloudflareAssets(): Promise<Uint8Array | null> {
