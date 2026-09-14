@@ -19,22 +19,81 @@ import type { IntakeFields } from "@/lib/types";
 
 const initialState: ActionState = {};
 
+function FieldRow({
+  columns,
+  children,
+}: {
+  columns: 2 | 3;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={
+        columns === 3
+          ? "flex flex-col gap-4 sm:grid sm:grid-cols-3 sm:grid-rows-[auto_auto_auto_auto] sm:gap-x-4 sm:gap-y-0"
+          : "flex flex-col gap-4 sm:grid sm:grid-cols-2 sm:grid-rows-[auto_auto_auto_auto] sm:gap-x-4 sm:gap-y-0"
+      }
+    >
+      {children}
+    </div>
+  );
+}
+
 function Field({
   name,
   label,
   error,
   hint,
   children,
+  split = false,
 }: {
   name: string;
   label: string;
   error?: string;
   hint?: string;
   children: React.ReactNode;
+  split?: boolean;
 }) {
   const hintId = hint ? `${name}-hint` : undefined;
   const errorId = error ? `${name}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
+
+  const hintSlot = (
+    <p
+      id={hintId}
+      className={`mt-1 text-sm sm:row-start-2 ${hint ? "text-muted" : "invisible max-sm:hidden"}`}
+      aria-hidden={hint ? undefined : true}
+    >
+      {hint || "\u00a0"}
+    </p>
+  );
+
+  const errorSlot = (
+    <p
+      id={errorId}
+      className={`mt-1 min-h-5 text-sm sm:row-start-4 ${error ? "text-terracotta" : "invisible max-sm:hidden"}`}
+      role={error ? "alert" : undefined}
+    >
+      {error || "\u00a0"}
+    </p>
+  );
+
+  if (split) {
+    return (
+      <div
+        className="flex min-w-0 flex-col sm:col-span-1 sm:row-span-4 sm:grid sm:grid-rows-subgrid sm:items-stretch"
+        data-field={name}
+        data-describedby={describedBy}
+      >
+        <label htmlFor={name} className="type-label sm:row-start-1">
+          {label}
+        </label>
+        {hintSlot}
+        <div className="sm:row-start-3">{children}</div>
+        {errorSlot}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col" data-describedby={describedBy}>
@@ -219,8 +278,9 @@ export function IntakeForm({
             autoComplete="organization"
           />
         </Field>
-        <div className="grid items-start gap-4 sm:grid-cols-2">
+        <FieldRow columns={2}>
           <Field
+            split
             name="buyerAttention"
             label="Buyer signatory / attention"
             hint="Appears as Attention on the notice block and as the Buyer signature name."
@@ -239,6 +299,7 @@ export function IntakeForm({
             />
           </Field>
           <Field
+            split
             name="buyerEmail"
             label="Buyer signatory email"
             hint="Notice email and DocuSign Buyer signer."
@@ -257,7 +318,7 @@ export function IntakeForm({
               autoComplete="email"
             />
           </Field>
-        </div>
+        </FieldRow>
         <Field
           name="buyerStreet"
           label="Street address"
@@ -276,8 +337,8 @@ export function IntakeForm({
             autoComplete="street-address"
           />
         </Field>
-        <div className="grid items-start gap-4 sm:grid-cols-3">
-          <Field name="buyerCity" label="City" error={errors.buyerCity}>
+        <FieldRow columns={3}>
+          <Field split name="buyerCity" label="City" error={errors.buyerCity}>
             <input
               {...controlProps("buyerCity", errors.buyerCity)}
               value={values.buyerCity}
@@ -286,7 +347,7 @@ export function IntakeForm({
               autoComplete="address-level2"
             />
           </Field>
-          <Field name="buyerState" label="State" error={errors.buyerState}>
+          <Field split name="buyerState" label="State" error={errors.buyerState}>
             <input
               {...controlProps("buyerState", errors.buyerState)}
               value={values.buyerState}
@@ -295,7 +356,7 @@ export function IntakeForm({
               autoComplete="address-level1"
             />
           </Field>
-          <Field name="buyerPostalCode" label="Postal code" error={errors.buyerPostalCode}>
+          <Field split name="buyerPostalCode" label="Postal code" error={errors.buyerPostalCode}>
             <input
               {...controlProps("buyerPostalCode", errors.buyerPostalCode)}
               value={values.buyerPostalCode}
@@ -304,7 +365,7 @@ export function IntakeForm({
               autoComplete="postal-code"
             />
           </Field>
-        </div>
+        </FieldRow>
         <Field
           name="buyerPhone"
           label="Phone"
@@ -410,8 +471,9 @@ export function IntakeForm({
             required
           />
         </Field>
-        <div className="grid items-start gap-4 sm:grid-cols-2">
+        <FieldRow columns={2}>
           <Field
+            split
             name="authorizedAgentName"
             label="Buyer’s authorized agent name"
             hint="First part of “Buyer’s authorized agent” on the agreement."
@@ -430,6 +492,7 @@ export function IntakeForm({
             />
           </Field>
           <Field
+            split
             name="authorizedAgentCompany"
             label="Buyer’s authorized agent company"
             hint="Second part of “Buyer’s authorized agent” on the agreement."
@@ -447,7 +510,7 @@ export function IntakeForm({
               autoComplete="organization"
             />
           </Field>
-        </div>
+        </FieldRow>
         <Field
           name="donorCompanyAffiliation"
           label="Donor company affiliation"
@@ -511,8 +574,13 @@ export function IntakeForm({
             on this form.
           </p>
         </div>
-        <div className="grid items-start gap-4 sm:grid-cols-2">
-          <Field name="buyerWitnessName" label="Buyer witness name" error={errors.buyerWitnessName}>
+        <FieldRow columns={2}>
+          <Field
+            split
+            name="buyerWitnessName"
+            label="Buyer witness name"
+            error={errors.buyerWitnessName}
+          >
             <input
               {...controlProps("buyerWitnessName", errors.buyerWitnessName)}
               value={values.buyerWitnessName}
@@ -522,6 +590,7 @@ export function IntakeForm({
             />
           </Field>
           <Field
+            split
             name="buyerWitnessEmail"
             label="Buyer witness email"
             error={errors.buyerWitnessEmail}
@@ -535,7 +604,7 @@ export function IntakeForm({
               autoComplete="email"
             />
           </Field>
-        </div>
+        </FieldRow>
       </section>
 
       <section hidden={step !== REVIEW_STEP_ID} className="space-y-5">
