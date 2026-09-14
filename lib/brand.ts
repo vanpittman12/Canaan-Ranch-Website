@@ -3,7 +3,7 @@ export const brand = {
   legalName: "Canaan Ranch LLP",
   tagline: "Gopher tortoise relocation recipient site.",
   lockupLine: "Recipient site",
-  habitatLine: "Longleaf pine & wiregrass",
+  habitatLine: "the ecologically pristine recipient site in Florida",
   shortTagline: "Reserve recipient-site capacity with a clear agreement.",
   fwcStatus: "Canaan Preserve is an FWC Approved Tier 1 Long Term Recipient site.",
   fwcBadge: "FWC Approved Tier 1",

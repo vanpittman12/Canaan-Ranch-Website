@@ -72,17 +72,17 @@ describe("site builder visual lock", () => {
     expect(header).toContain("BrandLockup");
     expect(lockup).toContain("h-12 w-auto");
     expect(brand.lockupLine).toBe("Recipient site");
-    expect(brand.habitatLine.toLowerCase()).toBe("longleaf pine & wiregrass");
+    expect(brand.habitatLine).toBe("the ecologically pristine recipient site in Florida");
   });
 
-  it("omits a place or county from the hero habitat line", () => {
+  it("uses Van’s Florida hero line without a county", () => {
     for (const surface of marketingSurfaces) {
       expect(surface.toLowerCase()).not.toContain("pasco");
     }
-    expect(brand.habitatLine.toLowerCase()).not.toContain("florida");
+    expect(brand.habitatLine).toBe("the ecologically pristine recipient site in Florida");
+    expect(brand.habitatLine).toContain("Florida");
     expect(brand.habitatLine.toLowerCase()).not.toMatch(/\bcounty\b/);
-    expect(brand.habitatLine.toLowerCase()).toContain("longleaf");
-    expect(brand.habitatLine.toLowerCase()).toContain("wiregrass");
+    expect(landing).toContain("{brand.habitatLine}");
   });
 
   it("draws longleaf pine and wiregrass on the sandhill without a cartoon tortoise", () => {
