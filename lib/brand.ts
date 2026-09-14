@@ -3,7 +3,7 @@ export const brand = {
   legalName: "Canaan Ranch LLP",
   tagline: "Gopher tortoise relocation recipient site.",
   lockupLine: "Recipient site",
-  habitatLine: "Pasco County · Longleaf pine & wiregrass",
+  habitatLine: "Longleaf pine & wiregrass",
   shortTagline: "Reserve recipient-site capacity with a clear agreement.",
   fwcStatus: "Canaan Preserve is an FWC Approved Tier 1 Long Term Recipient site.",
   fwcBadge: "FWC Approved Tier 1",

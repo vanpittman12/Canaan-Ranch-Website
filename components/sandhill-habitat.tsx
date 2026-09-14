@@ -1,14 +1,12 @@
 /**
- * Pasco County sandhill: open longleaf pine, wiregrass groundcover,
- * pale sand, and a gopher tortoise at a burrow apron.
- * Illustration only — no stock photography.
+ * Florida sandhill: open longleaf pine, wiregrass groundcover, and pale sand.
+ * Illustration only — no stock photography, no cartoon wildlife.
  */
 const FOREST = "#16241C";
 const PINE = "#24352A";
 const PINE_MID = "#2F4536";
 const WHEAT = "#E0D0B4";
 const BRASS = "#C4A15A";
-const CREAM = "#EFE6D4";
 const SAND = "#8A7348";
 
 export function SandhillHabitat() {
@@ -36,14 +34,14 @@ export function SandhillHabitat() {
         <Longleaf x={760} y={10} height={560} trunk={12} crown={1.45} color={FOREST} />
         <Longleaf x={1008} y={-20} height={590} trunk={14} crown={1.65} color={FOREST} />
         <Longleaf x={1236} y={0} height={570} trunk={13} crown={1.5} color={PINE} />
-        <Burrow x={1176} y={500} />
-        <HabitatTortoise x={1124} y={482} />
         <g>
           <WiregrassClump x={36} y={560} scale={1.6} color={BRASS} />
           <WiregrassClump x={150} y={572} scale={1.4} color={WHEAT} />
           <WiregrassClump x={268} y={564} scale={1.5} color={BRASS} />
           <WiregrassClump x={860} y={548} scale={1.45} color={WHEAT} />
           <WiregrassClump x={1024} y={568} scale={1.7} color={BRASS} />
+          <WiregrassClump x={1148} y={552} scale={1.8} color={WHEAT} />
+          <WiregrassClump x={1260} y={564} scale={1.5} color={BRASS} />
           <WiregrassClump x={1370} y={556} scale={1.4} color={WHEAT} />
         </g>
       </svg>
@@ -108,15 +106,22 @@ function Longleaf({
         strokeLinecap="round"
       />
       <g transform={`scale(${crown})`}>
-        <ellipse cx="0" cy="4" rx="20" ry="14" fill={color} />
-        <ellipse cx="-32" cy="20" rx="16" ry="12" fill={color} opacity="0.9" />
-        <ellipse cx="34" cy="24" rx="17" ry="12" fill={color} opacity="0.9" />
-        {[-48, -30, -14, 0, 16, 32, 48].map((dx) => (
+        {[-48, -32, -16, 0, 16, 32, 48].map((dx) => (
           <path
-            key={dx}
-            d={`M${dx * 0.15} 6 Q${dx * 0.6} ${-28 - Math.abs(dx) * 0.15} ${dx} ${-10 - Math.abs(dx) * 0.08}`}
+            key={`high-${dx}`}
+            d={`M0 14 Q${dx * 0.4} ${-10 - Math.abs(dx) * 0.08} ${dx} ${-22 - Math.abs(dx) * 0.1}`}
             stroke={color}
-            strokeWidth="2"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            fill="none"
+          />
+        ))}
+        {[-36, -18, 18, 36].map((dx) => (
+          <path
+            key={`mid-${dx}`}
+            d={`M0 32 Q${dx * 0.45} 12 ${dx} ${-4}`}
+            stroke={color}
+            strokeWidth="1.9"
             strokeLinecap="round"
             fill="none"
           />
@@ -182,39 +187,6 @@ function WiregrassClump({
         strokeLinecap="round"
         fill="none"
       />
-    </g>
-  );
-}
-
-function Burrow({ x, y }: { x: number; y: number }) {
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      <path
-        d="M-96 32 C-50 -20 20 -28 108 22 C58 44 12 50 -28 46 C-54 43 -78 38 -96 32Z"
-        fill={WHEAT}
-      />
-      <path d="M-12 14 C12 -12 40 -10 50 16 C32 26 10 26 -8 18Z" fill={FOREST} />
-    </g>
-  );
-}
-
-function HabitatTortoise({ x, y }: { x: number; y: number }) {
-  return (
-    <g transform={`translate(${x} ${y}) scale(1.7)`} fill="none">
-      <path
-        d="M2 11C2.4 6 8.2 2 16.8 1.4C24.6 0.8 30.8 3.6 32.6 8.2C33.6 7.4 37.4 8.2 38.6 10.8C39.6 13.2 38 15.8 35.2 16.2"
-        stroke={CREAM}
-        strokeWidth="2.1"
-        strokeLinecap="round"
-      />
-      <path
-        d="M8 7.4C13.4 4.8 20 4.2 27.2 6.4"
-        stroke={BRASS}
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-      <path d="M30.6 16.2C31.4 22 31.8 26.2 31 28" stroke={CREAM} strokeWidth="2.4" strokeLinecap="round" />
-      <path d="M12.4 16.4C11.4 22 10.4 26 11 28" stroke={CREAM} strokeWidth="2.4" strokeLinecap="round" />
     </g>
   );
 }

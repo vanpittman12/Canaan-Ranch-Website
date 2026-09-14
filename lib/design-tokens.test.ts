@@ -2,13 +2,15 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { brand } from "./brand";
-import { TORTOISE_SHELL_PATH } from "./tortoise-mark";
+import { PINE_NEEDLE_PATHS, PINE_TRUNK_PATH, WIREGRASS_PATHS } from "./pine-mark";
 
 const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
 const mark = readFileSync(path.join(process.cwd(), "components/brand-mark.tsx"), "utf8");
 const header = readFileSync(path.join(process.cwd(), "components/site-header.tsx"), "utf8");
 const habitat = readFileSync(path.join(process.cwd(), "components/sandhill-habitat.tsx"), "utf8");
+const icon = readFileSync(path.join(process.cwd(), "app/icon.svg"), "utf8");
+const marketingSurfaces = [landing, habitat, mark, header, icon, brand.habitatLine];
 
 describe("site builder visual lock", () => {
   it("retunes CSS tokens to the locked palette", () => {
@@ -36,23 +38,39 @@ describe("site builder visual lock", () => {
     expect(landing).toContain("habitatLine");
   });
 
-  it("uses a gopher tortoise mark and recipient-site lockup", () => {
-    expect(mark).toContain("gopher-tortoise");
-    expect(mark).toContain("TORTOISE_SHELL_PATH");
-    expect(mark).toContain("TORTOISE_SCUTE_PATHS");
-    expect(TORTOISE_SHELL_PATH.startsWith("M")).toBe(true);
-    expect(TORTOISE_SHELL_PATH.endsWith("Z")).toBe(true);
+  it("uses a longleaf pine and wiregrass mark and recipient-site lockup", () => {
+    expect(mark).toContain("longleaf-pine");
+    expect(mark).toContain("PINE_TRUNK_PATH");
+    expect(mark).toContain("PINE_NEEDLE_PATHS");
+    expect(mark).toContain("WIREGRASS_PATHS");
+    expect(mark).not.toContain("gopher-tortoise");
+    expect(mark).not.toContain("TORTOISE_");
+    expect(PINE_TRUNK_PATH.startsWith("M")).toBe(true);
+    expect(PINE_NEEDLE_PATHS.length).toBeGreaterThanOrEqual(5);
+    expect(WIREGRASS_PATHS.length).toBeGreaterThanOrEqual(3);
+    expect(icon).toContain("M32 16 V46");
+    expect(icon).not.toContain("TORTOISE");
     expect(header).toContain("BrandLockup");
     expect(brand.lockupLine).toBe("Recipient site");
+    expect(brand.habitatLine.toLowerCase()).toBe("longleaf pine & wiregrass");
+  });
+
+  it("omits a place or county from the hero habitat line", () => {
+    for (const surface of marketingSurfaces) {
+      expect(surface.toLowerCase()).not.toContain("pasco");
+    }
+    expect(brand.habitatLine.toLowerCase()).not.toContain("florida");
+    expect(brand.habitatLine.toLowerCase()).not.toMatch(/\bcounty\b/);
     expect(brand.habitatLine.toLowerCase()).toContain("longleaf");
     expect(brand.habitatLine.toLowerCase()).toContain("wiregrass");
   });
 
-  it("draws longleaf pine, wiregrass, and a burrow on the sandhill", () => {
+  it("draws longleaf pine and wiregrass on the sandhill without a cartoon tortoise", () => {
     expect(habitat).toContain("Longleaf");
     expect(habitat).toContain("WiregrassClump");
-    expect(habitat).toContain("Burrow");
-    expect(habitat).toContain("HabitatTortoise");
+    expect(habitat).not.toContain("HabitatTortoise");
+    expect(habitat).not.toContain("Burrow");
+    expect(habitat).not.toContain("Pasco");
     expect(css).toContain(".habitat-sky");
     expect(css).toContain(".habitat-ground");
     expect(css).toContain(".habitat-scrim");
