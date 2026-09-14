@@ -11,21 +11,21 @@ import {
   verifyAdminSession,
 } from "@/lib/auth";
 import {
-  sendEnvelope,
   buildStubSignedFilename,
-  buildEnvelopeRecipients,
   getLiveEnvelopeStatus,
   isDocuSignEnabled,
 } from "@/lib/docusign";
 import { syncLiveEnvelope } from "@/lib/docusign-complete";
 import {
   applyDocuSignCompleted,
-  applyDocuSignSent,
-  applyReview,
   artifactFromUpload,
+  canRetryDocuSignSend,
   EngagementError,
 } from "@/lib/engagement";
-import { generatePopulatedAgreement } from "@/lib/agreement-populate";
+import {
+  applyReviewAndSendEnvelope,
+  sendPopulatedEnvelope,
+} from "@/lib/accept-envelope";
 import { generateStubSignedPdf } from "@/lib/pdf";
 import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
 import type { ReviewDecision } from "@/lib/types";
@@ -80,31 +80,44 @@ export async function reviewEngagement(
   const note = String(formData.get("note") ?? "");
 
   try {
-    let next = applyReview(engagement, decision, note);
-    if (decision === "accept" && next.signingMethod === "docusign") {
-      const populated = await generatePopulatedAgreement(next);
-      const sent = await sendEnvelope({
-        engagementId: next.id,
-        reference: next.reference,
-        recipients: buildEnvelopeRecipients(next.intake),
-        document: {
-          name: populated.filename,
-          bytes: populated.bytes,
-          fileExtension: populated.fileExtension,
-        },
-      });
-      next = applyDocuSignSent(
-        next,
-        sent.envelopeId,
-        sent.message,
-        sent.mode,
-        sent.recipients,
-      );
-    }
-    await saveEngagement(next);
+    await applyReviewAndSendEnvelope(engagement, decision, note, saveEngagement);
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Unable to record the review.",
+    };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/engagements/${engagementId}`);
+  revalidatePath(`/engagements/${engagementId}`);
+  redirect(`/admin/engagements/${engagementId}`);
+}
+
+export async function retryDocuSignSend(
+  engagementId: string,
+  previousState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  void previousState;
+  void formData;
+  await requireAdmin();
+  const engagement = await getEngagement(engagementId);
+  if (!engagement) {
+    return { error: "Engagement not found." };
+  }
+  if (!canRetryDocuSignSend(engagement)) {
+    return { error: "DocuSign can be sent only after Accept, when no envelope exists yet." };
+  }
+
+  try {
+    const next = await sendPopulatedEnvelope(engagement);
+    await saveEngagement(next);
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to send the DocuSign envelope.",
     };
   }
 

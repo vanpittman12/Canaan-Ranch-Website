@@ -1,7 +1,14 @@
+import {
+  MAX_TEMPLATE_ZIP_BYTES,
+  parseDocxZip,
+  type DocxZipArchive,
+} from "./docx-zip";
+
 /**
  * Van’s blank Word agreement. Blank download 307s to the public file.
  * Populated download + DocuSign fill a copy of these same bytes.
  */
+
 export const BLANK_AGREEMENT_PUBLIC_PATH =
   "/agreements/Canaan-Preserve-Relocation-Agreement-template.docx";
 export const BLANK_AGREEMENT_PUBLIC_FILE =
@@ -13,6 +20,7 @@ export const POPULATED_AGREEMENT_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 let cachedTemplate: Uint8Array | null = null;
+let cachedArchive: DocxZipArchive | null = null;
 
 export function populatedAgreementFilename(reference: string) {
   return `${reference}-canaan-preserve-agreement.docx`;
@@ -24,17 +32,40 @@ export function populatedAgreementFilename(reference: string) {
  * route never goes through this loader — it 307s to the static asset.
  */
 export async function loadBlankAgreementTemplate(): Promise<Uint8Array> {
-  if (cachedTemplate) {
-    return cachedTemplate.slice();
-  }
-  const fromAssets = await readFromCloudflareAssets();
-  const bytes = fromAssets ?? (await readBlankAgreementFromDisk());
-  cachedTemplate = bytes;
+  const bytes = await loadBlankAgreementTemplateBytes();
   return bytes.slice();
+}
+
+/**
+ * Parsed ZIP + inflated document.xml, cached once per isolate.
+ * Other entries stay compressed so populate does not double-inflate.
+ */
+export async function loadCachedAgreementArchive(): Promise<DocxZipArchive> {
+  const bytes = await loadBlankAgreementTemplateBytes();
+  if (!cachedArchive) {
+    cachedArchive = parseDocxZip(bytes, MAX_TEMPLATE_ZIP_BYTES);
+  }
+  return cachedArchive;
 }
 
 export function resetBlankAgreementTemplateCache() {
   cachedTemplate = null;
+  cachedArchive = null;
+}
+
+async function loadBlankAgreementTemplateBytes(): Promise<Uint8Array> {
+  if (cachedTemplate) {
+    return cachedTemplate;
+  }
+  const fromAssets = await readFromCloudflareAssets();
+  const bytes = fromAssets ?? (await readBlankAgreementFromDisk());
+  if (bytes.byteLength > MAX_TEMPLATE_ZIP_BYTES) {
+    throw new Error(
+      `Agreement template is ${bytes.byteLength} bytes; exceeds the ${MAX_TEMPLATE_ZIP_BYTES}-byte Worker guard.`,
+    );
+  }
+  cachedTemplate = bytes;
+  return bytes;
 }
 
 async function readFromCloudflareAssets(): Promise<Uint8Array | null> {

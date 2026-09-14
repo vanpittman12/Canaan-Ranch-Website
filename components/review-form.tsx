@@ -3,10 +3,12 @@
 import { useActionState } from "react";
 import {
   refreshDocuSignStatus,
+  retryDocuSignSend,
   reviewEngagement,
   simulateDocuSignComplete,
   type AdminActionState,
 } from "@/app/actions/admin";
+import { canRetryDocuSignSend } from "@/lib/engagement";
 import type { Engagement } from "@/lib/types";
 
 const initialState: AdminActionState = {};
@@ -23,6 +25,16 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
           This engagement is no longer in the review queue. Decisions can only be recorded while
           the status is pending review. Nothing closes without Accept.
         </p>
+        {canRetryDocuSignSend(engagement) ? (
+          <>
+            {engagement.docusign.lastMessage ? (
+              <p className="mt-3 text-sm leading-6 text-terracotta">
+                {engagement.docusign.lastMessage}
+              </p>
+            ) : null}
+            <RetryDocuSign engagementId={engagement.id} />
+          </>
+        ) : null}
         {engagement.status === "accepted" &&
         engagement.signingMethod === "docusign" &&
         engagement.docusign.envelopeId ? (
@@ -90,6 +102,24 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
           Decline
         </button>
       </div>
+    </form>
+  );
+}
+
+function RetryDocuSign({ engagementId }: { engagementId: string }) {
+  const action = retryDocuSignSend.bind(null, engagementId);
+  const [state, formAction, pending] = useActionState(action, initialState);
+
+  return (
+    <form action={formAction} className="mt-5 rounded-[12px] border border-line bg-cream p-4">
+      <p className="text-sm font-medium text-ink">Send DocuSign envelope</p>
+      <p className="mt-1 text-sm text-muted">
+        Accept is on file. Send the populated Word agreement now (live or stub).
+      </p>
+      {state.error ? <p className="mt-2 text-sm text-terracotta">{state.error}</p> : null}
+      <button className="btn-secondary mt-3" type="submit" disabled={pending}>
+        {pending ? "Sending…" : "Send DocuSign envelope"}
+      </button>
     </form>
   );
 }

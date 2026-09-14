@@ -2,18 +2,17 @@
  * Fill intake values into Van’s Word agreement without rewriting the legal body.
  * Operates on a copy of the blank DOCX bytes (ZIP + word/document.xml).
  */
-import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import {
-  loadBlankAgreementTemplate,
+  loadCachedAgreementArchive,
   POPULATED_AGREEMENT_MIME,
   populatedAgreementFilename,
 } from "./agreement-template";
+import { parseDocxZip, rebuildDocxZip } from "./docx-zip";
 import { brand, getSellerWitness } from "./brand";
 import { DOCUSIGN_ANCHORS } from "./docusign";
 import { dealEconomics, numberToWords } from "./money";
 import type { Engagement } from "./types";
 
-const DOCUMENT_XML = "word/document.xml";
 const SAMPLE_COUNT = "seventeen (17)";
 const SAMPLE_TOTAL = "one hundred two thousand dollars ($102,000.00)";
 const BUYER_ENTITY = "Responsible party entity name";
@@ -97,21 +96,20 @@ export function populateAgreementDocx(
   templateBytes: Uint8Array,
   engagement: Engagement,
 ): Uint8Array {
-  const files = unzipSync(templateBytes);
-  const xmlFile = files[DOCUMENT_XML];
-  if (!xmlFile) {
-    throw new Error("Van’s agreement template is missing word/document.xml.");
-  }
-  files[DOCUMENT_XML] = strToU8(populateDocumentXml(strFromU8(xmlFile), engagement));
-  return zipSync(files);
+  const archive = parseDocxZip(templateBytes);
+  return rebuildDocxZip(archive, populateDocumentXml(archive.documentXml, engagement));
 }
 
 export async function generatePopulatedAgreement(
   engagement: Engagement,
 ): Promise<PopulatedAgreement> {
-  const template = await loadBlankAgreementTemplate();
+  const archive = await loadCachedAgreementArchive();
+  const bytes = rebuildDocxZip(
+    archive,
+    populateDocumentXml(archive.documentXml, engagement),
+  );
   return {
-    bytes: populateAgreementDocx(template, engagement),
+    bytes,
     filename: populatedAgreementFilename(engagement.reference),
     mimeType: POPULATED_AGREEMENT_MIME,
     fileExtension: "docx",
@@ -119,12 +117,11 @@ export async function generatePopulatedAgreement(
 }
 
 export function extractDocxPlainText(bytes: Uint8Array) {
-  const files = unzipSync(bytes);
-  const xmlFile = files[DOCUMENT_XML];
-  if (!xmlFile) {
+  try {
+    return paragraphTexts(parseDocxZip(bytes).documentXml).join("\n");
+  } catch {
     return "";
   }
-  return paragraphTexts(strFromU8(xmlFile)).join("\n");
 }
 
 export function populateDocumentXml(xml: string, engagement: Engagement): string {

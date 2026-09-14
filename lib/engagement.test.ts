@@ -5,6 +5,7 @@ import {
   applySignedArtifact,
   applySubmit,
   artifactFromUpload,
+  canRetryDocuSignSend,
   canSubmitForReview,
   nextStatusAfterAccept,
 } from "./engagement";
@@ -91,6 +92,7 @@ describe("engagement status machine", () => {
     expect(accepted.executedAt).toBeNull();
     expect(accepted.effectiveDate).toBeNull();
     expect(nextStatusAfterAccept(false)).toBe("accepted");
+    expect(canRetryDocuSignSend(accepted)).toBe(true);
   });
 
   it("executes on accept when a signed artifact is already present", () => {

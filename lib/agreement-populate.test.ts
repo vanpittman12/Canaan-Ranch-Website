@@ -10,6 +10,10 @@ import {
   populateAgreementDocx,
 } from "./agreement-populate";
 import {
+  MAX_POPULATED_AGREEMENT_BYTES,
+  MAX_TEMPLATE_ZIP_BYTES,
+} from "./docx-zip";
+import {
   BLANK_AGREEMENT_DOCX_SHA256,
   BLANK_AGREEMENT_DOCX_SIZE,
   BLANK_AGREEMENT_PUBLIC_FILE,
@@ -22,6 +26,8 @@ import type { Engagement, IntakeFields } from "./types";
 const TEMPLATE_DOCX = resolve(process.cwd(), BLANK_AGREEMENT_PUBLIC_FILE);
 const CONTRACT_ROUTE = resolve(process.cwd(), "app/api/engagements/[id]/contract/route.ts");
 const ADMIN_ACTIONS = resolve(process.cwd(), "app/actions/admin.ts");
+const ACCEPT_ENVELOPE = resolve(process.cwd(), "lib/accept-envelope.ts");
+const POPULATE_SRC = resolve(process.cwd(), "lib/agreement-populate.ts");
 
 const intake: IntakeFields = {
   buyerLegalName: "Suncoast Land Partners LLC",
@@ -88,6 +94,8 @@ describe("Van’s Word agreement populate", () => {
     const text = extractDocxPlainText(populated);
 
     expect(Buffer.from(populated.subarray(0, 2)).toString()).toBe("PK");
+    expect(populated.byteLength).toBeLessThan(MAX_TEMPLATE_ZIP_BYTES);
+    expect(populated.byteLength).toBeLessThan(MAX_POPULATED_AGREEMENT_BYTES);
     expect(createHash("sha256").update(blank).digest("hex")).toBe(BLANK_AGREEMENT_DOCX_SHA256);
 
     expect(text).toContain("Suncoast Land Partners LLC");
@@ -152,10 +160,16 @@ describe("Van’s Word agreement populate", () => {
 
     const contractSrc = readFileSync(CONTRACT_ROUTE, "utf8");
     const adminSrc = readFileSync(ADMIN_ACTIONS, "utf8");
+    const acceptSrc = readFileSync(ACCEPT_ENVELOPE, "utf8");
+    const populateSrc = readFileSync(POPULATE_SRC, "utf8");
     expect(contractSrc).toContain("generatePopulatedAgreement");
     expect(contractSrc).not.toContain("generateContractPdf");
-    expect(adminSrc).toContain("generatePopulatedAgreement");
+    expect(adminSrc).toContain("applyReviewAndSendEnvelope");
+    expect(adminSrc).toContain("sendPopulatedEnvelope");
     expect(adminSrc).not.toMatch(/bytes:\s*await generateContractPdf/);
+    expect(acceptSrc).toContain("generatePopulatedAgreement");
+    expect(populateSrc).not.toContain("unzipSync");
+    expect(populateSrc).not.toContain("zipSync");
   });
 
   it("documents the Word blanks that intake cannot fill yet", () => {

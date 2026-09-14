@@ -41,6 +41,18 @@ export function nextStatusAfterAccept(hasSignedArtifact: boolean): EngagementSta
   return hasSignedArtifact ? "executed" : "accepted";
 }
 
+export function shouldSendEnvelopeAfterAccept(engagement: Engagement) {
+  return engagement.status === "accepted" && engagement.signingMethod === "docusign";
+}
+
+export function canRetryDocuSignSend(engagement: Engagement) {
+  return (
+    shouldSendEnvelopeAfterAccept(engagement) &&
+    !engagement.docusign.envelopeId &&
+    engagement.docusign.status === "not_sent"
+  );
+}
+
 export function applySubmit(
   engagement: Engagement,
   signingMethod: SigningMethod,
