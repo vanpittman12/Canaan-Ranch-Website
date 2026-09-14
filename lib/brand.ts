@@ -13,7 +13,7 @@ export const brand = {
   fwcBadge: "FWC Approved Tier 1",
   fwcRecipientSitesUrl:
     "https://myfwc.com/license/wildlife/gopher-tortoise-permits/recipient-sites/",
-  email: "engagements@canaanpreserve.com",
+  email: "vpittman@beachparkcap.com",
   phone: "813-390-1044",
   website: "https://canaanpreserve.com",
   attention: "Van Pittman",

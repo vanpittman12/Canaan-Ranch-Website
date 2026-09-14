@@ -25,7 +25,7 @@ export const intakeSchema = z.object({
     .string()
     .trim()
     .min(2, "Donor company affiliation is required."),
-  donorSiteName: z.string().trim().default(""),
+  donorSiteName: z.string().trim().min(2, "Project name is required."),
   donorSiteDescription: z.string().trim().default(""),
   buyerWitnessName: z.string().trim().min(2, "Buyer witness name is required."),
   buyerWitnessEmail: z.string().trim().email("Enter a valid Buyer witness email."),

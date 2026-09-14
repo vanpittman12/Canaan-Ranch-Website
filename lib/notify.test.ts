@@ -21,8 +21,22 @@ const notice = {
   id: "34cb532f-d3ca-4e6b-9657-d2beef2faef3",
   reference: "CP-2026-TEST",
   buyerLegalName: "Suncoast Land Partners LLC",
-  relocationCounty: "Hillsborough",
+  buyerAttention: "Morgan Hale",
+  buyerEmail: "morgan@suncoast.example",
+  buyerPhone: "813-555-0190",
+  buyerStreet: "400 Harbour Island Boulevard",
+  buyerCity: "Tampa",
+  buyerState: "FL",
+  buyerPostalCode: "33602",
   tortoiseCount: 10,
+  relocationCounty: "Hillsborough",
+  authorizedAgentName: "Casey Nguyen",
+  authorizedAgentCompany: "Suncoast Permitting",
+  donorCompanyAffiliation: "Lennar",
+  projectName: "Harbour tract",
+  projectDescription: "Residential development parcel east of the county line.",
+  buyerWitnessName: "Riley Chen",
+  buyerWitnessEmail: "riley@suncoast.example",
 };
 
 function engagement() {
@@ -31,8 +45,22 @@ function engagement() {
     reference: notice.reference,
     intake: {
       buyerLegalName: notice.buyerLegalName,
-      relocationCounty: notice.relocationCounty,
+      buyerAttention: notice.buyerAttention,
+      buyerEmail: notice.buyerEmail,
+      buyerPhone: notice.buyerPhone,
+      buyerStreet: notice.buyerStreet,
+      buyerCity: notice.buyerCity,
+      buyerState: notice.buyerState,
+      buyerPostalCode: notice.buyerPostalCode,
       tortoiseCount: notice.tortoiseCount,
+      relocationCounty: notice.relocationCounty,
+      authorizedAgentName: notice.authorizedAgentName,
+      authorizedAgentCompany: notice.authorizedAgentCompany,
+      donorCompanyAffiliation: notice.donorCompanyAffiliation,
+      donorSiteName: notice.projectName,
+      donorSiteDescription: notice.projectDescription,
+      buyerWitnessName: notice.buyerWitnessName,
+      buyerWitnessEmail: notice.buyerWitnessEmail,
     },
   };
 }
@@ -92,7 +120,7 @@ describe("new engagement notify seam", () => {
     expect(info).toHaveBeenCalledWith(
       "[notify] stub: new engagement email (Gmail OAuth secrets unset)",
       expect.objectContaining({
-        to: [NEW_ENGAGEMENT_NOTIFY_TO, brand.email],
+        to: [NEW_ENGAGEMENT_NOTIFY_TO],
         subject: "New Canaan Preserve intake — CP-2026-TEST",
       }),
     );
@@ -142,13 +170,17 @@ describe("new engagement notify seam", () => {
     const sendBody = JSON.parse(String(sendInit.body)) as { raw: string };
     const rfc2822 = decodeGmailRaw(sendBody.raw);
     expect(rfc2822).toContain(`From: ${brand.name} <${DEFAULT_GMAIL_USER}>`);
-    expect(rfc2822).toContain(
-      `To: ${NEW_ENGAGEMENT_NOTIFY_TO}, ${brand.email}`,
-    );
+    expect(rfc2822).toContain(`To: ${NEW_ENGAGEMENT_NOTIFY_TO}`);
+    expect(rfc2822).not.toContain("engagements@canaanpreserve.com");
     expect(rfc2822).toContain("CP-2026-TEST");
     expect(rfc2822).toContain("Suncoast Land Partners LLC");
+    expect(rfc2822).toContain("morgan@suncoast.example");
+    expect(rfc2822).toContain("Casey Nguyen, Suncoast Permitting");
+    expect(rfc2822).toContain("Lennar");
+    expect(rfc2822).toContain("Harbour tract");
     expect(rfc2822).toContain("Hillsborough");
     expect(rfc2822).toContain("Tortoise count: 10");
+    expect(rfc2822).toContain("Riley Chen <riley@suncoast.example>");
     expect(rfc2822).toContain(
       "https://canaanpreserve.com/admin/engagements/34cb532f-d3ca-4e6b-9657-d2beef2faef3",
     );
@@ -212,12 +244,13 @@ describe("new engagement notify seam", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("emails Van and the brand inbox", () => {
-    expect(newEngagementRecipients()).toEqual([
-      NEW_ENGAGEMENT_NOTIFY_TO,
+  it("emails Van once when brand.email is the same test mailbox", () => {
+    expect(brand.email).toBe("vpittman@beachparkcap.com");
+    expect(brand.email).toBe(NEW_ENGAGEMENT_NOTIFY_TO);
+    expect(newEngagementRecipients()).toEqual([NEW_ENGAGEMENT_NOTIFY_TO]);
+    expect(newEngagementRecipients().join(",")).not.toContain(
       "engagements@canaanpreserve.com",
-    ]);
-    expect(brand.email).toBe("engagements@canaanpreserve.com");
+    );
   });
 
   it("honors NOTIFY_NEW_ENGAGEMENT_TO and GMAIL_USER", () => {
@@ -251,5 +284,9 @@ describe("new engagement notify seam", () => {
     expect(email.to[0]).toBe(NEW_ENGAGEMENT_NOTIFY_TO);
     expect(email.from).toBe(`${brand.name} <${DEFAULT_GMAIL_USER}>`);
     expect(email.text).toMatch(/Reference: CP-2026-TEST/);
+    expect(email.text).toContain("Buyer email: morgan@suncoast.example");
+    expect(email.text).toContain("Authorized agent: Casey Nguyen, Suncoast Permitting");
+    expect(email.text).toContain("Project name: Harbour tract");
+    expect(email.text).toContain("Buyer witness: Riley Chen <riley@suncoast.example>");
   });
 });

@@ -2,25 +2,22 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { generateContractPdf } from "./pdf";
-import { buildTemplateEngagement } from "./contract";
+import {
+  BLANK_AGREEMENT_DOCX_SHA256,
+  BLANK_AGREEMENT_DOCX_SIZE,
+  BLANK_AGREEMENT_PUBLIC_FILE,
+} from "./agreement-template";
 
-const BLANK_DOCX_SHA256 =
-  "0eb11197f8e2097ca18bab315ba557e4a3939d6eab20e354b9357aa7af0c362f";
-const BLANK_DOCX_SIZE = 66615;
-
-const TEMPLATE_DOCX = resolve(
-  process.cwd(),
-  "public/agreements/Canaan-Preserve-Relocation-Agreement-template.docx",
-);
+const TEMPLATE_DOCX = resolve(process.cwd(), BLANK_AGREEMENT_PUBLIC_FILE);
 const TEMPLATE_ROUTE = resolve(process.cwd(), "app/api/agreement-template/route.ts");
 const PUBLIC_HEADERS = resolve(process.cwd(), "public/_headers");
+const CONTRACT_ROUTE = resolve(process.cwd(), "app/api/engagements/[id]/contract/route.ts");
 
 describe("agreement templates", () => {
   it("ships Van’s uploaded blank agreement as exact Word bytes", () => {
     const bytes = readFileSync(TEMPLATE_DOCX);
-    expect(bytes.byteLength).toBe(BLANK_DOCX_SIZE);
-    expect(createHash("sha256").update(bytes).digest("hex")).toBe(BLANK_DOCX_SHA256);
+    expect(bytes.byteLength).toBe(BLANK_AGREEMENT_DOCX_SIZE);
+    expect(createHash("sha256").update(bytes).digest("hex")).toBe(BLANK_AGREEMENT_DOCX_SHA256);
     expect(bytes.subarray(0, 2).toString()).toBe("PK");
   });
 
@@ -41,9 +38,10 @@ describe("agreement templates", () => {
     );
   });
 
-  it("still builds a populated engagement PDF from generateContractPdf", async () => {
-    const bytes = await generateContractPdf(buildTemplateEngagement());
-    expect(bytes.byteLength).toBeGreaterThan(1000);
-    expect(Buffer.from(bytes).subarray(0, 5).toString()).toBe("%PDF-");
+  it("does not source the populated agreement from generateContractPdf", () => {
+    const src = readFileSync(CONTRACT_ROUTE, "utf8");
+    expect(src).toContain("generatePopulatedAgreement");
+    expect(src).not.toContain("generateContractPdf");
+    expect(src).not.toContain("application/pdf");
   });
 });

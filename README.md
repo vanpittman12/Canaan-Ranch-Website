@@ -4,7 +4,7 @@ Gopher tortoise recipient-site intake, downloadable relocation agreement, signat
 
 **Canaan Preserve is an FWC Approved Tier 1 Long Term Recipient site.**
 
-Buyer intake populates a **Multi-Project Gopher Tortoise Relocation Agreement**. After intake the buyer **downloads** the populated PDF to review (there is no on-screen contract preview). The client then chooses DocuSign or a manual signed PDF. **Nothing is executed until the team Accepts and a signed artifact is on file.**
+Buyer intake populates Van’s **Gopher Tortoise Relocation Agreement** Word file. After intake the buyer **downloads** that same document with intake fields filled (there is no on-screen contract preview). The client then chooses DocuSign or a manual signed upload. **Nothing is executed until the team Accepts and a signed artifact is on file.**
 
 ## Run locally
 
@@ -20,7 +20,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `/` | Public landing |
 | `/intake` | Buyer intake |
 | `/api/agreement-template` | Blank / template agreement Word file (Van’s uploaded .docx — not the `lib/contract.ts` form) |
-| `/engagements/[id]` | Download populated PDF, signing choice, status |
+| `/engagements/[id]` | Download populated Word agreement, signing choice, status |
 | `/admin/login` | Team sign-in |
 | `/admin` | Review queue |
 
@@ -93,8 +93,8 @@ Adult vs juvenile is not collected at intake. The $3,000 juvenile price stays in
 
 1. Buyer may download the blank agreement template from the landing page or intake.
 2. Buyer completes intake (legal name, notice / signatory, reserved capacity, project/ops fields, Buyer witness only).
-3. Submit generates the Multi-Project Gopher Tortoise Relocation Agreement. The buyer downloads the populated PDF to review. A successful public create also calls `notifyNewEngagement` so Van is emailed (intake still succeeds if that send fails).
-4. Usual path is **Accept, then DocuSign**. After Accept the envelope goes to the Buyer signer, Canaan Ranch LLP signer, the Buyer witness from intake, and the fixed Canaan witness. Manual PDF remains a fallback. Contract and signed PDFs require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
+3. Submit fills Van’s Word agreement (`public/agreements/Canaan-Preserve-Relocation-Agreement-template.docx`) with intake fields. The buyer downloads that populated DOCX to review — not a separately authored PDF from `lib/contract.ts`. A successful public create also calls `notifyNewEngagement` so Van is emailed (intake still succeeds if that send fails).
+4. Usual path is **Accept, then DocuSign**. After Accept the envelope goes to the Buyer signer, Canaan Ranch LLP signer, the Buyer witness from intake, and the fixed Canaan witness. The envelope document is the populated DOCX. Manual signed upload remains a fallback. Contract and signed files require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
 5. Team reviews at `/admin`:
    - **Accept** — if DocuSign, send the envelope (live API when `DOCUSIGN_ENABLED=true`, otherwise the local stub); if a signed file is already present, status becomes **Executed**.
    - **Request changes** — buyer can edit and resubmit.
@@ -109,8 +109,8 @@ After a **public intake create** succeeds, [`lib/notify.ts`](lib/notify.ts) `not
 | --- | --- |
 | From | `GMAIL_USER` if set, otherwise `vpittman@beachparkcap.com` (shown as `Canaan Preserve <…>`). Must be the Google account that issued the refresh token. |
 | Primary To | `vpittman@beachparkcap.com` |
-| Also To | `engagements@canaanpreserve.com` (brand inbox) |
-| Body | Engagement reference, buyer legal name, relocation county, tortoise count, admin review link (`/admin/engagements/[id]`) |
+| Also To | `brand.email` when it differs from the primary To. During testing `brand.email` is also `vpittman@beachparkcap.com`, so notify sends a single To (no duplicate). `engagements@canaanpreserve.com` is not a live inbox. |
+| Body | Reference, project name, buyer contact (name / attention / email / phone / address), county, tortoise count, authorized agent, donor affiliation, project description, buyer witness, admin review link. Operational fields stay in this email and admin — they are not stuffed into Van’s Word file. |
 
 **Provider: Gmail API** (HTTPS refresh-token grant, then `POST https://gmail.googleapis.com/gmail/v1/users/me/messages/send`). SMTP is not used — Cloudflare Workers cannot open outbound SMTP sockets (ports 25 / 465 / 587), so nodemailer and a Google App Password will not send from this Worker. No extra npm package; the seam uses `fetch` like the DocuSign live path.
 
@@ -120,7 +120,7 @@ After a **public intake create** succeeds, [`lib/notify.ts`](lib/notify.ts) `not
 | `GMAIL_CLIENT_SECRET` | OAuth client secret. **Cloudflare secret** — never commit. |
 | `GMAIL_REFRESH_TOKEN` | Long-lived refresh token for `https://www.googleapis.com/auth/gmail.send`. **Cloudflare secret** — never commit. |
 | `GMAIL_USER` | Optional From mailbox. Default `vpittman@beachparkcap.com`. **Cloudflare secret** if set. |
-| `NOTIFY_NEW_ENGAGEMENT_TO` | Optional primary recipient override. Default `vpittman@beachparkcap.com`. The brand inbox is still included. |
+| `NOTIFY_NEW_ENGAGEMENT_TO` | Optional primary recipient override. Default `vpittman@beachparkcap.com`. `brand.email` is added only when it is a different address. |
 | `APP_URL` | Public origin for the admin review link. Workers `vars` default is `https://canaanpreserve.com`. Locally, falls back to the origin of `DOCUSIGN_RETURN_URL`, then `http://localhost:3000`. |
 
 ### One-time Google setup (free personal / Workspace Gmail)
@@ -150,7 +150,7 @@ Integration lives in [`lib/docusign.ts`](lib/docusign.ts). Code reads credential
 
 When `DOCUSIGN_ENABLED` is not `true` (default), `sendEnvelope()` stores a `stub-…` envelope ID and makes **no** DocuSign API call. The admin **Simulate DocuSign signed** control still works for testing.
 
-When `DOCUSIGN_ENABLED=true`, Accept sends a live envelope: JWT grant, then `Envelopes:create` with the populated agreement PDF. Connect (`POST /api/docusign/webhook`) and polling (`Refresh envelope status`, plus `GET /api/docusign/return?engagementId=…`) mark the engagement executed when DocuSign reports completed.
+When `DOCUSIGN_ENABLED=true`, Accept sends a live envelope: JWT grant, then `Envelopes:create` with the populated Word agreement (same bytes as the buyer download). Connect (`POST /api/docusign/webhook`) and polling (`Refresh envelope status`, plus `GET /api/docusign/return?engagementId=…`) mark the engagement executed when DocuSign reports completed.
 
 ### Recipient roles
 
@@ -158,10 +158,10 @@ When `DOCUSIGN_ENABLED=true`, Accept sends a live envelope: JWT grant, then `Env
 | --- | --- | --- |
 | `buyer_signer` | Intake: Buyer attention + email | Routing order 1 |
 | `buyer_witness` | Intake: Buyer witness name + email | Routing order 2 |
-| `seller_signer` | Brand: Andrew V. Pittman, Jr. / `engagements@canaanpreserve.com` | Routing order 3 |
+| `seller_signer` | Brand: Andrew V. Pittman, Jr. / `vpittman@beachparkcap.com` | Routing order 3 |
 | `seller_witness` | Brand/env: Andrew Fuddy / `witness@canaanpreserve.com` (not on the public form) | Routing order 4 |
 
-The populated engagement PDF is the envelope document. Hidden anchor strings (`/sn_buyer/`, `/wit_buyer/`, `/sn_seller/`, `/wit_seller/`) place Sign Here and Date Signed tabs.
+The populated Word agreement is the envelope document. Hidden anchor strings (`/sn_buyer/`, `/wit_buyer/`, `/sn_seller/`, `/wit_seller/`) are injected into the populated copy only so Sign Here and Date Signed tabs can place.
 
 ### Environment variables
 

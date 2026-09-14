@@ -21,7 +21,7 @@ import type { EnvelopeRecipient, IntakeFields } from "./types";
 
 const recipients: EnvelopeRecipient[] = [
   { role: "buyer_signer", name: "Avery Cole", email: "avery@ridge.example" },
-  { role: "seller_signer", name: "Andrew V. Pittman, Jr.", email: "engagements@canaanpreserve.com" },
+  { role: "seller_signer", name: "Andrew V. Pittman, Jr.", email: "vpittman@beachparkcap.com" },
   { role: "buyer_witness", name: "Lee Park", email: "lee@ridge.example" },
   { role: "seller_witness", name: "Pat Morales", email: "pat@canaanpreserve.example" },
 ];
@@ -52,8 +52,9 @@ function sendInput() {
     reference: "CP-2026-TEST",
     recipients,
     document: {
-      name: "CP-2026-TEST-canaan-preserve-agreement.pdf",
-      bytes: new Uint8Array([37, 80, 68, 70, 45, 49]),
+      name: "CP-2026-TEST-canaan-preserve-agreement.docx",
+      bytes: new Uint8Array([80, 75, 3, 4]),
+      fileExtension: "docx",
     },
   };
 }
@@ -153,6 +154,7 @@ describe("DocuSign seam", () => {
         expect(init?.headers).toMatchObject({
           Authorization: "Bearer tok-live",
         });
+        expect(payload.documents[0]?.fileExtension).toBe("docx");
         expect(payload.documents[0]?.documentBase64).toBe(
           Buffer.from(sendInput().document.bytes).toString("base64"),
         );
@@ -235,6 +237,12 @@ describe("DocuSign seam", () => {
       email: brand.sellerWitnessEmail,
     });
     expect(routed.find((row) => row.role === "seller_witness")?.name).not.toBe("Pat Morales");
+    expect(routed.find((row) => row.role === "seller_signer")).toEqual({
+      role: "seller_signer",
+      name: brand.signatoryName,
+      email: "vpittman@beachparkcap.com",
+    });
+    expect(brand.sellerWitnessEmail).toBe("witness@canaanpreserve.com");
   });
 
   it("uses env-overridable Canaan witness on stub routing", () => {

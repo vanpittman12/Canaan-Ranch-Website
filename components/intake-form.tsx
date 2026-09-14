@@ -11,7 +11,6 @@ import {
   intakeValuesFromDefaults,
   nextStep,
   previousStep,
-  stepIndex,
   type IntakeWizardStep,
   validateThrough,
 } from "@/lib/intake-steps";
@@ -20,25 +19,84 @@ import type { IntakeFields } from "@/lib/types";
 
 const initialState: ActionState = {};
 
+function FieldRow({
+  columns,
+  children,
+}: {
+  columns: 2 | 3;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={
+        columns === 3
+          ? "flex flex-col gap-4 sm:grid sm:grid-cols-3 sm:grid-rows-[auto_auto_auto_auto] sm:gap-x-4 sm:gap-y-0"
+          : "flex flex-col gap-4 sm:grid sm:grid-cols-2 sm:grid-rows-[auto_auto_auto_auto] sm:gap-x-4 sm:gap-y-0"
+      }
+    >
+      {children}
+    </div>
+  );
+}
+
 function Field({
   name,
   label,
   error,
   hint,
   children,
+  split = false,
 }: {
   name: string;
   label: string;
   error?: string;
   hint?: string;
   children: React.ReactNode;
+  split?: boolean;
 }) {
   const hintId = hint ? `${name}-hint` : undefined;
   const errorId = error ? `${name}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
 
+  const hintSlot = (
+    <p
+      id={hintId}
+      className={`mt-1 text-sm sm:row-start-2 ${hint ? "text-muted" : "invisible max-sm:hidden"}`}
+      aria-hidden={hint ? undefined : true}
+    >
+      {hint || "\u00a0"}
+    </p>
+  );
+
+  const errorSlot = (
+    <p
+      id={errorId}
+      className={`mt-1 min-h-5 text-sm sm:row-start-4 ${error ? "text-terracotta" : "invisible max-sm:hidden"}`}
+      role={error ? "alert" : undefined}
+    >
+      {error || "\u00a0"}
+    </p>
+  );
+
+  if (split) {
+    return (
+      <div
+        className="flex min-w-0 flex-col sm:col-span-1 sm:row-span-4 sm:grid sm:grid-rows-subgrid sm:items-stretch"
+        data-field={name}
+        data-describedby={describedBy}
+      >
+        <label htmlFor={name} className="type-label sm:row-start-1">
+          {label}
+        </label>
+        {hintSlot}
+        <div className="sm:row-start-3">{children}</div>
+        {errorSlot}
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-col" data-describedby={describedBy}>
       <label htmlFor={name} className="type-label">
         {label}
       </label>
@@ -47,14 +105,14 @@ function Field({
           {hint}
         </p>
       ) : null}
-      <div className="mt-auto" data-describedby={describedBy}>
-        {children}
-        {error ? (
-          <p id={errorId} className="mt-1 text-sm text-terracotta" role="alert">
-            {error}
-          </p>
-        ) : null}
-      </div>
+      {children}
+      <p
+        id={errorId}
+        className={`mt-1 min-h-5 text-sm ${error ? "text-terracotta" : "invisible"}`}
+        role={error ? "alert" : undefined}
+      >
+        {error || "\u00a0"}
+      </p>
     </div>
   );
 }
@@ -125,16 +183,6 @@ export function IntakeForm({
   }
 
   function goTo(target: IntakeWizardStep) {
-    const targetIndex = stepIndex(target);
-    const currentIndex = stepIndex(step);
-    if (targetIndex > currentIndex || target === REVIEW_STEP_ID) {
-      const gate = validateThrough(target === REVIEW_STEP_ID ? REVIEW_STEP_ID : step, values);
-      if (Object.keys(gate).length > 0) {
-        setStepErrors(gate);
-        setStep(firstStepForErrors(gate));
-        return;
-      }
-    }
     setStepErrors({});
     setStep(target);
   }
@@ -230,8 +278,9 @@ export function IntakeForm({
             autoComplete="organization"
           />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FieldRow columns={2}>
           <Field
+            split
             name="buyerAttention"
             label="Buyer signatory / attention"
             hint="Appears as Attention on the notice block and as the Buyer signature name."
@@ -250,6 +299,7 @@ export function IntakeForm({
             />
           </Field>
           <Field
+            split
             name="buyerEmail"
             label="Buyer signatory email"
             hint="Notice email and DocuSign Buyer signer."
@@ -268,7 +318,7 @@ export function IntakeForm({
               autoComplete="email"
             />
           </Field>
-        </div>
+        </FieldRow>
         <Field
           name="buyerStreet"
           label="Street address"
@@ -287,8 +337,8 @@ export function IntakeForm({
             autoComplete="street-address"
           />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field name="buyerCity" label="City" error={errors.buyerCity}>
+        <FieldRow columns={3}>
+          <Field split name="buyerCity" label="City" error={errors.buyerCity}>
             <input
               {...controlProps("buyerCity", errors.buyerCity)}
               value={values.buyerCity}
@@ -297,7 +347,7 @@ export function IntakeForm({
               autoComplete="address-level2"
             />
           </Field>
-          <Field name="buyerState" label="State" error={errors.buyerState}>
+          <Field split name="buyerState" label="State" error={errors.buyerState}>
             <input
               {...controlProps("buyerState", errors.buyerState)}
               value={values.buyerState}
@@ -306,7 +356,7 @@ export function IntakeForm({
               autoComplete="address-level1"
             />
           </Field>
-          <Field name="buyerPostalCode" label="Postal code" error={errors.buyerPostalCode}>
+          <Field split name="buyerPostalCode" label="Postal code" error={errors.buyerPostalCode}>
             <input
               {...controlProps("buyerPostalCode", errors.buyerPostalCode)}
               value={values.buyerPostalCode}
@@ -315,7 +365,7 @@ export function IntakeForm({
               autoComplete="postal-code"
             />
           </Field>
-        </div>
+        </FieldRow>
         <Field
           name="buyerPhone"
           label="Phone"
@@ -399,9 +449,9 @@ export function IntakeForm({
         <div>
           <h2 className="type-h2 text-forest">Project and operations</h2>
           <p className="mt-2 text-sm text-muted">
-            County of relocation, donor company affiliation, and optional donor site appear in
-            the reserved-capacity paragraph. Buyer’s authorized agent appears in Parties,
-            Notices, and Buyer responsibilities.
+            Project name is required for tracking. County of relocation and donor company
+            affiliation also appear here. Buyer’s authorized agent appears in Parties, Notices,
+            and Buyer responsibilities.
           </p>
         </div>
         <Field
@@ -421,8 +471,9 @@ export function IntakeForm({
             required
           />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FieldRow columns={2}>
           <Field
+            split
             name="authorizedAgentName"
             label="Buyer’s authorized agent name"
             hint="First part of “Buyer’s authorized agent” on the agreement."
@@ -441,6 +492,7 @@ export function IntakeForm({
             />
           </Field>
           <Field
+            split
             name="authorizedAgentCompany"
             label="Buyer’s authorized agent company"
             hint="Second part of “Buyer’s authorized agent” on the agreement."
@@ -458,7 +510,7 @@ export function IntakeForm({
               autoComplete="organization"
             />
           </Field>
-        </div>
+        </FieldRow>
         <Field
           name="donorCompanyAffiliation"
           label="Donor company affiliation"
@@ -479,18 +531,19 @@ export function IntakeForm({
         </Field>
         <Field
           name="donorSiteName"
-          label="Donor site / project name (optional)"
-          hint="Maps to “Donor site / project” in the reserved-capacity paragraph."
+          label="Project name"
+          hint="Required for tracking. Maps to “Donor site / project” when the Word file has a blank."
           error={errors.donorSiteName}
         >
           <input
             {...controlProps(
               "donorSiteName",
               errors.donorSiteName,
-              "Maps to “Donor site / project” in the reserved-capacity paragraph.",
+              "Required for tracking. Maps to “Donor site / project” when the Word file has a blank.",
             )}
             value={values.donorSiteName}
             onChange={(event) => update("donorSiteName", event.target.value)}
+            required
           />
         </Field>
         <Field
@@ -521,8 +574,13 @@ export function IntakeForm({
             on this form.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field name="buyerWitnessName" label="Buyer witness name" error={errors.buyerWitnessName}>
+        <FieldRow columns={2}>
+          <Field
+            split
+            name="buyerWitnessName"
+            label="Buyer witness name"
+            error={errors.buyerWitnessName}
+          >
             <input
               {...controlProps("buyerWitnessName", errors.buyerWitnessName)}
               value={values.buyerWitnessName}
@@ -532,6 +590,7 @@ export function IntakeForm({
             />
           </Field>
           <Field
+            split
             name="buyerWitnessEmail"
             label="Buyer witness email"
             error={errors.buyerWitnessEmail}
@@ -545,14 +604,14 @@ export function IntakeForm({
               autoComplete="email"
             />
           </Field>
-        </div>
+        </FieldRow>
       </section>
 
       <section hidden={step !== REVIEW_STEP_ID} className="space-y-5">
         <div>
           <h2 className="type-h2 text-forest">Review answers</h2>
           <p className="mt-2 text-sm text-muted">
-            Confirm these details before the agreement PDF is generated. You can edit any section
+            Confirm these details before the populated agreement is generated. You can edit any section
             and return here. Submit is available only from this review.
           </p>
         </div>
@@ -593,7 +652,7 @@ export function IntakeForm({
               `${values.authorizedAgentName}, ${values.authorizedAgentCompany}`,
             ],
             ["Donor company affiliation", values.donorCompanyAffiliation],
-            ["Donor site", values.donorSiteName || "—"],
+            ["Project name", values.donorSiteName || "—"],
             ["Project description", values.donorSiteDescription || "—"],
           ]}
         />
@@ -610,7 +669,7 @@ export function IntakeForm({
       <div className="intake-sticky flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted">
           {step === REVIEW_STEP_ID
-            ? "Submitting drafts the Canaan Preserve / Canaan Ranch LLP relocation agreement. You will download the populated PDF next."
+            ? "Submitting drafts the Canaan Preserve / Canaan Ranch LLP relocation agreement. You will download the populated Word agreement next."
             : "Continue through Notice, Capacity, Project, and Witness, then review before generate."}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -629,7 +688,7 @@ export function IntakeForm({
                 ? "Saving…"
                 : engagementId
                   ? "Update agreement details"
-                  : "Generate agreement PDF"}
+                  : "Generate populated agreement"}
             </button>
           ) : (
             <button className="btn-primary" type="button" onClick={goNext}>

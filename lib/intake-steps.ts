@@ -5,12 +5,13 @@ export type IntakeStepId = (typeof INTAKE_STEP_IDS)[number];
 export const REVIEW_STEP_ID = "review" as const;
 export type IntakeWizardStep = IntakeStepId | typeof REVIEW_STEP_ID;
 
-export const INTAKE_MINUTES = 8;
+export const INTAKE_MINUTES = 3;
 
 export const PREPARE_ITEMS = [
   "Buyer legal name",
   "Buyer notice: signatory, street, city, state, postal code, phone, and email",
   "Reserved tortoise count",
+  "Project name",
   "County of relocation",
   "Buyer’s authorized agent and donor company affiliation",
   "Buyer witness name and email",
@@ -47,6 +48,7 @@ export const INTAKE_STEPS = [
       "authorizedAgentName",
       "authorizedAgentCompany",
       "donorCompanyAffiliation",
+      "donorSiteName",
     ],
   },
   {
