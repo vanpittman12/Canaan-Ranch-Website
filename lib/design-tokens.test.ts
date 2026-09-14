@@ -72,17 +72,21 @@ describe("site builder visual lock", () => {
     expect(header).toContain("BrandLockup");
     expect(lockup).toContain("h-12 w-auto");
     expect(brand.lockupLine).toBe("Recipient site");
-    expect(brand.habitatLine).toBe("the ecologically pristine recipient site in Florida");
+    expect(brand.habitatLine).toBe("The most ecologically pristine recipient site in Florida");
   });
 
   it("uses Van’s Florida hero line without a county", () => {
     for (const surface of marketingSurfaces) {
       expect(surface.toLowerCase()).not.toContain("pasco");
     }
-    expect(brand.habitatLine).toBe("the ecologically pristine recipient site in Florida");
+    expect(brand.habitatLine).toBe("The most ecologically pristine recipient site in Florida");
     expect(brand.habitatLine).toContain("Florida");
     expect(brand.habitatLine.toLowerCase()).not.toMatch(/\bcounty\b/);
     expect(landing).toContain("{brand.habitatLine}");
+    expect(landing).toContain("{brand.fwcValueProp}");
+    expect(landing).toContain("{brand.intakeInvite}");
+    expect(brand.fwcValueProp).toContain("FWC approved Tier 1 recipient site");
+    expect(brand.intakeInvite).toContain("intake form");
   });
 
   it("draws longleaf pine and wiregrass on the sandhill without a cartoon tortoise", () => {
