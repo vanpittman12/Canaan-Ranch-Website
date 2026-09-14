@@ -34,9 +34,9 @@ export type { DocuSignMode, EnvelopeRecipient };
 export const DEFAULT_ACCOUNT_BASE_URI = "https://demo.docusign.net";
 export const DEFAULT_AUTH_SERVER = "https://account-d.docusign.com";
 
-import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
 
-export { DOCUSIGN_ANCHORS };
+export { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR };
 
 const REQUIRED_LIVE_VARS = [
   "DOCUSIGN_INTEGRATION_KEY",
@@ -84,12 +84,22 @@ export interface ConnectEvent {
   envelopeId: string | null;
   status: string | null;
   event: string | null;
+  completedDateTime: string | null;
+  buyerSignedDateTime: string | null;
 }
 
 export interface LiveEnvelopeSnapshot {
   envelopeId: string;
   status: string;
+  completedDateTime: string | null;
+  buyerSignedDateTime: string | null;
 }
+
+export type DateSignedTab = {
+  anchorString: string;
+  anchorUnits: "pixels";
+  anchorIgnoreIfNotPresent: "false";
+};
 
 type EnvelopeSigner = {
   email: string;
@@ -103,11 +113,7 @@ type EnvelopeSigner = {
       anchorUnits: string;
       anchorIgnoreIfNotPresent: string;
     }>;
-    dateSignedTabs: Array<{
-      anchorString: string;
-      anchorUnits: string;
-      anchorIgnoreIfNotPresent: string;
-    }>;
+    dateSignedTabs: DateSignedTab[];
   };
 };
 
@@ -263,6 +269,23 @@ export function documentFileExtension(document: DocuSignDocument) {
   return match?.[1]?.toLowerCase() || "docx";
 }
 
+export function dateSignedTab(anchorString: string): DateSignedTab {
+  return {
+    anchorString,
+    anchorUnits: "pixels",
+    anchorIgnoreIfNotPresent: "false",
+  };
+}
+
+/** Date Signed tabs only — never text tabs the recipient types. */
+export function dateSignedAnchorsForRole(role: EnvelopeRecipient["role"]): string[] {
+  const anchors: string[] = [DOCUSIGN_ANCHORS[role].date];
+  if (role === "buyer_signer") {
+    anchors.push(EFFECTIVE_DATE_SIGNED_ANCHOR);
+  }
+  return anchors;
+}
+
 export function buildEnvelopeDefinition(input: DocuSignSendInput): EnvelopeDefinition {
   if (!input.document?.bytes.length) {
     throw new Error(
@@ -300,13 +323,7 @@ export function buildEnvelopeDefinition(input: DocuSignSendInput): EnvelopeDefin
                 anchorIgnoreIfNotPresent: "false",
               },
             ],
-            dateSignedTabs: [
-              {
-                anchorString: anchors.date,
-                anchorUnits: "pixels",
-                anchorIgnoreIfNotPresent: "false",
-              },
-            ],
+            dateSignedTabs: dateSignedAnchorsForRole(recipient.role).map(dateSignedTab),
           },
         };
       }),
@@ -483,7 +500,7 @@ export async function getLiveEnvelopeStatus(
   http: DocuSignHttp = defaultHttp(),
 ): Promise<LiveEnvelopeSnapshot> {
   const token = await requestAccessToken(http);
-  const response = await http.fetch(envelopeUrl(envelopeId), {
+  const response = await http.fetch(`${envelopeUrl(envelopeId)}?include=recipients`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
@@ -493,10 +510,12 @@ export async function getLiveEnvelopeStatus(
   if (!response.ok) {
     throw new Error(formatApiError("Envelopes:get", body, response.status));
   }
-  const parsed = parseJson(body) as { envelopeId?: string; status?: string };
+  const parsed = parseJson(body) as Record<string, unknown>;
   return {
-    envelopeId: parsed.envelopeId ?? envelopeId,
-    status: parsed.status ?? "",
+    envelopeId: stringOrNull(parsed.envelopeId) ?? envelopeId,
+    status: stringOrNull(parsed.status) ?? "",
+    completedDateTime: stringOrNull(parsed.completedDateTime),
+    buyerSignedDateTime: extractBuyerSignedDateTime(parsed),
   };
 }
 
@@ -539,16 +558,21 @@ export function verifyConnectSignature(
 export function parseConnectPayload(rawBody: string): ConnectEvent {
   const trimmed = rawBody.trim();
   if (!trimmed) {
-    return { envelopeId: null, status: null, event: null };
+    return emptyConnectEvent();
   }
   if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
     const json = parseJson(trimmed) as Record<string, unknown>;
     const data = asRecord(json.data) ?? json;
     const summary = asRecord(data.envelopeSummary) ?? asRecord(json.envelopeSummary) ?? {};
+    const dateSource = { ...json, ...data, ...summary };
     return {
       envelopeId: stringOrNull(data.envelopeId ?? json.envelopeId ?? summary.envelopeId),
       status: stringOrNull(summary.status ?? data.status ?? json.status),
       event: stringOrNull(json.event ?? data.event),
+      completedDateTime: stringOrNull(
+        summary.completedDateTime ?? data.completedDateTime ?? json.completedDateTime,
+      ),
+      buyerSignedDateTime: extractBuyerSignedDateTime(dateSource),
     };
   }
 
@@ -556,7 +580,46 @@ export function parseConnectPayload(rawBody: string): ConnectEvent {
     envelopeId: trimmed.match(/<EnvelopeID>([^<]+)<\/EnvelopeID>/i)?.[1] ?? null,
     status: trimmed.match(/<Status>([^<]+)<\/Status>/i)?.[1] ?? null,
     event: null,
+    completedDateTime: trimmed.match(/<Completed>([^<]+)<\/Completed>/i)?.[1] ?? null,
+    buyerSignedDateTime: null,
   };
+}
+
+function emptyConnectEvent(): ConnectEvent {
+  return {
+    envelopeId: null,
+    status: null,
+    event: null,
+    completedDateTime: null,
+    buyerSignedDateTime: null,
+  };
+}
+
+/** Prefer the Buyer signer’s Date Signed; fall back to envelope completedDateTime. */
+export function extractBuyerSignedDateTime(source: unknown): string | null {
+  const record = asRecord(source);
+  if (!record) {
+    return null;
+  }
+  const recipients = asRecord(record.recipients);
+  const signers = Array.isArray(recipients?.signers) ? recipients.signers : [];
+  for (const signer of signers) {
+    const row = asRecord(signer);
+    if (!row) {
+      continue;
+    }
+    const role = stringOrNull(row.roleName);
+    if (role === "buyer_signer") {
+      return stringOrNull(row.signedDateTime);
+    }
+  }
+  return null;
+}
+
+export function resolveSignedAt(
+  ...candidates: Array<string | null | undefined>
+): string | undefined {
+  return candidates.find((value) => typeof value === "string" && value.trim())?.trim();
 }
 
 export function normalizeEnvelopeStatus(

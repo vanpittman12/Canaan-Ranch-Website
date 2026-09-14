@@ -6,7 +6,11 @@ import { describe, expect, it } from "vitest";
 import {
   AGREEMENT_FIELD_MAP,
   AGREEMENT_UNMAPPED_GAPS,
+  EFFECTIVE_DATE_LEFTOVER,
+  EXPIRATION_DATE_LEFTOVER,
   extractDocxPlainText,
+  formatEffectiveDateStamp,
+  formatExpirationDateStamp,
   generatePopulatedAgreement,
   populateAgreementDocx,
   populateAgreementFromParts,
@@ -21,7 +25,8 @@ import {
   resetBlankAgreementTemplateCache,
 } from "./agreement-template";
 import { brand } from "./brand";
-import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
+import { addOneYear, formatLongDate } from "./money";
 import type { Engagement, IntakeFields } from "./types";
 
 const TEMPLATE_DOCX = resolve(process.cwd(), BLANK_AGREEMENT_PUBLIC_FILE);
@@ -142,6 +147,7 @@ describe("Van’s Word agreement populate", () => {
     expect(files).toContain(DOCUSIGN_ANCHORS.seller_signer.sign);
     expect(files).toContain(DOCUSIGN_ANCHORS.buyer_witness.sign);
     expect(files).toContain(DOCUSIGN_ANCHORS.seller_witness.sign);
+    expect(files).toContain(EFFECTIVE_DATE_SIGNED_ANCHOR);
 
     const blankText = extractDocxPlainText(blank);
     expect(blankText).not.toContain(DOCUSIGN_ANCHORS.buyer_signer.sign);
@@ -150,7 +156,7 @@ describe("Van’s Word agreement populate", () => {
     expect(blankText).toMatch(/Witness(?:\s*1)?\s+Signature/);
   });
 
-  it("places all eight DocuSign anchors on Van’s real signature labels without vanish", () => {
+  it("places signature Date Signed anchors plus the Effective Date Date Signed tab without vanish", () => {
     const allEight = [
       DOCUSIGN_ANCHORS.buyer_signer.sign,
       DOCUSIGN_ANCHORS.buyer_signer.date,
@@ -160,6 +166,7 @@ describe("Van’s Word agreement populate", () => {
       DOCUSIGN_ANCHORS.buyer_witness.date,
       DOCUSIGN_ANCHORS.seller_witness.sign,
       DOCUSIGN_ANCHORS.seller_witness.date,
+      EFFECTIVE_DATE_SIGNED_ANCHOR,
     ];
 
     // Public blank download template (Witness Signature ×2).
@@ -248,5 +255,33 @@ describe("Van’s Word agreement populate", () => {
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/Buyer email/i);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/Effective Date/i);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/county/i);
+  });
+
+  it("leaves Effective/Expiration leftovers empty until the Buyer signs", () => {
+    const blank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
+    const unsigned = extractDocxPlainText(populateAgreementDocx(blank, engagement()));
+    expect(unsigned).toContain(EFFECTIVE_DATE_LEFTOVER);
+    expect(unsigned).toContain(EXPIRATION_DATE_LEFTOVER);
+    expect(unsigned).toContain(EFFECTIVE_DATE_SIGNED_ANCHOR);
+    expect(unsigned).not.toContain("this 15th day of April, 2026");
+    expect(unsigned).not.toContain("April 15, 2027");
+  });
+
+  it("stamps Effective leftover from the sign date and Expiration as addOneYear", () => {
+    expect(formatEffectiveDateStamp("2026-04-15")).toBe("this 15th day of April, 2026");
+    expect(formatExpirationDateStamp("2026-04-15")).toBe("April 15, 2027,");
+    expect(addOneYear("2026-04-15")).toBe("2027-04-15");
+    expect(formatLongDate(addOneYear("2026-04-15"))).toBe("April 15, 2027");
+
+    const blank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
+    const signed = extractDocxPlainText(
+      populateAgreementDocx(blank, engagement({ effectiveDate: "2026-04-15" })),
+    );
+    expect(signed).toContain("this 15th day of April, 2026");
+    expect(signed).toContain("April 15, 2027,");
+    expect(signed).toContain("referred to herein as the “Expiration Date.”");
+    expect(signed).not.toContain(EFFECTIVE_DATE_LEFTOVER);
+    expect(signed).not.toContain(EXPIRATION_DATE_LEFTOVER);
+    expect(signed).not.toContain(EFFECTIVE_DATE_SIGNED_ANCHOR);
   });
 });

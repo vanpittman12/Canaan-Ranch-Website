@@ -3,12 +3,15 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { brand, getSellerWitness } from "./brand";
+import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
 import {
   buildEnvelopeDefinition,
   buildEnvelopeRecipients,
   createJwtAssertion,
+  dateSignedAnchorsForRole,
   describeDocuSignSeam,
   DOCUSIGN_ENV_VARS,
+  extractBuyerSignedDateTime,
   getLiveEnvelopeStatus,
   isCompleteEnvelopeStatus,
   missingLiveConfigVars,
@@ -280,6 +283,8 @@ describe("DocuSign Connect and polling", () => {
       envelopeId: "env-1",
       status: "completed",
       event: "envelope-completed",
+      completedDateTime: null,
+      buyerSignedDateTime: null,
     });
     expect(
       parseConnectPayload("<EnvelopeStatus><EnvelopeID>env-xml</EnvelopeID><Status>Completed</Status></EnvelopeStatus>"),
@@ -287,6 +292,8 @@ describe("DocuSign Connect and polling", () => {
       envelopeId: "env-xml",
       status: "Completed",
       event: null,
+      completedDateTime: null,
+      buyerSignedDateTime: null,
     });
     expect(isCompleteEnvelopeStatus("completed")).toBe(true);
     expect(isCompleteEnvelopeStatus("envelope-completed")).toBe(true);
@@ -302,16 +309,94 @@ describe("DocuSign Connect and polling", () => {
           status: 200,
         });
       }
-      if (url.endsWith("/envelopes/env-live-1")) {
-        return new Response(JSON.stringify({ envelopeId: "env-live-1", status: "completed" }), {
-          status: 200,
-        });
+      if (url.includes("/envelopes/env-live-1")) {
+        expect(url).toContain("include=recipients");
+        return new Response(
+          JSON.stringify({
+            envelopeId: "env-live-1",
+            status: "completed",
+            completedDateTime: "2026-06-03T16:00:00.000Z",
+            recipients: {
+              signers: [
+                {
+                  roleName: "buyer_signer",
+                  signedDateTime: "2026-06-02T09:00:00.000Z",
+                },
+              ],
+            },
+          }),
+          { status: 200 },
+        );
       }
       throw new Error(`Unexpected URL ${url}`);
     });
 
     const snapshot = await getLiveEnvelopeStatus("env-live-1", { fetch: fetchMock });
-    expect(snapshot).toEqual({ envelopeId: "env-live-1", status: "completed" });
+    expect(snapshot).toEqual({
+      envelopeId: "env-live-1",
+      status: "completed",
+      completedDateTime: "2026-06-03T16:00:00.000Z",
+      buyerSignedDateTime: "2026-06-02T09:00:00.000Z",
+    });
     expect(isCompleteEnvelopeStatus(snapshot.status)).toBe(true);
+  });
+
+  it("places Date Signed tabs (not typed date fields) on every signer and the Effective Date leftover", () => {
+    const definition = buildEnvelopeDefinition(sendInput());
+    const roles = ["buyer_signer", "seller_signer", "buyer_witness", "seller_witness"] as const;
+    expect(dateSignedAnchorsForRole("buyer_signer")).toEqual([
+      DOCUSIGN_ANCHORS.buyer_signer.date,
+      EFFECTIVE_DATE_SIGNED_ANCHOR,
+    ]);
+    expect(dateSignedAnchorsForRole("buyer_witness")).toEqual([DOCUSIGN_ANCHORS.buyer_witness.date]);
+    expect(dateSignedAnchorsForRole("seller_signer")).toEqual([DOCUSIGN_ANCHORS.seller_signer.date]);
+    expect(dateSignedAnchorsForRole("seller_witness")).toEqual([DOCUSIGN_ANCHORS.seller_witness.date]);
+
+    for (const role of roles) {
+      const signer = definition.recipients.signers.find((row) => row.roleName === role);
+      expect(signer).toBeDefined();
+      expect(signer?.tabs).not.toHaveProperty("textTabs");
+      expect(signer?.tabs).not.toHaveProperty("dateTabs");
+      expect(signer?.tabs.dateSignedTabs.map((tab) => tab.anchorString)).toEqual(
+        dateSignedAnchorsForRole(role),
+      );
+      expect(
+        signer?.tabs.dateSignedTabs.every(
+          (tab) => tab.anchorUnits === "pixels" && tab.anchorIgnoreIfNotPresent === "false",
+        ),
+      ).toBe(true);
+    }
+  });
+
+  it("reads the Buyer Date Signed from an envelope or Connect payload", () => {
+    expect(
+      extractBuyerSignedDateTime({
+        completedDateTime: "2026-06-03T16:00:00.000Z",
+        recipients: {
+          signers: [
+            { roleName: "seller_signer", signedDateTime: "2026-06-03T16:00:00.000Z" },
+            { roleName: "buyer_signer", signedDateTime: "2026-06-02T09:00:00.000Z" },
+          ],
+        },
+      }),
+    ).toBe("2026-06-02T09:00:00.000Z");
+
+    const payload = parseConnectPayload(
+      JSON.stringify({
+        event: "envelope-completed",
+        data: {
+          envelopeId: "env-2",
+          envelopeSummary: {
+            status: "completed",
+            completedDateTime: "2026-06-03T16:00:00.000Z",
+            recipients: {
+              signers: [{ roleName: "buyer_signer", signedDateTime: "2026-06-02T09:15:00.000Z" }],
+            },
+          },
+        },
+      }),
+    );
+    expect(payload.buyerSignedDateTime).toBe("2026-06-02T09:15:00.000Z");
+    expect(payload.completedDateTime).toBe("2026-06-03T16:00:00.000Z");
   });
 });

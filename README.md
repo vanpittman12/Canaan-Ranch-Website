@@ -161,7 +161,17 @@ When `DOCUSIGN_ENABLED=true`, Accept sends a live envelope: JWT grant, then `Env
 | `seller_signer` | Brand: Andrew V. Pittman, Jr. / `vpittman@beachparkcap.com` | Routing order 3 |
 | `seller_witness` | Brand/env: Andrew Fuddy / `witness@canaanpreserve.com` (not on the public form) | Routing order 4 |
 
-The populated Word agreement is the envelope document. Hidden anchor strings (`/sn_buyer/`, `/wit_buyer/`, `/sn_seller/`, `/wit_seller/`) are injected into the populated copy only so Sign Here and Date Signed tabs can place.
+The populated Word agreement is the envelope document. Hidden anchor strings (`/sn_buyer/`, `/wit_buyer/`, `/sn_seller/`, `/wit_seller/`, plus matching `/date_*` strings) are injected into the populated copy only so Sign Here and **Date Signed** tabs can place. Those date anchors are `dateSignedTabs` (auto-fill when that recipient signs) — not typed text fields.
+
+**Effective Date and Expiration**
+
+| When | Effective Date | Expiration Date |
+| --- | --- | --- |
+| Accept / envelope send | Left blank (Van’s “this  day of, 2024”). A Buyer **Date Signed** tab (`/date_effective/`) sits on that leftover so the live DocuSign view shows the sign date. | Left blank (Van’s “, 202 ,”). DocuSign has no reliable “Date Signed + 1 year” formula for Word leftovers. |
+| DocuSign completed (Connect / poll / return) | `engagement.effectiveDate` = Buyer `signedDateTime` when the API reports it, else envelope `completedDateTime`. | `addOneYear(effectiveDate)`, formatted into the regenerated / stored executed Word. |
+| Manual signed upload | `engagement.effectiveDate` = upload time (already in `applySignedArtifact`). | Same +1 year stamp into the stored executed Word. |
+
+The DocuSign combined PDF is the signed artifact (signatures + Date Signed tabs, including the body Effective Date). Expiration is stamped after complete into the populated Word (`{id}-executed-agreement.docx` and any later contract download). That is not a bait-and-switch: Accept never writes a guessed calendar date into the body.
 
 ### Environment variables
 

@@ -26,6 +26,7 @@ import {
   EngagementError,
 } from "@/lib/engagement";
 import { generatePopulatedAgreement } from "@/lib/agreement-populate";
+import { persistExecutedAgreement } from "@/lib/executed-agreement";
 import { generateStubSignedPdf } from "@/lib/pdf";
 import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
 import type { Engagement, ReviewDecision } from "@/lib/types";
@@ -207,20 +208,25 @@ export async function simulateDocuSignComplete(
 
   try {
     const storedName = `${engagement.id}-signed.pdf`;
-    const bytes = await generateStubSignedPdf(engagement);
+    const artifact = artifactFromUpload({
+      filename: buildStubSignedFilename(engagement.reference),
+      storedName,
+      source: "docusign_stub",
+      mimeType: "application/pdf",
+      sizeBytes: 0,
+    });
+    const next = applyDocuSignCompleted(engagement, artifact);
+    const bytes = await generateStubSignedPdf(next);
     await putUpload(storedName, bytes);
-
-    const next = applyDocuSignCompleted(
-      engagement,
-      artifactFromUpload({
-        filename: buildStubSignedFilename(engagement.reference),
-        storedName,
-        source: "docusign_stub",
-        mimeType: "application/pdf",
+    const executed = {
+      ...next,
+      signedArtifact: {
+        ...artifact,
         sizeBytes: bytes.length,
-      }),
-    );
-    await saveEngagement(next);
+      },
+    };
+    await persistExecutedAgreement(executed);
+    await saveEngagement(executed);
   } catch (error) {
     return {
       error:
@@ -263,7 +269,12 @@ export async function refreshDocuSignStatus(
 
   try {
     const snapshot = await getLiveEnvelopeStatus(engagement.docusign.envelopeId);
-    await syncLiveEnvelope(engagement, snapshot.status);
+    await syncLiveEnvelope(
+      engagement,
+      snapshot.status,
+      undefined,
+      snapshot.buyerSignedDateTime ?? snapshot.completedDateTime,
+    );
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Unable to refresh DocuSign status.",

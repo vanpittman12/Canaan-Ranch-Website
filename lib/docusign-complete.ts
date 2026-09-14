@@ -6,10 +6,13 @@ import {
 import {
   buildLiveSignedFilename,
   downloadLiveCombinedDocument,
+  getLiveEnvelopeStatus,
   isCompleteEnvelopeStatus,
   normalizeEnvelopeStatus,
+  resolveSignedAt,
   type DocuSignHttp,
 } from "./docusign";
+import { persistExecutedAgreement } from "./executed-agreement";
 import { putUpload, saveEngagement } from "./store";
 import type { Engagement } from "./types";
 
@@ -17,6 +20,7 @@ export async function syncLiveEnvelope(
   engagement: Engagement,
   status: string | null | undefined,
   http?: DocuSignHttp,
+  signedAt?: string | null,
 ): Promise<Engagement> {
   if (!engagement.docusign.envelopeId) {
     return engagement;
@@ -32,18 +36,21 @@ export async function syncLiveEnvelope(
     const bytes = await downloadLiveCombinedDocument(engagement.docusign.envelopeId, http);
     const storedName = `${engagement.id}-signed.pdf`;
     await putUpload(storedName, bytes);
-    return saveEngagement(
-      applyDocuSignCompleted(
-        engagement,
-        artifactFromUpload({
-          filename: buildLiveSignedFilename(engagement.reference),
-          storedName,
-          source: "docusign",
-          mimeType: "application/pdf",
-          sizeBytes: bytes.length,
-        }),
-      ),
+    const fromEnvelope = signedAt ?? (await buyerSignedAtFromEnvelope(engagement.docusign.envelopeId, http));
+    const next = applyDocuSignCompleted(
+      engagement,
+      artifactFromUpload({
+        filename: buildLiveSignedFilename(engagement.reference),
+        storedName,
+        source: "docusign",
+        mimeType: "application/pdf",
+        sizeBytes: bytes.length,
+      }),
+      undefined,
+      fromEnvelope,
     );
+    await persistExecutedAgreement(next);
+    return saveEngagement(next);
   }
 
   const mapped = normalizeEnvelopeStatus(status);
@@ -54,4 +61,13 @@ export async function syncLiveEnvelope(
   }
 
   return engagement;
+}
+
+async function buyerSignedAtFromEnvelope(envelopeId: string, http?: DocuSignHttp) {
+  try {
+    const snapshot = await getLiveEnvelopeStatus(envelopeId, http);
+    return resolveSignedAt(snapshot.buyerSignedDateTime, snapshot.completedDateTime);
+  } catch {
+    return undefined;
+  }
 }
