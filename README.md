@@ -110,7 +110,7 @@ After a **public intake create** succeeds, [`lib/notify.ts`](lib/notify.ts) `not
 | From | `GMAIL_USER` if set, otherwise `vpittman@beachparkcap.com` (shown as `Canaan Preserve <…>`). Must be the Google account that issued the refresh token. |
 | Primary To | `vpittman@beachparkcap.com` |
 | Also To | `brand.email` when it differs from the primary To. During testing `brand.email` is also `vpittman@beachparkcap.com`, so notify sends a single To (no duplicate). `engagements@canaanpreserve.com` is not a live inbox. |
-| Body | Engagement reference, buyer legal name, relocation county, tortoise count, admin review link (`/admin/engagements/[id]`) |
+| Body | Reference, project name, buyer contact (name / attention / email / phone / address), county, tortoise count, authorized agent, donor affiliation, project description, buyer witness, admin review link. Operational fields stay in this email and admin — they are not stuffed into Van’s Word file. |
 
 **Provider: Gmail API** (HTTPS refresh-token grant, then `POST https://gmail.googleapis.com/gmail/v1/users/me/messages/send`). SMTP is not used — Cloudflare Workers cannot open outbound SMTP sockets (ports 25 / 465 / 587), so nodemailer and a Google App Password will not send from this Worker. No extra npm package; the seam uses `fetch` like the DocuSign live path.
 

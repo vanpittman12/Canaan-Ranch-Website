@@ -31,8 +31,22 @@ export type NewEngagementNotice = {
   id: string;
   reference: string;
   buyerLegalName: string;
-  relocationCounty: string;
+  buyerAttention: string;
+  buyerEmail: string;
+  buyerPhone: string;
+  buyerStreet: string;
+  buyerCity: string;
+  buyerState: string;
+  buyerPostalCode: string;
   tortoiseCount: number;
+  relocationCounty: string;
+  authorizedAgentName: string;
+  authorizedAgentCompany: string;
+  donorCompanyAffiliation: string;
+  projectName: string;
+  projectDescription: string;
+  buyerWitnessName: string;
+  buyerWitnessEmail: string;
 };
 
 export type NewEngagementEmail = {
@@ -50,7 +64,26 @@ export type NotifyResult = {
 };
 
 export type EngagementLike = Pick<Engagement, "id" | "reference"> & {
-  intake: Pick<IntakeFields, "buyerLegalName" | "relocationCounty" | "tortoiseCount">;
+  intake: Pick<
+    IntakeFields,
+    | "buyerLegalName"
+    | "buyerAttention"
+    | "buyerEmail"
+    | "buyerPhone"
+    | "buyerStreet"
+    | "buyerCity"
+    | "buyerState"
+    | "buyerPostalCode"
+    | "relocationCounty"
+    | "tortoiseCount"
+    | "authorizedAgentName"
+    | "authorizedAgentCompany"
+    | "donorCompanyAffiliation"
+    | "donorSiteName"
+    | "donorSiteDescription"
+    | "buyerWitnessName"
+    | "buyerWitnessEmail"
+  >;
 };
 
 export type GmailOAuthSecrets = {
@@ -115,35 +148,70 @@ export function adminReviewUrl(engagementId: string) {
 }
 
 export function toNewEngagementNotice(engagement: EngagementLike): NewEngagementNotice {
+  const { intake } = engagement;
   return {
     id: engagement.id,
     reference: engagement.reference,
-    buyerLegalName: engagement.intake.buyerLegalName,
-    relocationCounty: engagement.intake.relocationCounty,
-    tortoiseCount: engagement.intake.tortoiseCount,
+    buyerLegalName: intake.buyerLegalName,
+    buyerAttention: intake.buyerAttention,
+    buyerEmail: intake.buyerEmail,
+    buyerPhone: intake.buyerPhone,
+    buyerStreet: intake.buyerStreet,
+    buyerCity: intake.buyerCity,
+    buyerState: intake.buyerState,
+    buyerPostalCode: intake.buyerPostalCode,
+    tortoiseCount: intake.tortoiseCount,
+    relocationCounty: intake.relocationCounty,
+    authorizedAgentName: intake.authorizedAgentName,
+    authorizedAgentCompany: intake.authorizedAgentCompany,
+    donorCompanyAffiliation: intake.donorCompanyAffiliation,
+    projectName: intake.donorSiteName,
+    projectDescription: intake.donorSiteDescription,
+    buyerWitnessName: intake.buyerWitnessName,
+    buyerWitnessEmail: intake.buyerWitnessEmail,
   };
 }
 
 export function buildNewEngagementEmail(notice: NewEngagementNotice): NewEngagementEmail {
   const reviewUrl = adminReviewUrl(notice.id);
   const subject = `New Canaan Preserve intake — ${notice.reference}`;
+  const noticeAddress = `${notice.buyerStreet}, ${notice.buyerCity}, ${notice.buyerState} ${notice.buyerPostalCode}`;
+  const agent = `${notice.authorizedAgentName}, ${notice.authorizedAgentCompany}`;
   const text = [
     "A public intake engagement was created.",
     "",
     `Reference: ${notice.reference}`,
+    `Project name: ${notice.projectName}`,
     `Buyer legal name: ${notice.buyerLegalName}`,
+    `Buyer attention: ${notice.buyerAttention}`,
+    `Buyer email: ${notice.buyerEmail}`,
+    `Buyer phone: ${notice.buyerPhone}`,
+    `Buyer notice address: ${noticeAddress}`,
     `Relocation county: ${notice.relocationCounty}`,
     `Tortoise count: ${notice.tortoiseCount}`,
+    `Authorized agent: ${agent}`,
+    `Donor company affiliation: ${notice.donorCompanyAffiliation}`,
+    `Project description: ${notice.projectDescription || "—"}`,
+    `Buyer witness: ${notice.buyerWitnessName} <${notice.buyerWitnessEmail}>`,
     "",
     `Review: ${reviewUrl}`,
   ].join("\n");
   const html = [
-    "<p>A public intake engagement was created.</p>",
+    "<p>A public intake engagement was created. Operational fields below are for review — they are not rewritten into the Word agreement unless Van’s file already has a blank.</p>",
     "<ul>",
     `<li><strong>Reference:</strong> ${escapeHtml(notice.reference)}</li>`,
+    `<li><strong>Project name:</strong> ${escapeHtml(notice.projectName)}</li>`,
     `<li><strong>Buyer legal name:</strong> ${escapeHtml(notice.buyerLegalName)}</li>`,
+    `<li><strong>Buyer attention:</strong> ${escapeHtml(notice.buyerAttention)}</li>`,
+    `<li><strong>Buyer email:</strong> ${escapeHtml(notice.buyerEmail)}</li>`,
+    `<li><strong>Buyer phone:</strong> ${escapeHtml(notice.buyerPhone)}</li>`,
+    `<li><strong>Buyer notice address:</strong> ${escapeHtml(noticeAddress)}</li>`,
     `<li><strong>Relocation county:</strong> ${escapeHtml(notice.relocationCounty)}</li>`,
     `<li><strong>Tortoise count:</strong> ${escapeHtml(String(notice.tortoiseCount))}</li>`,
+    `<li><strong>Authorized agent:</strong> ${escapeHtml(agent)}</li>`,
+    `<li><strong>Donor company affiliation:</strong> ${escapeHtml(notice.donorCompanyAffiliation)}</li>`,
+    `<li><strong>Project description:</strong> ${escapeHtml(notice.projectDescription || "—")}</li>`,
+    `<li><strong>Buyer witness:</strong> ${escapeHtml(`${notice.buyerWitnessName} <${notice.buyerWitnessEmail}>`)}</li>`,
     "</ul>",
     `<p><a href="${escapeHtml(reviewUrl)}">Open admin review</a></p>`,
   ].join("");

@@ -91,9 +91,14 @@ export default async function AdminEngagementPage({
                   label="Donor company affiliation"
                   value={engagement.intake.donorCompanyAffiliation}
                 />
-                {engagement.intake.donorSiteName ? (
-                  <Row label="Project name" value={engagement.intake.donorSiteName} />
-                ) : null}
+                <Row
+                  label="Project name"
+                  value={engagement.intake.donorSiteName || "—"}
+                />
+                <Row
+                  label="Project description"
+                  value={engagement.intake.donorSiteDescription || "—"}
+                />
                 <Row
                   label="Buyer witness"
                   value={`${engagement.intake.buyerWitnessName} · ${engagement.intake.buyerWitnessEmail}`}
@@ -103,11 +108,6 @@ export default async function AdminEngagementPage({
                   value={`${engagement.intake.sellerWitnessName} · ${engagement.intake.sellerWitnessEmail}`}
                 />
               </dl>
-              {engagement.intake.donorSiteDescription ? (
-                <p className="mt-4 text-sm leading-7 text-ink/80">
-                  {engagement.intake.donorSiteDescription}
-                </p>
-              ) : null}
               <RateOverrideForm engagement={engagement} />
             </section>
 

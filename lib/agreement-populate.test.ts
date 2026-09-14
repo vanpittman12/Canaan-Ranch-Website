@@ -116,6 +116,10 @@ describe("Van’s Word agreement populate", () => {
     expect(text).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
     expect(text).not.toContain("This Multi-Project Gopher Tortoise Relocation Agreement");
     expect(text).not.toContain("Canaan Ranch LLP, a Florida limited liability partnership");
+    expect(text).not.toContain("Hillsborough");
+    expect(text).not.toContain("morgan@suncoast.example");
+    expect(text).not.toContain("Casey Nguyen");
+    expect(text).not.toContain("riley@suncoast.example");
   });
 
   it("escapes buyer XML and injects DocuSign anchors into the populated copy only", () => {
