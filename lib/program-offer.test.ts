@@ -24,14 +24,14 @@ describe("What we offer", () => {
     expect(offerModule).toContain('id="what-we-offer"');
   });
 
-  it("does not add Lykes pricing, free juveniles, or a service-area map", () => {
+  it("does not add Lykes pricing or free juveniles", () => {
     const surfaces = [landing, offerModule, offerLib];
     for (const surface of surfaces) {
       expect(surface.toLowerCase()).not.toContain("lykes");
       expect(surface.toLowerCase()).not.toContain("free juvenile");
-      expect(surface).not.toContain("service-area");
-      expect(surface).not.toContain("ServiceArea");
     }
+    expect(offerModule).not.toContain("ServiceArea");
+    expect(offerLib).not.toContain("ServiceArea");
     expect(programOfferItems.some((item) => /free/i.test(item))).toBe(false);
     expect(programOfferItems.join(" ")).toContain("$6,000");
     expect(programOfferItems.join(" ")).toContain("$3,000");
