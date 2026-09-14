@@ -1,35 +1,58 @@
+import {
+  TORTOISE_EYE,
+  TORTOISE_FORELEG_PATH,
+  TORTOISE_HEAD_PATH,
+  TORTOISE_HINDLEG_PATH,
+  TORTOISE_SCALE_PATHS,
+  TORTOISE_SCUTE_PATHS,
+  TORTOISE_SHELL_PATH,
+  TORTOISE_TAIL_PATH,
+  TORTOISE_VIEWBOX,
+} from "@/lib/tortoise-mark";
+
 export function BrandMark({
   className = "h-10 w-10",
   light = false,
+  framed = false,
 }: {
   className?: string;
   light?: boolean;
+  framed?: boolean;
 }) {
-  const ink = light ? "#EFE6D4" : "#24352A";
+  const ink = framed && !light ? "#EFE6D4" : light ? "#EFE6D4" : "#24352A";
   const brass = "#C4A15A";
+  const field = "#24352A";
 
   return (
     <svg
       className={className}
-      viewBox="0 0 64 64"
+      viewBox={TORTOISE_VIEWBOX}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
+      data-mark="gopher-tortoise"
     >
-      <rect x="2" y="2" width="60" height="60" rx="14" stroke={ink} strokeWidth="2.4" />
+      {framed ? <rect x="0" y="0" width="64" height="64" rx="14" fill={field} /> : null}
+      {framed ? (
+        <rect x="5" y="5" width="54" height="54" rx="11" stroke={brass} strokeWidth="1" opacity="0.75" />
+      ) : null}
+      <path d={TORTOISE_SHELL_PATH} fill={ink} fillOpacity="0.14" stroke={ink} strokeWidth="2.15" />
+      <path d={TORTOISE_HEAD_PATH} fill={ink} fillOpacity="0.14" stroke={ink} strokeWidth="2.15" />
       <path
-        d="M18 46c2.2-9 6.4-16 14-16s11.8 7 14 16"
+        d={TORTOISE_FORELEG_PATH}
         stroke={ink}
-        strokeWidth="2.2"
+        strokeWidth="3.3"
         strokeLinecap="round"
       />
-      <path
-        d="M32 14v16M24 22c2.4 3.2 5.4 5.4 8 6.2C34.6 27.4 37.6 25.2 40 22"
-        stroke={brass}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <circle cx="32" cy="14" r="2.2" fill={brass} />
+      <path d={TORTOISE_HINDLEG_PATH} stroke={ink} strokeWidth="3.3" strokeLinecap="round" />
+      <path d={TORTOISE_TAIL_PATH} stroke={ink} strokeWidth="1.8" strokeLinecap="round" />
+      {TORTOISE_SCUTE_PATHS.map((d) => (
+        <path key={d} d={d} stroke={brass} strokeWidth="1.45" strokeLinecap="round" />
+      ))}
+      {TORTOISE_SCALE_PATHS.map((d) => (
+        <path key={d} d={d} stroke={brass} strokeWidth="1.15" strokeLinecap="round" />
+      ))}
+      <circle cx={TORTOISE_EYE.cx} cy={TORTOISE_EYE.cy} r={TORTOISE_EYE.r} fill={ink} />
     </svg>
   );
 }

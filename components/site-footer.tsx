@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { brand, formatBrandAddress } from "@/lib/brand";
+import { BrandLockup } from "./brand-lockup";
 
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-line bg-forest text-cream">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-10 sm:flex-row sm:items-end sm:justify-between sm:px-8">
         <div>
-          <p className="font-serif text-2xl">{brand.name}</p>
-          <p className="mt-2 text-sm text-cream/80">
+          <BrandLockup light />
+          <p className="mt-4 text-sm text-cream/80">
             A {brand.legalName} recipient site. {brand.tagline}
           </p>
           <p className="mt-3 max-w-sm text-sm font-medium text-cream">{brand.fwcStatus}</p>

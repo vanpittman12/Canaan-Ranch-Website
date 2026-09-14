@@ -18,7 +18,7 @@ export default async function AdminLoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-paper px-5 py-16">
       <div className="surface-card w-full max-w-md p-8">
-        <BrandMark className="h-12 w-12" />
+        <BrandMark className="h-12 w-12" framed />
         <h1 className="type-h2 mt-5 text-forest">Canaan Preserve team</h1>
         <p className="mt-2 text-sm leading-6 text-muted">
           Review queue access. Local default password is documented in the README
