@@ -9,7 +9,7 @@ const stages = [
   {
     id: "download",
     title: "Download agreement",
-    body: "Review the populated PDF. There is no on-screen contract preview.",
+    body: "Review the populated Word agreement. There is no on-screen contract preview.",
   },
   {
     id: "signing",

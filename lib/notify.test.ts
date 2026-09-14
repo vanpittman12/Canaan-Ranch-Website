@@ -92,7 +92,7 @@ describe("new engagement notify seam", () => {
     expect(info).toHaveBeenCalledWith(
       "[notify] stub: new engagement email (Gmail OAuth secrets unset)",
       expect.objectContaining({
-        to: [NEW_ENGAGEMENT_NOTIFY_TO, brand.email],
+        to: [NEW_ENGAGEMENT_NOTIFY_TO],
         subject: "New Canaan Preserve intake — CP-2026-TEST",
       }),
     );
@@ -142,9 +142,8 @@ describe("new engagement notify seam", () => {
     const sendBody = JSON.parse(String(sendInit.body)) as { raw: string };
     const rfc2822 = decodeGmailRaw(sendBody.raw);
     expect(rfc2822).toContain(`From: ${brand.name} <${DEFAULT_GMAIL_USER}>`);
-    expect(rfc2822).toContain(
-      `To: ${NEW_ENGAGEMENT_NOTIFY_TO}, ${brand.email}`,
-    );
+    expect(rfc2822).toContain(`To: ${NEW_ENGAGEMENT_NOTIFY_TO}`);
+    expect(rfc2822).not.toContain("engagements@canaanpreserve.com");
     expect(rfc2822).toContain("CP-2026-TEST");
     expect(rfc2822).toContain("Suncoast Land Partners LLC");
     expect(rfc2822).toContain("Hillsborough");
@@ -212,12 +211,13 @@ describe("new engagement notify seam", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("emails Van and the brand inbox", () => {
-    expect(newEngagementRecipients()).toEqual([
-      NEW_ENGAGEMENT_NOTIFY_TO,
+  it("emails Van once when brand.email is the same test mailbox", () => {
+    expect(brand.email).toBe("vpittman@beachparkcap.com");
+    expect(brand.email).toBe(NEW_ENGAGEMENT_NOTIFY_TO);
+    expect(newEngagementRecipients()).toEqual([NEW_ENGAGEMENT_NOTIFY_TO]);
+    expect(newEngagementRecipients().join(",")).not.toContain(
       "engagements@canaanpreserve.com",
-    ]);
-    expect(brand.email).toBe("engagements@canaanpreserve.com");
+    );
   });
 
   it("honors NOTIFY_NEW_ENGAGEMENT_TO and GMAIL_USER", () => {

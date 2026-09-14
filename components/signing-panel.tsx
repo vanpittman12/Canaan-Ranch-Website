@@ -23,7 +23,7 @@ export function SigningPanel({
       <div>
         <h2 className="type-h2 text-forest">Choose how you will sign</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Download the populated agreement PDF first. Usual path: DocuSign after Canaan Preserve
+          Download the populated Word agreement first. Usual path: DocuSign after Canaan Preserve
           accepts. The Canaan Ranch LLP witness is already routed from brand config. Nothing is
           executed until the team accepts and a signed artifact is on file.
         </p>
@@ -68,10 +68,10 @@ export function SigningPanel({
               onChange={() => setMethod("manual")}
             />
             <span>
-              <span className="block font-medium text-ink">Download PDF and upload a signed copy</span>
+              <span className="block font-medium text-ink">Download and upload a signed copy</span>
               <span className="mt-1 block text-sm leading-6 text-muted">
-                Download the agreement, sign it, and upload the PDF. You may upload now or after
-                you submit. Execution still requires an Accept decision.
+                Download the populated Word agreement, sign it, and upload the signed file. You
+                may upload now or after you submit. Execution still requires an Accept decision.
               </span>
             </span>
           </label>
@@ -79,7 +79,7 @@ export function SigningPanel({
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <a className="btn-secondary" href={contractUrl}>
-            Download populated agreement PDF
+            Download populated agreement
           </a>
           <button className="btn-primary" type="submit" disabled={pending}>
             {pending ? "Submitting…" : "Submit for Canaan Preserve review"}

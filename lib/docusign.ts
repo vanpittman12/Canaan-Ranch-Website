@@ -60,6 +60,7 @@ const RECIPIENT_ROUTING: Record<
 export interface DocuSignDocument {
   name: string;
   bytes: Uint8Array;
+  fileExtension?: string;
 }
 
 export interface DocuSignSendInput {
@@ -257,10 +258,18 @@ export function bytesToBase64(bytes: Uint8Array) {
   return Buffer.from(bytes).toString("base64");
 }
 
+export function documentFileExtension(document: DocuSignDocument) {
+  if (document.fileExtension?.trim()) {
+    return document.fileExtension.replace(/^\./, "").toLowerCase();
+  }
+  const match = document.name.match(/\.([a-z0-9]+)$/i);
+  return match?.[1]?.toLowerCase() || "docx";
+}
+
 export function buildEnvelopeDefinition(input: DocuSignSendInput): EnvelopeDefinition {
   if (!input.document?.bytes.length) {
     throw new Error(
-      "DocuSign live send requires the populated agreement PDF as the envelope document.",
+      "DocuSign live send requires the populated agreement (Van’s Word file with intake fields filled) as the envelope document.",
     );
   }
 
@@ -272,7 +281,7 @@ export function buildEnvelopeDefinition(input: DocuSignSendInput): EnvelopeDefin
       {
         documentId: "1",
         name: input.document.name,
-        fileExtension: "pdf",
+        fileExtension: documentFileExtension(input.document),
         documentBase64: bytesToBase64(input.document.bytes),
       },
     ],

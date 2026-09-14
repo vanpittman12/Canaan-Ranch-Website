@@ -25,7 +25,8 @@ import {
   artifactFromUpload,
   EngagementError,
 } from "@/lib/engagement";
-import { generateContractPdf, generateStubSignedPdf } from "@/lib/pdf";
+import { generatePopulatedAgreement } from "@/lib/agreement-populate";
+import { generateStubSignedPdf } from "@/lib/pdf";
 import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
 import type { ReviewDecision } from "@/lib/types";
 
@@ -81,13 +82,15 @@ export async function reviewEngagement(
   try {
     let next = applyReview(engagement, decision, note);
     if (decision === "accept" && next.signingMethod === "docusign") {
+      const populated = await generatePopulatedAgreement(next);
       const sent = await sendEnvelope({
         engagementId: next.id,
         reference: next.reference,
         recipients: buildEnvelopeRecipients(next.intake),
         document: {
-          name: `${next.reference}-canaan-preserve-agreement.pdf`,
-          bytes: await generateContractPdf(next),
+          name: populated.filename,
+          bytes: populated.bytes,
+          fileExtension: populated.fileExtension,
         },
       });
       next = applyDocuSignSent(

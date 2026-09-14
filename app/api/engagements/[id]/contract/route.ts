@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
+import { generatePopulatedAgreement } from "@/lib/agreement-populate";
 import { ADMIN_COOKIE, canAccessEngagementDocument } from "@/lib/auth";
 import { asArrayBuffer } from "@/lib/http";
-import { generateContractPdf } from "@/lib/pdf";
 import { getEngagement } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -29,11 +29,11 @@ export async function GET(
     return new Response("Engagement not found.", { status: 404 });
   }
 
-  const bytes = await generateContractPdf(engagement);
-  return new Response(asArrayBuffer(bytes), {
+  const populated = await generatePopulatedAgreement(engagement);
+  return new Response(asArrayBuffer(populated.bytes), {
     headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${engagement.reference}-canaan-preserve-agreement.pdf"`,
+      "Content-Type": populated.mimeType,
+      "Content-Disposition": `attachment; filename="${populated.filename}"`,
       "Cache-Control": "no-store",
     },
   });

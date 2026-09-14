@@ -119,11 +119,11 @@ function ConfirmationCard({ engagement }: { engagement: Engagement }) {
       <h2 className="type-h2 mt-2 text-forest">{engagement.reference}</h2>
       <p className="mt-2 text-[17px] leading-[27px] text-ink">
         {engagement.status === "draft"
-          ? "Intake is saved. Download the populated agreement PDF first, then choose a signing path."
+          ? "Intake is saved. Download the populated Word agreement first, then choose a signing path."
           : "This engagement is in the Canaan Preserve review queue."}
       </p>
       <ol className="mt-4 list-decimal space-y-1 pl-5 text-sm leading-6 text-muted">
-        <li>Download the populated agreement PDF.</li>
+        <li>Download the populated Word agreement.</li>
         <li>Choose DocuSign after Accept, or a manual signed PDF.</li>
         <li>Canaan Preserve reviews. Nothing is executed until Accept and a signed copy are on file.</li>
       </ol>
@@ -231,7 +231,7 @@ function SubmittedPanel({
       </div>
       <div className="flex flex-col gap-3 sm:flex-row">
         <a className="btn-secondary" href={contractUrl}>
-          Download agreement PDF
+          Download agreement
         </a>
         {signedUrl ? (
           <a className="btn-secondary" href={signedUrl}>
