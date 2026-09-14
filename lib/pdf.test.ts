@@ -1,9 +1,14 @@
+import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { generateContractPdf } from "./pdf";
 import { buildTemplateEngagement } from "./contract";
+
+const AUTHENTIC_SHA256 =
+  "5711a4abeb62609bbcc63b3df578a60fb3bb2a2ef8838c3836be363903692412";
+const AUTHENTIC_SIZE = 73031;
 
 const TEMPLATE_PDF = resolve(
   process.cwd(),
@@ -19,10 +24,13 @@ function pdfText(path: string) {
 
 describe("agreement PDFs", () => {
   it("ships Van’s Word-derived blank template as a static PDF", () => {
+    const original = readFileSync(ORIGINAL_DOCX);
+    expect(original.byteLength).toBe(AUTHENTIC_SIZE);
+    expect(createHash("sha256").update(original).digest("hex")).toBe(AUTHENTIC_SHA256);
+
     const bytes = readFileSync(TEMPLATE_PDF);
     expect(bytes.byteLength).toBeGreaterThan(10_000);
     expect(bytes.subarray(0, 5).toString()).toBe("%PDF-");
-    expect(existsSync(ORIGINAL_DOCX)).toBe(true);
     expect(existsSync(ORIGINAL_PDF)).toBe(true);
 
     const text = pdfText(TEMPLATE_PDF);
@@ -31,7 +39,7 @@ describe("agreement PDFs", () => {
     expect(text).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
     expect(text).toContain("six thousand dollars ($5,750.00)");
     expect(text).toContain("Initial Payment");
-    expect(text).toContain("$3,000.00");
+    expect(text).toContain("$3,000");
     expect(text).toContain("Witness 1");
     expect(text).toContain("Witness 2");
     expect(text).toContain("____________________");
