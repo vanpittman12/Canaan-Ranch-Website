@@ -181,4 +181,19 @@ describe("engagement status machine", () => {
     expect(executed.docusign.lastMessage).toMatch(/DocuSign: envelope completed/i);
     expect(executed.effectiveDate).toBe("2026-06-02");
   });
+
+  it("prefers the Buyer Date Signed over the artifact upload time for Effective Date", () => {
+    const pending = applySubmit(draft(), "docusign");
+    const accepted = applyReview(pending, "accept", "");
+    const executed = applyDocuSignCompleted(
+      accepted,
+      {
+        ...artifact(),
+        uploadedAt: "2026-06-03T16:00:00.000Z",
+      },
+      undefined,
+      "2026-06-02T09:15:00.000Z",
+    );
+    expect(executed.effectiveDate).toBe("2026-06-02");
+  });
 });

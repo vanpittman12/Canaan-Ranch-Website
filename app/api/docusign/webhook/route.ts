@@ -37,7 +37,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    await syncLiveEnvelope(engagement, event.status ?? event.event);
+    await syncLiveEnvelope(
+      engagement,
+      event.status ?? event.event,
+      undefined,
+      event.buyerSignedDateTime ?? event.completedDateTime,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to apply DocuSign status.";
     return new Response(message, { status: 500 });

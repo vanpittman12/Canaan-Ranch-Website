@@ -188,6 +188,7 @@ export function applyDocuSignCompleted(
   engagement: Engagement,
   artifact: SignedArtifact,
   message?: string,
+  signedAt?: string,
 ): Engagement {
   if (engagement.status !== "accepted" && engagement.status !== "executed") {
     throw new EngagementError(
@@ -201,7 +202,7 @@ export function applyDocuSignCompleted(
     signedArtifact: artifact,
     status: "executed",
     executedAt: engagement.executedAt ?? now,
-    effectiveDate: stampEffectiveDate(engagement, artifact.uploadedAt ?? now),
+    effectiveDate: stampEffectiveDate(engagement, signedAt ?? artifact.uploadedAt ?? now),
     updatedAt: now,
     docusign: {
       ...engagement.docusign,

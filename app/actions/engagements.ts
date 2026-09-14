@@ -9,6 +9,7 @@ import {
   canCustomerEdit,
   EngagementError,
 } from "@/lib/engagement";
+import { persistExecutedAgreement } from "@/lib/executed-agreement";
 import { persistAndNotifyNewEngagement } from "@/lib/notify";
 import {
   createEngagementRecord,
@@ -143,6 +144,7 @@ export async function uploadSignedCopy(
       sizeBytes: file.size,
     }),
   );
+  await persistExecutedAgreement(next);
   await saveEngagement(next);
 
   revalidatePath(`/engagements/${engagementId}`);

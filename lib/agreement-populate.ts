@@ -14,8 +14,8 @@ import {
   populatedAgreementFilename,
 } from "./agreement-template";
 import { brand, getSellerWitness } from "./brand";
-import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
-import { dealEconomics, numberToWords } from "./money";
+import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
+import { addOneYear, dealEconomics, formatFormalDate, formatLongDate, numberToWords } from "./money";
 import type { Engagement } from "./types";
 
 const DOCUMENT_XML = "word/document.xml";
@@ -43,9 +43,14 @@ export const AGREEMENT_FIELD_MAP = [
   { placeholder: "By: (buyer)", source: "intake.buyerAttention" },
 ] as const;
 
+/** Van’s opening leftover: “entered into this  day of, 2024,” */
+export const EFFECTIVE_DATE_LEFTOVER = "this  day of, 2024";
+/** Van’s Term leftover paragraph starts “, 202 , referred to herein as the “Expiration Date.”” */
+export const EXPIRATION_DATE_LEFTOVER = ", 202 ,";
+
 export const AGREEMENT_UNMAPPED_GAPS = [
-  "Effective Date leftover (“this  day of, 2024”) — not an intake field; stamped only after the Buyer signs",
-  "Expiration leftover (“, 202 ,”) — derived from Effective Date, not intake",
+  "Effective Date leftover (“this  day of, 2024”) — not an intake field; stamped from the Buyer’s Date Signed after they sign (DocuSign complete or manual upload), never from Accept or intake",
+  "Expiration leftover (“, 202 ,”) — derived as addOneYear(Effective Date) and stamped into the stored/regenerated Word after complete; DocuSign cannot formula-fill Date Signed + 1 year on this leftover",
   "Buyer email — Van’s notice block has name / address / phone only",
   "Buyer title (“Its:”) — not collected on intake",
   "Relocation county — no matching blank in the Word file",
@@ -83,6 +88,29 @@ export function canaanAgentFill() {
   return `${brand.agentName} Attention: ${brand.agentContact}`;
 }
 
+/**
+ * Fill Van’s “this  day of, 2024” leftover. formatFormalDate is
+ * “the 15th day of April, 2026”; the leftover already starts with “this”.
+ */
+export function formatEffectiveDateStamp(isoDate: string) {
+  return `this ${formatFormalDate(isoDate).replace(/^the /, "")}`;
+}
+
+/** Fill Van’s “, 202 ,” leftover as “April 15, 2027,” (Effective + 1 year). */
+export function formatExpirationDateStamp(isoDate: string) {
+  return `${formatLongDate(addOneYear(isoDate))},`;
+}
+
+export function buildAgreementDateStamps(engagement: Engagement): Array<[string, string]> {
+  if (!engagement.effectiveDate) {
+    return [];
+  }
+  return [
+    [EFFECTIVE_DATE_LEFTOVER, formatEffectiveDateStamp(engagement.effectiveDate)],
+    [EXPIRATION_DATE_LEFTOVER, formatExpirationDateStamp(engagement.effectiveDate)],
+  ];
+}
+
 export function buildAgreementReplacements(engagement: Engagement): Array<[string, string]> {
   const { intake } = engagement;
   const economics = dealEconomics(intake);
@@ -95,6 +123,7 @@ export function buildAgreementReplacements(engagement: Engagement): Array<[strin
     [BUYER_CITY_LINE, `${intake.buyerCity}, ${intake.buyerState} ${intake.buyerPostalCode}`],
     [BUYER_PHONE, intake.buyerPhone],
     [CANAAN_AGENT_BLANK, canaanAgentFill()],
+    ...buildAgreementDateStamps(engagement),
   ];
 }
 
@@ -171,7 +200,7 @@ export function populateDocumentXml(xml: string, engagement: Engagement): string
     }
 
     let result = next === text ? paragraph : rewriteParagraphText(paragraph, next);
-    const anchors = anchorsForParagraph(text, witnessSignatureIndex);
+    const anchors = anchorsForParagraph(text, witnessSignatureIndex, engagement);
     if (anchors.length > 0) {
       result = appendHiddenAnchors(result, anchors);
     }
@@ -206,7 +235,14 @@ function isWitnessSignatureParagraph(text: string) {
   return /^(Witness(?:\s*1)?\s+Signature)$/i.test(compact);
 }
 
-function anchorsForParagraph(text: string, witnessSignatureIndex: number) {
+function anchorsForParagraph(
+  text: string,
+  witnessSignatureIndex: number,
+  engagement: Engagement,
+) {
+  if (!engagement.effectiveDate && text.includes(EFFECTIVE_DATE_LEFTOVER)) {
+    return [EFFECTIVE_DATE_SIGNED_ANCHOR];
+  }
   const compact = text.replace(/\s+/g, " ").trim();
   if (compact.includes("By: Name: Andrew V. Pittman, Jr.")) {
     return [DOCUSIGN_ANCHORS.seller_signer.sign, DOCUSIGN_ANCHORS.seller_signer.date];
