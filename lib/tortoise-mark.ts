@@ -1,19 +1,29 @@
 /**
- * Gopher tortoise mark geometry (Gopherus polyphemus).
- * Side profile, facing right — bold enough to read at 24–40px.
- * Shared by the header lockup and the generated favicon.
+ * Gopher tortoise mark (Gopherus polyphemus).
+ * Engraved side profile — oblong carapace, shovel head, columnar digging legs.
+ * Stroke-led so it reads as a stewardship seal at 24–40px, not a filled emoji.
  */
 export const TORTOISE_VIEWBOX = "0 0 64 64";
 
-/** Unified walking silhouette: shell, head, two legs. */
-export const TORTOISE_BODY_PATH =
-  "M12.2 35.2C11.6 29.4 15.2 22.6 22.4 18.8C28.2 15.8 36.2 15.2 43.4 17.6C48.8 19.4 52.6 23.6 53.6 28.6C54.8 28.2 56.4 28.4 57.8 29.6C60.4 31.8 60.6 35.8 58.2 38.2C56.4 40 53.6 40.4 51.6 39.2C50.8 40.2 49.4 40.8 47.6 41C48.2 45.6 48.8 49.4 47.6 51.8C46.4 54.2 42.8 54.4 41.8 51.6C41 49.2 41.4 45.6 41.2 42.2L23.6 42.2C23 45.8 22.2 49.2 22.6 51.6C23 54.2 19.4 54.6 18.4 51.8C17.4 49 18.4 45.4 19.2 42C16.2 41.2 13.4 39.4 12.2 35.2Z";
+export const TORTOISE_SHELL_PATH =
+  "M9.5 34.8C9.8 26.4 17.6 19.2 30.2 18C41.6 16.8 50 21.2 52.2 28.6C53.2 31.8 52.2 34.8 49 36.6C44.8 38.8 17.6 39 12.4 37.2C10.6 36.6 9.4 35.8 9.5 34.8Z";
 
-/** Concentric / transverse scutes — engraved lines, not cartoon plating. */
+export const TORTOISE_HEAD_PATH =
+  "M50.4 28.2C54.8 26.2 60.6 27.6 62 31.6C63.2 35.2 60.6 38.8 56.2 39.2C53.2 39.4 51.2 37.4 50.2 35C49.6 33.2 49.6 30.6 50.4 28.2Z";
+
+export const TORTOISE_FORELEG_PATH = "M41.2 37.2C42.4 42.6 43.6 48.2 43.2 52";
+export const TORTOISE_HINDLEG_PATH = "M19.4 37.6C18 43 16.6 48.4 17.2 52";
+
+export const TORTOISE_TAIL_PATH = "M10 35.4C8.2 36.4 7 37.8 6.6 39.4";
+
 export const TORTOISE_SCUTE_PATHS = [
-  "M20.5 27.5C26 22.8 33.5 21.6 41.2 23.8C45.2 25 48.2 27.2 50 29.8",
-  "M18.8 33.2C25.4 29.6 33.2 28.6 42.4 31.2C45.8 32.2 48.4 34 50.2 36",
-  "M31.6 19.2C31.2 24.4 31.4 30.2 32.2 36.4",
+  "M16.4 28.6C24 23.4 33.8 22.2 44.6 25C47.8 26 50.2 27.6 51.6 29.6",
+  "M14.2 33.6C23.2 30.6 34 30 45.6 32.8C48.2 33.6 50 34.8 51.2 36",
+  "M23.8 20.6C23.4 25.8 23.6 31.2 24.4 36.8",
+  "M32.6 18.8C32.2 25 32.4 31 33.2 37.2",
+  "M41.2 20.6C41 26 41.4 31.4 42.4 36.6",
 ] as const;
 
-export const TORTOISE_EYE = { cx: 55.6, cy: 33.2, r: 1.05 } as const;
+export const TORTOISE_SCALE_PATHS = ["M40.4 43.2H44", "M40.2 47.6H44.2", "M17.2 43.6H20.8", "M16.6 47.8H20.6"] as const;
+
+export const TORTOISE_EYE = { cx: 57.4, cy: 32.2, r: 1.15 } as const;

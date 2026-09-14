@@ -288,25 +288,25 @@ body {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    115deg,
+    118deg,
     #16241c 0%,
-    #1c2d24 26%,
-    #24352a 46%,
-    #3a4530 64%,
-    #6b5c38 82%,
-    #8f7a45 100%
+    #203328 32%,
+    #3d4a32 54%,
+    #8a7348 76%,
+    #c4a15a 92%,
+    #e0d0b4 100%
   );
 }
 
 .habitat-sun {
   position: absolute;
-  top: 8%;
-  right: 16%;
-  width: 11rem;
-  height: 11rem;
+  top: 6%;
+  right: 14%;
+  width: 14rem;
+  height: 14rem;
   border-radius: 999px;
-  background: radial-gradient(circle, #c4a15a 0%, rgba(196, 161, 90, 0.38) 38%, transparent 72%);
-  opacity: 0.62;
+  background: radial-gradient(circle, #efe6d4 0%, #c4a15a 28%, rgba(196, 161, 90, 0.28) 52%, transparent 74%);
+  opacity: 0.8;
 }
 
 .habitat-grain {
@@ -318,14 +318,28 @@ body {
   background-size: 180px 180px;
 }
 
+.habitat-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 48%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(138, 115, 72, 0.28) 42%,
+    rgba(224, 208, 180, 0.3) 100%
+  );
+}
+
 .habitat-scrim {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     90deg,
-    rgba(22, 36, 28, 0.74) 0%,
-    rgba(22, 36, 28, 0.32) 54%,
-    rgba(22, 36, 28, 0.08) 100%
+    rgba(22, 36, 28, 0.52) 0%,
+    rgba(22, 36, 28, 0.12) 44%,
+    rgba(22, 36, 28, 0) 70%
   );
 }
 

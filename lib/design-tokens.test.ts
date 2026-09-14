@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { brand } from "./brand";
-import { TORTOISE_BODY_PATH } from "./tortoise-mark";
+import { TORTOISE_SHELL_PATH } from "./tortoise-mark";
 
 const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
@@ -38,9 +38,10 @@ describe("site builder visual lock", () => {
 
   it("uses a gopher tortoise mark and recipient-site lockup", () => {
     expect(mark).toContain("gopher-tortoise");
-    expect(mark).toContain("TORTOISE_BODY_PATH");
-    expect(TORTOISE_BODY_PATH.startsWith("M")).toBe(true);
-    expect(TORTOISE_BODY_PATH.endsWith("Z")).toBe(true);
+    expect(mark).toContain("TORTOISE_SHELL_PATH");
+    expect(mark).toContain("TORTOISE_SCUTE_PATHS");
+    expect(TORTOISE_SHELL_PATH.startsWith("M")).toBe(true);
+    expect(TORTOISE_SHELL_PATH.endsWith("Z")).toBe(true);
     expect(header).toContain("BrandLockup");
     expect(brand.lockupLine).toBe("Recipient site");
     expect(brand.habitatLine.toLowerCase()).toContain("longleaf");
@@ -49,10 +50,11 @@ describe("site builder visual lock", () => {
 
   it("draws longleaf pine, wiregrass, and a burrow on the sandhill", () => {
     expect(habitat).toContain("Longleaf");
-    expect(habitat).toContain("Wiregrass");
+    expect(habitat).toContain("WiregrassClump");
     expect(habitat).toContain("Burrow");
     expect(habitat).toContain("HabitatTortoise");
     expect(css).toContain(".habitat-sky");
+    expect(css).toContain(".habitat-ground");
     expect(css).toContain(".habitat-scrim");
   });
 
