@@ -12,7 +12,7 @@ export function BrandLockup({
 
   return (
     <span className="flex min-w-0 items-center gap-3">
-      <BrandMark className="h-11 w-11 shrink-0" light={light} framed={light} />
+      <BrandMark className="h-12 w-auto shrink-0" plate={light} />
       <span className="min-w-0 leading-tight">
         <span
           className={`block truncate font-serif text-xl tracking-tight ${light ? "text-cream" : "text-forest"}`}

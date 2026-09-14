@@ -19,7 +19,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | --- | --- |
 | `/` | Public landing |
 | `/intake` | Buyer intake |
-| `/api/agreement-template` | Blank / template agreement PDF (Van’s original Word contract, yellow intake blanks — not the `lib/contract.ts` form) |
+| `/api/agreement-template` | Blank / template agreement Word file (Van’s uploaded .docx — not the `lib/contract.ts` form) |
 | `/engagements/[id]` | Download populated PDF, signing choice, status |
 | `/admin/login` | Team sign-in |
 | `/admin` | Review queue |

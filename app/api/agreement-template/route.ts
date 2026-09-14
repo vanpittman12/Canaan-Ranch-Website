@@ -1,11 +1,14 @@
 /**
- * Serves Van’s Word-derived blank agreement (yellow intake fill-ins).
- * Redirects to the static public PDF so Workers can serve it as an asset.
+ * Serves Van’s uploaded blank agreement as a Word attachment.
+ * Redirects to the static public DOCX so Workers can serve it as an asset.
  * Populated engagement PDFs still come from generateContractPdf.
  */
 export async function GET(request: Request) {
   return Response.redirect(
-    new URL("/agreements/canaan-preserve-relocation-agreement-template.pdf", request.url),
+    new URL(
+      "/agreements/Canaan-Preserve-Relocation-Agreement-template.docx",
+      request.url,
+    ),
     307,
   );
 }

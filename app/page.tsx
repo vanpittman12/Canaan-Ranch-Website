@@ -49,7 +49,7 @@ export default function Home() {
           <SandhillHabitat />
           <div className="relative mx-auto w-full max-w-6xl px-5 pt-16 sm:px-8 lg:min-h-[34rem] lg:pt-24">
             <div className="max-w-2xl">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+              <p className="text-[13px] font-semibold tracking-wide text-brass">
                 {brand.habitatLine}
               </p>
               <div className="mt-4">

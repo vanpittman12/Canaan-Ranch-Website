@@ -1,15 +1,27 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { brand } from "./brand";
-import { PINE_NEEDLE_PATHS, PINE_TRUNK_PATH, WIREGRASS_PATHS } from "./pine-mark";
+import {
+  BRAND_MARK_BYTE_LENGTH,
+  BRAND_MARK_FILE,
+  BRAND_MARK_FOREST,
+  BRAND_MARK_GOLD,
+  BRAND_MARK_SHA256,
+  BRAND_MARK_SRC,
+  BRAND_MARK_VIEWBOX,
+} from "./brand-mark-asset";
 
 const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
 const mark = readFileSync(path.join(process.cwd(), "components/brand-mark.tsx"), "utf8");
+const markAsset = readFileSync(path.join(process.cwd(), "lib/brand-mark-asset.ts"), "utf8");
+const lockup = readFileSync(path.join(process.cwd(), "components/brand-lockup.tsx"), "utf8");
 const header = readFileSync(path.join(process.cwd(), "components/site-header.tsx"), "utf8");
 const habitat = readFileSync(path.join(process.cwd(), "components/sandhill-habitat.tsx"), "utf8");
-const icon = readFileSync(path.join(process.cwd(), "app/icon.svg"), "utf8");
+const icon = readFileSync(path.join(process.cwd(), "app/icon.tsx"), "utf8");
+const appleIcon = readFileSync(path.join(process.cwd(), "app/apple-icon.tsx"), "utf8");
 const marketingSurfaces = [landing, habitat, mark, header, icon, brand.habitatLine];
 
 describe("site builder visual lock", () => {
@@ -38,31 +50,39 @@ describe("site builder visual lock", () => {
     expect(landing).toContain("habitatLine");
   });
 
-  it("uses a longleaf pine and wiregrass mark and recipient-site lockup", () => {
-    expect(mark).toContain("longleaf-pine");
-    expect(mark).toContain("PINE_TRUNK_PATH");
-    expect(mark).toContain("PINE_NEEDLE_PATHS");
-    expect(mark).toContain("WIREGRASS_PATHS");
+  it("uses Van’s longleaf pine and wiregrass mark and recipient-site lockup", () => {
+    const svg = readFileSync(path.join(process.cwd(), BRAND_MARK_FILE));
+    expect(svg.byteLength).toBe(BRAND_MARK_BYTE_LENGTH);
+    expect(createHash("sha256").update(svg).digest("hex")).toBe(BRAND_MARK_SHA256);
+    expect(svg.includes(`viewBox="${BRAND_MARK_VIEWBOX}"`)).toBe(true);
+    expect(svg.includes(BRAND_MARK_FOREST)).toBe(true);
+    expect(svg.includes(BRAND_MARK_GOLD)).toBe(true);
+    expect(markAsset).toContain(BRAND_MARK_SRC);
+    expect(mark).toContain("BRAND_MARK_SRC");
+    expect(mark).toContain("canaan-preserve");
+    expect(mark).toContain("<img");
+    expect(mark).not.toContain("longleaf-pine");
+    expect(mark).not.toContain("PINE_TRUNK_PATH");
     expect(mark).not.toContain("gopher-tortoise");
     expect(mark).not.toContain("TORTOISE_");
-    expect(PINE_TRUNK_PATH.startsWith("M")).toBe(true);
-    expect(PINE_NEEDLE_PATHS.length).toBeGreaterThanOrEqual(5);
-    expect(WIREGRASS_PATHS.length).toBeGreaterThanOrEqual(3);
-    expect(icon).toContain("M32 16 V46");
+    expect(icon).toContain("BRAND_MARK_FILE");
     expect(icon).not.toContain("TORTOISE");
+    expect(appleIcon).toContain("BRAND_MARK_FILE");
+    expect(markAsset).toContain(BRAND_MARK_FILE);
     expect(header).toContain("BrandLockup");
+    expect(lockup).toContain("h-12 w-auto");
     expect(brand.lockupLine).toBe("Recipient site");
-    expect(brand.habitatLine.toLowerCase()).toBe("longleaf pine & wiregrass");
+    expect(brand.habitatLine).toBe("the ecologically pristine recipient site in Florida");
   });
 
-  it("omits a place or county from the hero habitat line", () => {
+  it("uses Van’s Florida hero line without a county", () => {
     for (const surface of marketingSurfaces) {
       expect(surface.toLowerCase()).not.toContain("pasco");
     }
-    expect(brand.habitatLine.toLowerCase()).not.toContain("florida");
+    expect(brand.habitatLine).toBe("the ecologically pristine recipient site in Florida");
+    expect(brand.habitatLine).toContain("Florida");
     expect(brand.habitatLine.toLowerCase()).not.toMatch(/\bcounty\b/);
-    expect(brand.habitatLine.toLowerCase()).toContain("longleaf");
-    expect(brand.habitatLine.toLowerCase()).toContain("wiregrass");
+    expect(landing).toContain("{brand.habitatLine}");
   });
 
   it("draws longleaf pine and wiregrass on the sandhill without a cartoon tortoise", () => {

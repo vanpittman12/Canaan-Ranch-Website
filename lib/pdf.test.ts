@@ -1,61 +1,44 @@
 import { createHash } from "node:crypto";
-import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { generateContractPdf } from "./pdf";
 import { buildTemplateEngagement } from "./contract";
 
-const AUTHENTIC_SHA256 =
-  "5711a4abeb62609bbcc63b3df578a60fb3bb2a2ef8838c3836be363903692412";
-const AUTHENTIC_SIZE = 73031;
+const BLANK_DOCX_SHA256 =
+  "0eb11197f8e2097ca18bab315ba557e4a3939d6eab20e354b9357aa7af0c362f";
+const BLANK_DOCX_SIZE = 66615;
 
-const TEMPLATE_PDF = resolve(
+const TEMPLATE_DOCX = resolve(
   process.cwd(),
-  "public/agreements/canaan-preserve-relocation-agreement-template.pdf",
+  "public/agreements/Canaan-Preserve-Relocation-Agreement-template.docx",
 );
-const ORIGINAL_DOCX = resolve(process.cwd(), "content/agreements/van-original.docx");
-const ORIGINAL_PDF = resolve(process.cwd(), "content/agreements/van-original.pdf");
 const TEMPLATE_ROUTE = resolve(process.cwd(), "app/api/agreement-template/route.ts");
+const PUBLIC_HEADERS = resolve(process.cwd(), "public/_headers");
 
-function pdfText(path: string) {
-  return execFileSync("pdftotext", ["-layout", path, "-"], { encoding: "utf8" });
-}
-
-describe("agreement PDFs", () => {
-  it("ships Van’s Word-derived blank template as a static PDF", () => {
-    const original = readFileSync(ORIGINAL_DOCX);
-    expect(original.byteLength).toBe(AUTHENTIC_SIZE);
-    expect(createHash("sha256").update(original).digest("hex")).toBe(AUTHENTIC_SHA256);
-
-    const bytes = readFileSync(TEMPLATE_PDF);
-    expect(bytes.byteLength).toBeGreaterThan(10_000);
-    expect(bytes.subarray(0, 5).toString()).toBe("%PDF-");
-    expect(existsSync(ORIGINAL_PDF)).toBe(true);
-
-    const text = pdfText(TEMPLATE_PDF);
-    expect(text).toContain("Post Oak Preserve");
-    expect(text).toContain("Post Oak Partners, LLC");
-    expect(text).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
-    expect(text).toContain("six thousand dollars ($5,750.00)");
-    expect(text).toContain("Initial Payment");
-    expect(text).toContain("$3,000");
-    expect(text).toContain("Witness 1");
-    expect(text).toContain("Witness 2");
-    expect(text).toContain("____________________");
-    expect(text).not.toContain("Bio-Tech");
-    expect(text).not.toContain("seventeen (17)");
-    expect(text).not.toContain("$102,000.00");
-    expect(text).not.toContain("Canaan Ranch");
-    expect(text).not.toContain("Canaan Preserve");
+describe("agreement templates", () => {
+  it("ships Van’s uploaded blank agreement as exact Word bytes", () => {
+    const bytes = readFileSync(TEMPLATE_DOCX);
+    expect(bytes.byteLength).toBe(BLANK_DOCX_SIZE);
+    expect(createHash("sha256").update(bytes).digest("hex")).toBe(BLANK_DOCX_SHA256);
+    expect(bytes.subarray(0, 2).toString()).toBe("PK");
   });
 
-  it("does not generate the blank template from lib/contract.ts or node:fs", () => {
+  it("307s the blank template to the static Word file, not the yellow PDF", () => {
     const src = readFileSync(TEMPLATE_ROUTE, "utf8");
+    const headers = readFileSync(PUBLIC_HEADERS, "utf8");
+    expect(src).toContain("/agreements/Canaan-Preserve-Relocation-Agreement-template.docx");
+    expect(src).toContain("Response.redirect");
+    expect(src).toContain("307");
+    expect(src).not.toContain("canaan-preserve-relocation-agreement-template.pdf");
+    expect(src).not.toContain("readFileSync");
+    expect(src).not.toMatch(/from ["']node:fs["']/);
     expect(src).not.toContain("generateTemplateAgreementPdf");
     expect(src).not.toMatch(/from ["']@\/lib\/(pdf|contract)["']/);
-    expect(src).not.toMatch(/from ["']node:fs["']/);
-    expect(src).toContain("/agreements/canaan-preserve-relocation-agreement-template.pdf");
+    expect(headers).toContain("/agreements/Canaan-Preserve-Relocation-Agreement-template.docx");
+    expect(headers).toContain(
+      'Content-Disposition: attachment; filename="Canaan-Preserve-Relocation-Agreement-template.docx"',
+    );
   });
 
   it("still builds a populated engagement PDF from generateContractPdf", async () => {
