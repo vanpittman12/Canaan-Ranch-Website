@@ -1,15 +1,20 @@
 /**
  * Fill intake values into Van’s Word agreement without rewriting the legal body.
- * Operates on a copy of the blank DOCX bytes (ZIP + word/document.xml).
+ * Operates on Van’s blank DOCX (ZIP + word/document.xml).
+ *
+ * Cloudflare Workers: avoid repeated inflate/deflate of the 424KB document.xml.
+ * generatePopulatedAgreement() reuses cached unzipped parts and zips at store
+ * level so contract download / Accept stay under CPU limits (Error 1102).
  */
 import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import {
-  loadBlankAgreementTemplate,
+  loadBlankAgreementParts,
   POPULATED_AGREEMENT_MIME,
+  POPULATED_ZIP_LEVEL,
   populatedAgreementFilename,
 } from "./agreement-template";
 import { brand, getSellerWitness } from "./brand";
-import { DOCUSIGN_ANCHORS } from "./docusign";
+import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
 import { dealEconomics, numberToWords } from "./money";
 import type { Engagement } from "./types";
 
@@ -98,20 +103,40 @@ export function populateAgreementDocx(
   engagement: Engagement,
 ): Uint8Array {
   const files = unzipSync(templateBytes);
+  return zipPopulatedParts(files, engagement);
+}
+
+/**
+ * Workers-safe populate: reuse cached unzipped parts and re-zip at store
+ * level (no deflate). Only word/document.xml is replaced; other entries are
+ * shared immutable views from the isolate cache.
+ */
+export function populateAgreementFromParts(
+  parts: Record<string, Uint8Array>,
+  engagement: Engagement,
+): Uint8Array {
+  return zipPopulatedParts({ ...parts }, engagement);
+}
+
+function zipPopulatedParts(
+  files: Record<string, Uint8Array>,
+  engagement: Engagement,
+): Uint8Array {
   const xmlFile = files[DOCUMENT_XML];
   if (!xmlFile) {
     throw new Error("Van’s agreement template is missing word/document.xml.");
   }
   files[DOCUMENT_XML] = strToU8(populateDocumentXml(strFromU8(xmlFile), engagement));
-  return zipSync(files);
+  // level 0 (store) — deflating the 424KB document.xml was the Error 1102 culprit.
+  return zipSync(files, { level: POPULATED_ZIP_LEVEL });
 }
 
 export async function generatePopulatedAgreement(
   engagement: Engagement,
 ): Promise<PopulatedAgreement> {
-  const template = await loadBlankAgreementTemplate();
+  const parts = await loadBlankAgreementParts();
   return {
-    bytes: populateAgreementDocx(template, engagement),
+    bytes: populateAgreementFromParts(parts, engagement),
     filename: populatedAgreementFilename(engagement.reference),
     mimeType: POPULATED_AGREEMENT_MIME,
     fileExtension: "docx",

@@ -8,15 +8,19 @@ import {
   extractDocxPlainText,
   generatePopulatedAgreement,
   populateAgreementDocx,
+  populateAgreementFromParts,
 } from "./agreement-populate";
 import {
   BLANK_AGREEMENT_DOCX_SHA256,
   BLANK_AGREEMENT_DOCX_SIZE,
   BLANK_AGREEMENT_PUBLIC_FILE,
   POPULATED_AGREEMENT_MIME,
+  POPULATED_ZIP_LEVEL,
+  loadBlankAgreementParts,
+  resetBlankAgreementTemplateCache,
 } from "./agreement-template";
 import { brand } from "./brand";
-import { DOCUSIGN_ANCHORS } from "./docusign";
+import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
 import type { Engagement, IntakeFields } from "./types";
 
 const TEMPLATE_DOCX = resolve(process.cwd(), BLANK_AGREEMENT_PUBLIC_FILE);
@@ -156,6 +160,30 @@ describe("Van’s Word agreement populate", () => {
     expect(contractSrc).not.toContain("generateContractPdf");
     expect(adminSrc).toContain("generatePopulatedAgreement");
     expect(adminSrc).not.toMatch(/bytes:\s*await generateContractPdf/);
+  });
+
+
+  it("stays Workers-safe: cached parts + store-level zip, no docusign crypto import", async () => {
+    resetBlankAgreementTemplateCache();
+    const parts = await loadBlankAgreementParts();
+    const again = await loadBlankAgreementParts();
+    expect(again).toBe(parts);
+    expect(POPULATED_ZIP_LEVEL).toBe(0);
+
+    const populated = populateAgreementFromParts(parts, engagement());
+    expect(Buffer.from(populated.subarray(0, 2)).toString()).toBe("PK");
+    expect(extractDocxPlainText(populated)).toContain("Suncoast Land Partners LLC");
+
+    const populateSrc = readFileSync(resolve(process.cwd(), "lib/agreement-populate.ts"), "utf8");
+    expect(populateSrc).toContain('from "./docusign-anchors"');
+    expect(populateSrc).not.toMatch(/from ["']\.\/docusign["']/);
+    expect(populateSrc).toContain("POPULATED_ZIP_LEVEL");
+    expect(populateSrc).toContain("loadBlankAgreementParts");
+
+    const adminSrc = readFileSync(ADMIN_ACTIONS, "utf8");
+    expect(adminSrc.indexOf("await saveEngagement(next)")).toBeLessThan(
+      adminSrc.indexOf("generatePopulatedAgreement(next)"),
+    );
   });
 
   it("documents the Word blanks that intake cannot fill yet", () => {
