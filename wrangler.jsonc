@@ -11,10 +11,6 @@
   "observability": {
     "enabled": true
   },
-  // Paid Workers default is 30s; raise headroom for Accept (populate + DocuSign JWT).
-  "limits": {
-    "cpu_ms": 60000
-  },
   "vars": {
     "STORAGE_ADAPTER": "cloudflare",
     "DOCUSIGN_ENABLED": "true",
