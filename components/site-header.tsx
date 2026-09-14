@@ -38,7 +38,7 @@ export function SiteHeader({
                 href="/api/agreement-template"
                 className="hidden min-h-11 items-center hover:text-forest sm:inline-flex"
               >
-                Blank PDF
+                Blank agreement
               </a>
               <Link href="/intake" className="btn-primary !px-3 text-sm sm:!px-4">
                 Start intake

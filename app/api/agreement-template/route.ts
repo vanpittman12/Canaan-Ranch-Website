@@ -1,11 +1,23 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
+const FILENAME = "Canaan-Preserve-Relocation-Agreement-template.docx";
+const MIME =
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
 /**
- * Serves Van’s Word-derived blank agreement (yellow intake fill-ins).
- * Redirects to the static public PDF so Workers can serve it as an asset.
+ * Serves Van’s uploaded blank agreement as a Word attachment.
  * Populated engagement PDFs still come from generateContractPdf.
  */
-export async function GET(request: Request) {
-  return Response.redirect(
-    new URL("/agreements/canaan-preserve-relocation-agreement-template.pdf", request.url),
-    307,
+export async function GET() {
+  const body = readFileSync(
+    path.join(process.cwd(), "public/agreements", FILENAME),
   );
+  return new Response(body, {
+    headers: {
+      "Content-Type": MIME,
+      "Content-Disposition": `attachment; filename="${FILENAME}"`,
+      "Cache-Control": "public, max-age=300",
+    },
+  });
 }

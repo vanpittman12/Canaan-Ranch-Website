@@ -16,7 +16,7 @@ export function TemplateDownloadButton({
 
   return (
     <a className={`${styles} ${className}`.trim()} href={TEMPLATE_AGREEMENT_PATH}>
-      Download blank agreement PDF
+      Download blank agreement
     </a>
   );
 }
