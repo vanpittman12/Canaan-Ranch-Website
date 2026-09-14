@@ -49,9 +49,9 @@ export const MAP_OVERLAY = {
   outsideOpacity: 0.4,
   outline: "#24352a",
   cutoff: "#c4a15a",
-  cutoffHalo: "#f7f1e6",
-  cutoffWidth: 3.75,
-  cutoffHaloWidth: 7,
+  cutoffHalo: "#24352a",
+  cutoffWidth: 4,
+  cutoffHaloWidth: 8,
 } as const;
 
 export type MapLabelSide = "left" | "right" | "top" | "bottom";

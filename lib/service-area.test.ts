@@ -132,6 +132,7 @@ describe("service area map", () => {
     expect(cutoffY - canaanY).toBeGreaterThan(120);
     expect(tampaY).toBeGreaterThan(cutoffY);
     expect(MAP_OVERLAY.cutoffWidth).toBeGreaterThanOrEqual(3.5);
+    expect(MAP_OVERLAY.cutoffHalo).toBe("#24352a");
     expect(mapModule).toContain("cutoffHaloWidth");
     expect(mapModule).toContain("cutoffWidth");
     expect(mapLib).not.toContain("28.33");
