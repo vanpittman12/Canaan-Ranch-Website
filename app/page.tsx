@@ -45,11 +45,16 @@ export default function Home() {
     <>
       <SiteHeader />
       <main>
-        <section className="relative overflow-hidden border-b border-line bg-forest text-cream">
+        <section className="relative overflow-hidden border-b border-line bg-forest-deep text-cream">
           <SandhillHabitat />
-          <div className="relative mx-auto w-full max-w-6xl px-5 pt-16 sm:px-8 lg:pt-20">
-            <div className="max-w-2xl rounded-[16px] border border-line/40 bg-forest p-6 sm:p-8">
-              <FwcBadge onForest />
+          <div className="relative mx-auto w-full max-w-6xl px-5 pt-16 sm:px-8 lg:pt-24">
+            <div className="max-w-2xl">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+                {brand.habitatLine}
+              </p>
+              <div className="mt-4">
+                <FwcBadge onForest />
+              </div>
               <h1 className="type-h1 mt-5 max-w-xl text-cream">
                 Start relocation intake for a clear recipient-site agreement.
               </h1>
@@ -70,7 +75,7 @@ export default function Home() {
               </div>
             </div>
 
-            <dl className="mt-10 grid gap-px overflow-hidden rounded-t-[16px] border border-b-0 border-line/30 bg-forest-deep sm:grid-cols-4">
+            <dl className="mt-16 grid gap-px overflow-hidden rounded-t-[16px] border border-b-0 border-line/30 bg-forest-deep/80 sm:grid-cols-4">
               {facts.map((fact) => (
                 <div key={fact.label} className="bg-forest px-5 py-5">
                   <dt className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">

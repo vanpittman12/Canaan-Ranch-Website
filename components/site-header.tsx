@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { brand } from "@/lib/brand";
-import { BrandMark } from "./brand-mark";
+import { BrandLockup } from "./brand-lockup";
 
 export function SiteHeader({
   variant = "public",
@@ -11,15 +11,7 @@ export function SiteHeader({
     <header className="border-b border-line bg-paper">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-8">
         <Link href="/" className="flex min-w-0 items-center gap-3">
-          <BrandMark className="h-10 w-10 shrink-0" />
-          <span className="min-w-0 leading-tight">
-            <span className="block truncate font-serif text-xl tracking-tight text-forest">
-              {brand.name}
-            </span>
-            <span className="block truncate text-[12px] font-semibold uppercase tracking-[0.12em] text-muted">
-              {variant === "admin" ? "Internal review" : brand.legalName}
-            </span>
-          </span>
+          <BrandLockup variant={variant} />
         </Link>
         <nav className="flex shrink-0 items-center gap-3 text-sm text-ink sm:gap-5">
           {variant === "admin" ? (
