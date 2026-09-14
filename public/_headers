@@ -1,2 +1,7 @@
 /_next/static/*
   Cache-Control: public,max-age=31536000,immutable
+
+/agreements/canaan-preserve-relocation-agreement-template.pdf
+  Content-Type: application/pdf
+  Content-Disposition: attachment; filename="canaan-preserve-relocation-agreement-template.pdf"
+  Cache-Control: public, max-age=300
