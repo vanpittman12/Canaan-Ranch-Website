@@ -1,14 +1,11 @@
 import {
-  TORTOISE_EYE,
-  TORTOISE_FORELEG_PATH,
-  TORTOISE_HEAD_PATH,
-  TORTOISE_HINDLEG_PATH,
-  TORTOISE_SCALE_PATHS,
-  TORTOISE_SCUTE_PATHS,
-  TORTOISE_SHELL_PATH,
-  TORTOISE_TAIL_PATH,
-  TORTOISE_VIEWBOX,
-} from "@/lib/tortoise-mark";
+  GROUND_LINE_PATH,
+  PINE_CROWN_NODE,
+  PINE_NEEDLE_PATHS,
+  PINE_TRUNK_PATH,
+  PINE_VIEWBOX,
+  WIREGRASS_PATHS,
+} from "@/lib/pine-mark";
 
 export function BrandMark({
   className = "h-10 w-10",
@@ -26,33 +23,25 @@ export function BrandMark({
   return (
     <svg
       className={className}
-      viewBox={TORTOISE_VIEWBOX}
+      viewBox={PINE_VIEWBOX}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      data-mark="gopher-tortoise"
+      data-mark="longleaf-pine"
     >
       {framed ? <rect x="0" y="0" width="64" height="64" rx="14" fill={field} /> : null}
       {framed ? (
         <rect x="5" y="5" width="54" height="54" rx="11" stroke={brass} strokeWidth="1" opacity="0.75" />
       ) : null}
-      <path d={TORTOISE_SHELL_PATH} fill={ink} fillOpacity="0.14" stroke={ink} strokeWidth="2.15" />
-      <path d={TORTOISE_HEAD_PATH} fill={ink} fillOpacity="0.14" stroke={ink} strokeWidth="2.15" />
-      <path
-        d={TORTOISE_FORELEG_PATH}
-        stroke={ink}
-        strokeWidth="3.3"
-        strokeLinecap="round"
-      />
-      <path d={TORTOISE_HINDLEG_PATH} stroke={ink} strokeWidth="3.3" strokeLinecap="round" />
-      <path d={TORTOISE_TAIL_PATH} stroke={ink} strokeWidth="1.8" strokeLinecap="round" />
-      {TORTOISE_SCUTE_PATHS.map((d) => (
-        <path key={d} d={d} stroke={brass} strokeWidth="1.45" strokeLinecap="round" />
+      <path d={PINE_TRUNK_PATH} stroke={ink} strokeWidth="2.8" strokeLinecap="round" />
+      {PINE_NEEDLE_PATHS.map((d) => (
+        <path key={d} d={d} stroke={ink} strokeWidth="1.8" strokeLinecap="round" />
       ))}
-      {TORTOISE_SCALE_PATHS.map((d) => (
-        <path key={d} d={d} stroke={brass} strokeWidth="1.15" strokeLinecap="round" />
+      <circle cx={PINE_CROWN_NODE.cx} cy={PINE_CROWN_NODE.cy} r={PINE_CROWN_NODE.r} fill={brass} />
+      <path d={GROUND_LINE_PATH} stroke={ink} strokeWidth="1.4" strokeLinecap="round" opacity="0.45" />
+      {WIREGRASS_PATHS.map((d) => (
+        <path key={d} d={d} stroke={brass} strokeWidth="1.6" strokeLinecap="round" />
       ))}
-      <circle cx={TORTOISE_EYE.cx} cy={TORTOISE_EYE.cy} r={TORTOISE_EYE.r} fill={ink} />
     </svg>
   );
 }
