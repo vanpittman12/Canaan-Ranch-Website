@@ -33,7 +33,12 @@ export function UploadSigned({
       {engagement.signedArtifact ? (
         <p className="mt-2 text-sm text-forest">
           On file: {engagement.signedArtifact.filename} (
-          {engagement.signedArtifact.source === "manual_upload" ? "manual upload" : "DocuSign stub"})
+          {engagement.signedArtifact.source === "manual_upload"
+            ? "manual upload"
+            : engagement.signedArtifact.source === "docusign"
+              ? "DocuSign"
+              : "DocuSign stub"}
+          )
         </p>
       ) : null}
       {state.error ? (

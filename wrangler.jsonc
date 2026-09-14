@@ -12,7 +12,10 @@
     "enabled": true
   },
   "vars": {
-    "STORAGE_ADAPTER": "cloudflare"
+    "STORAGE_ADAPTER": "cloudflare",
+    "DOCUSIGN_ENABLED": "false",
+    "DOCUSIGN_ACCOUNT_BASE_URI": "https://demo.docusign.net",
+    "DOCUSIGN_AUTH_SERVER": "https://account-d.docusign.com"
   },
   "services": [
     {

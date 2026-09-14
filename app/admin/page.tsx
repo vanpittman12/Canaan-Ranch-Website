@@ -35,7 +35,10 @@ export default async function AdminQueuePage({
             <h1 className="type-h1 mt-2 text-forest">Review ledger</h1>
             <p className="mt-2 text-sm text-muted">
               {pendingCount} awaiting a decision. Nothing closes without Accept. DocuSign is in{" "}
-              {seam.mode} mode and does not make live API calls.
+              {seam.mode} mode
+              {seam.makesNetworkCalls
+                ? " and sends live envelopes after Accept."
+                : " (local stub — no live API calls)."}
             </p>
           </div>
           <form action={logoutAdmin}>

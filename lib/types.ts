@@ -7,7 +7,8 @@ export type EngagementStatus =
   | "accepted"
   | "executed";
 export type ReviewDecision = "accept" | "request_changes" | "decline";
-export type ArtifactSource = "manual_upload" | "docusign_stub";
+export type ArtifactSource = "manual_upload" | "docusign_stub" | "docusign";
+export type DocuSignMode = "stub" | "live";
 export type DocuSignEnvelopeStatus =
   | "not_sent"
   | "sent"
@@ -54,7 +55,7 @@ export interface EnvelopeRecipient {
 }
 
 export interface DocuSignState {
-  mode: "stub" | "live_placeholder";
+  mode: DocuSignMode;
   envelopeId: string | null;
   status: DocuSignEnvelopeStatus;
   sentAt: string | null;

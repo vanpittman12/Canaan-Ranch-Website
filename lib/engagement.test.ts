@@ -159,5 +159,26 @@ describe("engagement status machine", () => {
     expect(executed.status).toBe("executed");
     expect(executed.docusign.status).toBe("completed");
     expect(executed.effectiveDate).toBe("2026-06-02");
+    expect(executed.docusign.lastMessage).toMatch(/stub/i);
+  });
+
+  it("records a live DocuSign completion message when the envelope mode is live", () => {
+    const pending = applySubmit(draft(), "docusign");
+    const accepted = {
+      ...applyReview(pending, "accept", ""),
+      docusign: {
+        ...pending.docusign,
+        mode: "live" as const,
+        envelopeId: "env-live-1",
+        status: "sent" as const,
+      },
+    };
+    const executed = applyDocuSignCompleted(accepted, {
+      ...artifact(),
+      source: "docusign",
+      uploadedAt: "2026-06-02T09:00:00.000Z",
+    });
+    expect(executed.docusign.lastMessage).toMatch(/DocuSign: envelope completed/i);
+    expect(executed.effectiveDate).toBe("2026-06-02");
   });
 });
