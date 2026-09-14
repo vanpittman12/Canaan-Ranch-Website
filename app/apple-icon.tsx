@@ -1,10 +1,5 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import { ImageResponse } from "next/og";
-import { BRAND_MARK_FILE } from "@/lib/brand-mark-asset";
-
-const mark = readFileSync(path.join(process.cwd(), BRAND_MARK_FILE));
-const src = `data:image/svg+xml;base64,${mark.toString("base64")}`;
+import { BRAND_MARK_DATA_URI } from "@/lib/brand-mark-asset";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -23,7 +18,7 @@ export default function AppleIcon() {
           borderRadius: 40,
         }}
       >
-        <img src={src} width={93} height={150} alt="" />
+        <img src={BRAND_MARK_DATA_URI} width={93} height={150} alt="" />
       </div>
     ),
     size,

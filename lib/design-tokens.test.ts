@@ -65,9 +65,9 @@ describe("site builder visual lock", () => {
     expect(mark).not.toContain("PINE_TRUNK_PATH");
     expect(mark).not.toContain("gopher-tortoise");
     expect(mark).not.toContain("TORTOISE_");
-    expect(icon).toContain("BRAND_MARK_FILE");
+    expect(icon).toContain("BRAND_MARK_DATA_URI");
     expect(icon).not.toContain("TORTOISE");
-    expect(appleIcon).toContain("BRAND_MARK_FILE");
+    expect(appleIcon).toContain("BRAND_MARK_DATA_URI");
     expect(markAsset).toContain(BRAND_MARK_FILE);
     expect(header).toContain("BrandLockup");
     expect(lockup).toContain("h-12 w-auto");
