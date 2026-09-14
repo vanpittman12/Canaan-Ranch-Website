@@ -38,7 +38,7 @@ function Field({
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <label htmlFor={name} className="type-label">
         {label}
       </label>
@@ -47,12 +47,14 @@ function Field({
           {hint}
         </p>
       ) : null}
-      <div data-describedby={describedBy}>{children}</div>
-      {error ? (
-        <p id={errorId} className="mt-1 text-sm text-terracotta" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <div className="mt-auto" data-describedby={describedBy}>
+        {children}
+        {error ? (
+          <p id={errorId} className="mt-1 text-sm text-terracotta" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -362,27 +364,29 @@ export function IntakeForm({
               onChange={(event) => update("tortoiseCount", event.target.value)}
             />
           </Field>
-          <div>
+          <div className="flex h-full flex-col">
             <p className="type-label">Adult rate</p>
-            {allowRateOverride ? (
-              <input
-                className="field-control"
-                name="perGtRate"
-                type="number"
-                min={1}
-                step={1}
-                defaultValue={rate}
-              />
-            ) : (
-              <p className="field-control bg-cream">{formatUsd(brand.defaultPerGtRate)} per adult</p>
-            )}
-            <p className="mt-1 text-sm text-muted">
-              {formatUsd(brand.juvenileRate)} per juvenile at delivery (all-in, not added to the
-              adult rate). No deposits required.
-            </p>
-            {errors.perGtRate ? (
-              <p className="mt-1 text-sm text-terracotta">{errors.perGtRate}</p>
-            ) : null}
+            <div className="mt-auto">
+              {allowRateOverride ? (
+                <input
+                  className="field-control"
+                  name="perGtRate"
+                  type="number"
+                  min={1}
+                  step={1}
+                  defaultValue={rate}
+                />
+              ) : (
+                <p className="field-control bg-cream">{formatUsd(brand.defaultPerGtRate)} per adult</p>
+              )}
+              <p className="mt-1 text-sm text-muted">
+                {formatUsd(brand.juvenileRate)} per juvenile at delivery (all-in, not added to the
+                adult rate). No deposits required.
+              </p>
+              {errors.perGtRate ? (
+                <p className="mt-1 text-sm text-terracotta">{errors.perGtRate}</p>
+              ) : null}
+            </div>
           </div>
         </div>
         <div className="rounded-[12px] border border-line bg-cream px-4 py-3 text-sm text-ink">
