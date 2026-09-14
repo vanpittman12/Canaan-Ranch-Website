@@ -1,7 +1,7 @@
 export const brand = {
   name: "Canaan Preserve",
   legalName: "Canaan Ranch LLP",
-  tagline: "Gopher tortoise relocation recipient site.",
+  tagline: "Canaan Ranch LLP operates this FWC Approved Tier 1 Long-Term recipient site.",
   lockupLine: "Recipient site",
   habitatLine: "The most ecologically pristine recipient site in Florida",
   shortTagline: "Reserve recipient-site capacity with a clear agreement.",
@@ -9,8 +9,13 @@ export const brand = {
   /** Van’s exact hero slogan — do not polish. */
   heroSlogan:
     "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
-  intakeInvite:
-    "Fill out our intake form to automatically populate the relocation agreement and expedite the reservation letter process.",
+  /** Full sentence under the locked slogan. Uses site-wide Long-Term casing. */
+  heroLead:
+    "Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get human review before anything closes.",
+  flowInvite:
+    "Review the template, complete intake, and download your signature-ready relocation agreement. After Canaan Preserve Accepts, DocuSign is the usual signing path.",
+  footerLine:
+    "Canaan Ranch LLP operates this FWC Approved Tier 1 Long-Term recipient site.",
   fwcBadge: "FWC Approved Tier 1",
   /** FWC mitigation table explaining why Tier 1 recipient sites have lower requirements. */
   fwcRecipientSitesUrl:

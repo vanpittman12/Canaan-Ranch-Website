@@ -10,7 +10,7 @@ export const fwcSavingsRows = [
   { insteadOf: "Short-term Level 3", fwcPerGt: 4193, savedPerGt: 3774 },
   { insteadOf: "Short-term Level 2", fwcPerGt: 2515, savedPerGt: 2096 },
   { insteadOf: "Short-term Level 1", fwcPerGt: 1257, savedPerGt: 838 },
-  { insteadOf: "Long-term Level 2", fwcPerGt: 838, savedPerGt: 419 },
+  { insteadOf: "Long-Term Level 2", fwcPerGt: 838, savedPerGt: 419 },
 ] as const;
 
 export const fwcSavingsExample = {

@@ -8,10 +8,7 @@ export function SiteFooter() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-10 sm:flex-row sm:items-end sm:justify-between sm:px-8">
         <div>
           <BrandLockup light />
-          <p className="mt-4 text-sm text-cream/80">
-            {brand.legalName} is the contracting party.
-          </p>
-          <p className="mt-3 max-w-sm text-sm font-medium text-cream">{brand.fwcStatus}</p>
+          <p className="mt-4 max-w-sm text-sm text-cream/80">{brand.footerLine}</p>
           <p className="mt-4 text-sm text-cream/70">{formatBrandAddress()}</p>
           <p className="text-sm text-cream/70">
             {brand.email} · {brand.phone}

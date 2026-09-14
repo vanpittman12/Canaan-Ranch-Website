@@ -24,7 +24,7 @@ describe("FWC mitigation savings", () => {
       "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
     expect(landing).toContain("{brand.heroSlogan}");
-    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(2);
+    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
     expect(landing).toContain("<h1");
     expect(landing.indexOf("{brand.heroSlogan}")).toBeLessThan(landing.indexOf("facts.map"));
     expect(landing).not.toContain("fwcValueProp");
@@ -49,7 +49,7 @@ describe("FWC mitigation savings", () => {
       { insteadOf: "Short-term Level 3", fwcPerGt: 4193, savedPerGt: 3774 },
       { insteadOf: "Short-term Level 2", fwcPerGt: 2515, savedPerGt: 2096 },
       { insteadOf: "Short-term Level 1", fwcPerGt: 1257, savedPerGt: 838 },
-      { insteadOf: "Long-term Level 2", fwcPerGt: 838, savedPerGt: 419 },
+      { insteadOf: "Long-Term Level 2", fwcPerGt: 838, savedPerGt: 419 },
     ]);
     for (const row of fwcSavingsRows) {
       expect(row.savedPerGt).toBe(row.fwcPerGt - CANAAN_FWC_PER_ADDITIONAL_GT);

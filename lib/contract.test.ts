@@ -141,4 +141,12 @@ describe("gopher tortoise agreement mapping", () => {
     expect(contract.sellerBlock.join(" ")).toContain(brand.sellerWitnessName);
     expect(body).not.toMatch(/non-negotiable/i);
   });
+
+  it("pluralizes a reserved count of one gopher tortoise", () => {
+    const body = contractBody(
+      buildContract(engagement({ intake: { ...intake, tortoiseCount: 1 } })),
+    );
+    expect(body).toContain("up to 1 (one) gopher tortoise");
+    expect(body).not.toContain("up to 1 (one) gopher tortoises");
+  });
 });

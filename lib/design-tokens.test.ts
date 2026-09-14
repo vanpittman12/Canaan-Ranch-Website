@@ -16,6 +16,7 @@ import {
 const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
 const intakePage = readFileSync(path.join(process.cwd(), "app/intake/page.tsx"), "utf8");
+const intakeForm = readFileSync(path.join(process.cwd(), "components/intake-form.tsx"), "utf8");
 const footer = readFileSync(path.join(process.cwd(), "components/site-footer.tsx"), "utf8");
 const signingPanel = readFileSync(
   path.join(process.cwd(), "components/signing-panel.tsx"),
@@ -94,44 +95,81 @@ describe("site builder visual lock", () => {
     expect(brand.habitatLine.toLowerCase()).not.toMatch(/\bcounty\b/);
     expect(landing).toContain("{brand.habitatLine}");
     expect(landing).toContain("{brand.heroSlogan}");
-    expect(landing).toContain("{brand.intakeInvite}");
-    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(2);
-    expect(landing.match(/\{brand\.intakeInvite\}/g)).toHaveLength(2);
+    expect(landing).toContain("{brand.heroLead}");
+    expect(landing).toContain("{brand.flowInvite}");
+    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.heroLead\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.flowInvite\}/g)).toHaveLength(1);
     expect(landing).toContain("FwcSavingsModule");
     expect(landing).not.toContain("Start relocation intake for a clear recipient-site agreement.");
     expect(landing).not.toContain("is the contracting party. Intake produces");
+    expect(landing).not.toContain("reservation letter");
     expect(landing).toContain("Word/DOCX");
     expect(landing).not.toContain("Download the PDF");
-    expect(landing).toContain("DocuSign is the usual path");
+    expect(landing).toContain("DocuSign is the usual signing path");
     expect(landing).toContain("download the Word agreement and upload a signed copy");
+    expect(landing).not.toContain("when available");
     expect(landing.toLowerCase()).not.toContain("this demo");
     expect(landing.toLowerCase()).not.toContain("go-live");
-    expect(signingPanel).toContain("DocuSign after Accept (usual path)");
+    expect(signingPanel).toContain("DocuSign after Accept (usual signing path)");
+    expect(signingPanel).toContain("The fallback is to download the Word agreement");
+    expect(signingPanel).not.toContain("when available");
     expect(signingPanel.toLowerCase()).not.toContain("this demo");
     expect(signingPanel.toLowerCase()).not.toContain("go-live");
-    expect(timeline).toContain("DocuSign after Accept is the usual path");
+    expect(timeline).toContain("DocuSign after Accept is the usual signing path");
+    expect(timeline).toContain("The fallback is to download the Word agreement");
     expect(timeline.toLowerCase()).not.toContain("this demo");
     expect(timeline.toLowerCase()).not.toContain("go-live");
     expect(landing).toContain("adult /");
     expect(landing).toContain("juvenile");
+    expect(landing).toContain("FWC Approved Tier 1");
     expect(brand.heroSlogan).toBe(
       "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
     expect(brand.heroSlogan).toContain("Long Term Tier 1");
+    expect(brand.heroLead).toMatch(/^[A-Z].*\.$/);
+    expect(brand.heroLead).toContain("FWC Approved Tier 1 Long-Term");
+    expect(brand.heroLead).toContain("signature-ready");
+    expect(brand.heroLead).toContain("human review before anything closes");
+    expect(brand.heroLead).not.toContain("reservation letter");
+    expect(brand.flowInvite).toContain("Review the template");
+    expect(brand.flowInvite).toContain("complete intake");
+    expect(brand.flowInvite).toContain("signature-ready");
+    expect(brand.flowInvite).toContain("DocuSign is the usual signing path");
     expect(landing).not.toContain("lowest mitigation");
     expect(landing).not.toContain("saving our clients money");
+    expect(landing).not.toContain("signature ready");
     expect(brand.fwcStatus).toContain("Long-Term");
-    expect(brand.intakeInvite).toBe(
-      "Fill out our intake form to automatically populate the relocation agreement and expedite the reservation letter process.",
-    );
-    expect(brand.intakeInvite).toContain("intake form");
-    expect(brand.intakeInvite).toContain("reservation letter");
-    expect(brand.intakeInvite).not.toContain("capacity reservation");
-    expect(brand.intakeInvite).not.toContain("Accepts");
+    expect(brand.fwcStatus).toContain("FWC Approved Tier 1");
     expect(intakePage).toContain("Have these agreement details ready");
     expect(intakePage).not.toContain("existing agreement details");
-    expect(footer).toContain("is the contracting party");
+    expect(intakePage).not.toContain("Have these existing agreement details ready");
+    expect(footer).toContain("{brand.footerLine}");
+    expect(footer).not.toContain("A Canaan Ranch LLP recipient site");
+    expect(footer).not.toContain("Gopher tortoise relocation recipient site.");
     expect(footer).not.toContain("{brand.tagline}");
+    expect(brand.footerLine).toBe(
+      "Canaan Ranch LLP operates this FWC Approved Tier 1 Long-Term recipient site.",
+    );
+    const depositsRequiredHits = [landing, intakePage, intakeForm].flatMap((surface) =>
+      surface.match(/No deposits required/g) ?? [],
+    );
+    expect(depositsRequiredHits).toHaveLength(1);
+    expect(intakeForm).toContain("No deposits required");
+    expect(landing).not.toContain("No deposits required");
+    expect(intakePage).not.toContain("No deposits required");
+    const marketingCopy = [
+      landing,
+      intakePage,
+      footer,
+      brand.heroLead,
+      brand.flowInvite,
+      brand.footerLine,
+      brand.fwcStatus,
+      brand.fwcBadge,
+    ].join("\n");
+    expect(marketingCopy).not.toMatch(/signature ready(?!-)/);
+    expect(marketingCopy.replaceAll(brand.heroSlogan, "")).not.toMatch(/Long Term/);
   });
 
   it("draws longleaf pine and wiregrass on the sandhill without a cartoon tortoise", () => {

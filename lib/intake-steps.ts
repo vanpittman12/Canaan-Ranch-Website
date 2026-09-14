@@ -7,13 +7,17 @@ export type IntakeWizardStep = IntakeStepId | typeof REVIEW_STEP_ID;
 
 export const INTAKE_MINUTES = 3;
 
+export function gopherTortoiseNoun(count: number) {
+  return count === 1 ? "gopher tortoise" : "gopher tortoises";
+}
+
 export function formatGopherTortoiseCount(count: number | string) {
   const raw = typeof count === "string" ? count.trim() : String(count);
   const n = Number(raw);
   if (!raw || !Number.isFinite(n)) {
     return "— gopher tortoises";
   }
-  return n === 1 ? "1 gopher tortoise" : `${n} gopher tortoises`;
+  return `${n} ${gopherTortoiseNoun(n)}`;
 }
 
 export const PREPARE_ITEMS = [

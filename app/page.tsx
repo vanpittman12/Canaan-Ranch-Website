@@ -27,12 +27,12 @@ const steps = [
   {
     n: "04",
     title: "Canaan Preserve Accepts, then sign",
-    body: "Review happens first. After Accept, DocuSign is the usual path. You can also download the Word agreement and upload a signed copy. Nothing is executed until Accept and a signed copy are on file.",
+    body: "Review happens first. After Accept, DocuSign is the usual signing path. The fallback is to download the Word agreement and upload a signed copy. Nothing is executed until Accept and a signed copy are on file.",
   },
 ];
 
 const facts = [
-  { label: "Status", value: "FWC Tier 1" },
+  { label: "Status", value: "FWC Approved Tier 1" },
   {
     label: "Pricing",
     value: `${formatUsd(brand.defaultPerGtRate)} adult / ${formatUsd(brand.juvenileRate)} juvenile`,
@@ -60,7 +60,7 @@ export default function Home() {
                 {brand.heroSlogan}
               </h1>
               <p className="mt-6 max-w-xl text-[17px] leading-[27px] text-cream/85">
-                {brand.intakeInvite}
+                {brand.heroLead}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">
@@ -96,7 +96,7 @@ export default function Home() {
             How it works
           </p>
           <h2 className="type-h2 mt-3 max-w-xl text-forest">
-            Four steps from reserved spots to an executed agreement.
+            Four steps from reserved capacity to a signed agreement.
           </h2>
           <ol className="mt-10 grid gap-4 md:grid-cols-4">
             {steps.map((step, index) => (
@@ -116,9 +116,6 @@ export default function Home() {
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-5 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8">
             <div>
               <FwcBadge />
-              <p className="mt-3 max-w-2xl text-[17px] leading-[27px] text-ink">
-                {brand.heroSlogan}
-              </p>
             </div>
             <a
               className="btn-secondary shrink-0"
@@ -133,13 +130,13 @@ export default function Home() {
 
         <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
           <div className="rounded-[16px] border border-line bg-forest px-8 py-12 text-cream sm:px-14">
-            <h2 className="type-h2 max-w-xl text-cream">Ready to reserve capacity.</h2>
+            <h2 className="type-h2 max-w-xl text-cream">Start the four steps.</h2>
             <p className="mt-4 max-w-xl text-[17px] leading-[27px] text-cream/80">
-              {brand.intakeInvite}
+              {brand.flowInvite}
             </p>
             <p className="mt-4 text-sm font-medium text-cream">
               {formatUsd(brand.defaultPerGtRate)} per adult · {formatUsd(brand.juvenileRate)} per
-              juvenile · No deposits required
+              juvenile
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">

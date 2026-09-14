@@ -33,6 +33,7 @@ describe("intake wizard", () => {
     expect(formatGopherTortoiseCount("1")).toBe("1 gopher tortoise");
     expect(formatGopherTortoiseCount(8)).toBe("8 gopher tortoises");
     expect(formatGopherTortoiseCount("")).toBe("— gopher tortoises");
+    expect(formatGopherTortoiseCount(1)).not.toBe("1 gopher tortoises");
   });
 
   it("lists intake items including required project name and no invented schema fields", () => {
