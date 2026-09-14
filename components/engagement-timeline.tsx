@@ -14,7 +14,7 @@ const stages = [
   {
     id: "signing",
     title: "Choose signing",
-    body: "DocuSign after Accept is the usual path. You can also download the Word agreement and upload a signed copy.",
+    body: "DocuSign after Accept is the usual signing path. The fallback is to download the Word agreement and upload a signed copy.",
   },
   {
     id: "review",

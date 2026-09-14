@@ -262,7 +262,8 @@ export function IntakeForm({
           <h2 className="type-h2 text-forest">Buyer notice block</h2>
           <p className="mt-2 text-sm text-muted">
             These fields become the Buyer notice in Parties and Notices. The Effective Date is
-            the date the Buyer signs — it is not collected here.
+            the date the Buyer signs — it is not collected here. The Expiration Date is one year
+            after the Buyer Date Signed / Effective Date.
           </p>
         </div>
         <Field

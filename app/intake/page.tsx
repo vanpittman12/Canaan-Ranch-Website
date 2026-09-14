@@ -25,14 +25,15 @@ export default function IntakePage() {
           Buyer notice block, reserved tortoise count, county of relocation, authorized agent,
           donor affiliation, and one Buyer witness. The Canaan Ranch LLP witness is seller-side
           and is not collected here. The Effective Date is the date the Buyer signs — not a field
-          on this form. After submit you download the populated Word agreement to review.
+          on this form. The Expiration Date is one year after the Buyer Date Signed / Effective
+          Date. After submit you download the populated Word agreement to review.
         </p>
         <div className="mt-4">
           <FwcBadge />
         </div>
         <p className="mt-3 text-sm text-muted">
           {formatUsd(brand.defaultPerGtRate)} per adult · {formatUsd(brand.juvenileRate)} per
-          juvenile · No deposits required
+          juvenile
         </p>
         <div className="mt-6">
           <TemplateDownloadButton variant="primary" />

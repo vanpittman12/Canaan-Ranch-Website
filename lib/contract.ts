@@ -1,4 +1,5 @@
 import { brand, formatSellerNotice, getSellerWitness } from "./brand";
+import { gopherTortoiseNoun } from "./intake-steps";
 import {
   addOneYear,
   dealEconomics,
@@ -86,6 +87,7 @@ export function buildContract(engagement: Engagement): ContractDocument {
   const capacityCount = isTemplate
     ? "[Reserved capacity count]"
     : `${economics.count} (${numberToWords(economics.count)})`;
+  const tortoiseNoun = isTemplate ? "gopher tortoises" : gopherTortoiseNoun(economics.count);
   const estimatedTotal = isTemplate
     ? "[Total estimated payment at the adult rate] (reserved capacity count × adult rate)"
     : `${economics.totalFormatted} (${economics.totalWords}), calculated as ${economics.count} × ${economics.rateFormatted}`;
@@ -137,7 +139,7 @@ export function buildContract(engagement: Engagement): ContractDocument {
       {
         heading: "2. Reserved capacity",
         paragraphs: [
-          `Seller agrees to reserve recipient-site capacity at Canaan Preserve for the relocation of up to ${capacityCount} gopher tortoises (Gopherus polyphemus) under this Agreement (the “Reserved Capacity”). Adult versus juvenile classification is determined at delivery and acceptance, not at reservation.`,
+          `Seller agrees to reserve recipient-site capacity at Canaan Preserve for the relocation of up to ${capacityCount} ${tortoiseNoun} (Gopherus polyphemus) under this Agreement (the “Reserved Capacity”). Adult versus juvenile classification is determined at delivery and acceptance, not at reservation.`,
           reservedCapacityContext(intake),
         ],
       },
