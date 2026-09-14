@@ -2,20 +2,26 @@
  * New-engagement email seam.
  *
  * After a public intake create succeeds, call notifyNewEngagement (via
- * persistAndNotifyNewEngagement). Missing RESEND_API_KEY uses a console stub.
- * A live Resend failure is logged and never thrown to the intake caller.
+ * persistAndNotifyNewEngagement). Missing Gmail OAuth secrets use a console stub.
+ * A live Gmail failure is logged and never thrown to the intake caller.
  *
- * Provider is Resend over HTTPS (fetch). SMTP is not used — Cloudflare Workers
- * have no reliable outbound SMTP, and the app already uses fetch for DocuSign.
+ * Provider is Gmail API over HTTPS (fetch). SMTP / nodemailer / App Passwords
+ * are not used — Cloudflare Workers cannot open outbound SMTP sockets
+ * (ports 25 / 465 / 587). The app already uses fetch for DocuSign.
  */
 import { brand } from "./brand";
 import type { Engagement, IntakeFields } from "./types";
 
 export const NEW_ENGAGEMENT_NOTIFY_TO = "vpittman@beachparkcap.com";
-export const RESEND_EMAILS_URL = "https://api.resend.com/emails";
+export const DEFAULT_GMAIL_USER = "vpittman@beachparkcap.com";
+export const GMAIL_OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token";
+export const GMAIL_SEND_URL =
+  "https://gmail.googleapis.com/gmail/v1/users/me/messages/send";
+export const GMAIL_SEND_SCOPE = "https://www.googleapis.com/auth/gmail.send";
 const SEND_TIMEOUT_MS = 8_000;
+const MIME_BOUNDARY = "canaan-preserve-notify";
 
-export type NotifyMode = "stub" | "resend";
+export type NotifyMode = "stub" | "gmail";
 
 export type NotifyHttp = {
   fetch: typeof fetch;
@@ -47,8 +53,24 @@ export type EngagementLike = Pick<Engagement, "id" | "reference"> & {
   intake: Pick<IntakeFields, "buyerLegalName" | "relocationCounty" | "tortoiseCount">;
 };
 
+export type GmailOAuthSecrets = {
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string;
+};
+
+export function readGmailOAuthSecrets(): GmailOAuthSecrets | null {
+  const clientId = process.env.GMAIL_CLIENT_ID?.trim();
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET?.trim();
+  const refreshToken = process.env.GMAIL_REFRESH_TOKEN?.trim();
+  if (!clientId || !clientSecret || !refreshToken) {
+    return null;
+  }
+  return { clientId, clientSecret, refreshToken };
+}
+
 export function isEmailNotifyEnabled() {
-  return Boolean(process.env.RESEND_API_KEY?.trim());
+  return readGmailOAuthSecrets() !== null;
 }
 
 export function newEngagementRecipients() {
@@ -62,11 +84,11 @@ export function newEngagementRecipients() {
 }
 
 export function notifyFromAddress() {
-  const configured = process.env.RESEND_FROM_EMAIL?.trim();
+  const configured = process.env.GMAIL_USER?.trim();
   if (configured) {
-    return configured;
+    return configured.includes("<") ? configured : `${brand.name} <${configured}>`;
   }
-  return `${brand.name} <${brand.email}>`;
+  return `${brand.name} <${DEFAULT_GMAIL_USER}>`;
 }
 
 export function publicAppOrigin() {
@@ -135,6 +157,34 @@ export function buildNewEngagementEmail(notice: NewEngagementNotice): NewEngagem
   };
 }
 
+export function buildRfc2822Message(email: NewEngagementEmail): string {
+  const lines = [
+    `From: ${email.from}`,
+    `To: ${email.to.join(", ")}`,
+    `Subject: ${encodeMimeHeader(email.subject)}`,
+    "MIME-Version: 1.0",
+    `Content-Type: multipart/alternative; boundary="${MIME_BOUNDARY}"`,
+    "",
+    `--${MIME_BOUNDARY}`,
+    'Content-Type: text/plain; charset="UTF-8"',
+    "Content-Transfer-Encoding: 8bit",
+    "",
+    email.text,
+    `--${MIME_BOUNDARY}`,
+    'Content-Type: text/html; charset="UTF-8"',
+    "Content-Transfer-Encoding: 8bit",
+    "",
+    email.html,
+    `--${MIME_BOUNDARY}--`,
+    "",
+  ];
+  return lines.join("\r\n");
+}
+
+export function toGmailRaw(rfc2822: string): string {
+  return utf8ToBase64Url(rfc2822);
+}
+
 /**
  * Send (or stub) the new-engagement email. Never throws — intake must succeed
  * even when the provider is down or misconfigured.
@@ -145,7 +195,7 @@ export async function notifyNewEngagement(
 ): Promise<NotifyResult> {
   const email = buildNewEngagementEmail(notice);
   if (!isEmailNotifyEnabled()) {
-    console.info("[notify] stub: new engagement email (RESEND_API_KEY unset)", {
+    console.info("[notify] stub: new engagement email (Gmail OAuth secrets unset)", {
       to: email.to,
       subject: email.subject,
       text: email.text,
@@ -154,12 +204,12 @@ export async function notifyNewEngagement(
   }
 
   try {
-    await sendViaResend(email, http);
-    return { mode: "resend", sent: true };
+    await sendViaGmail(email, http);
+    return { mode: "gmail", sent: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to send email.";
     console.error("[notify] new engagement email failed", error);
-    return { mode: "resend", sent: false, error: message };
+    return { mode: "gmail", sent: false, error: message };
   }
 }
 
@@ -172,32 +222,61 @@ export async function persistAndNotifyNewEngagement<T extends EngagementLike>(
   return engagement;
 }
 
-async function sendViaResend(email: NewEngagementEmail, http: NotifyHttp) {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY is not set.");
+async function sendViaGmail(email: NewEngagementEmail, http: NotifyHttp) {
+  const secrets = readGmailOAuthSecrets();
+  if (!secrets) {
+    throw new Error("Gmail OAuth secrets are not set.");
   }
 
-  const response = await http.fetch(RESEND_EMAILS_URL, {
+  const accessToken = await refreshGmailAccessToken(secrets, http);
+  const response = await http.fetch(GMAIL_SEND_URL, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: email.from,
-      to: email.to,
-      subject: email.subject,
-      text: email.text,
-      html: email.html,
-    }),
+    body: JSON.stringify({ raw: toGmailRaw(buildRfc2822Message(email)) }),
     signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
   });
 
   const body = await response.text();
   if (!response.ok) {
-    throw new Error(`Resend emails failed (${response.status}): ${body.slice(0, 240)}`);
+    throw new Error(`Gmail send failed (${response.status}): ${body.slice(0, 240)}`);
   }
+}
+
+async function refreshGmailAccessToken(secrets: GmailOAuthSecrets, http: NotifyHttp) {
+  const response = await http.fetch(GMAIL_OAUTH_TOKEN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      client_id: secrets.clientId,
+      client_secret: secrets.clientSecret,
+      refresh_token: secrets.refreshToken,
+      grant_type: "refresh_token",
+    }).toString(),
+    signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
+  });
+
+  const body = await response.text();
+  if (!response.ok) {
+    throw new Error(`Gmail OAuth token failed (${response.status}): ${body.slice(0, 240)}`);
+  }
+
+  let parsed: { access_token?: unknown };
+  try {
+    parsed = JSON.parse(body) as { access_token?: unknown };
+  } catch {
+    throw new Error("Gmail OAuth token response was not JSON.");
+  }
+
+  if (typeof parsed.access_token !== "string" || !parsed.access_token) {
+    throw new Error("Gmail OAuth token response did not include access_token.");
+  }
+
+  return parsed.access_token;
 }
 
 function defaultHttp(): NotifyHttp {
@@ -214,4 +293,24 @@ function escapeHtml(value: string) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function encodeMimeHeader(value: string) {
+  if (/^[\x20-\x7E]*$/.test(value)) {
+    return value;
+  }
+  return `=?UTF-8?B?${utf8ToBase64(value)}?=`;
+}
+
+function utf8ToBase64(value: string) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary);
+}
+
+function utf8ToBase64Url(value: string) {
+  return utf8ToBase64(value).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/g, "");
 }

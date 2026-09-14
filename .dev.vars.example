@@ -18,8 +18,10 @@ DOCUSIGN_RETURN_URL=http://localhost:3000/api/docusign/return
 # DOCUSIGN_PRIVATE_KEY=
 # DOCUSIGN_WEBHOOK_SECRET=
 
-# New-engagement email (Resend). Unset = console stub. Never commit a real key.
+# New-engagement email (Gmail API). Unset = console stub. Never commit secrets.
 APP_URL=http://localhost:3000
-# RESEND_API_KEY=
-# RESEND_FROM_EMAIL=
+# GMAIL_CLIENT_ID=
+# GMAIL_CLIENT_SECRET=
+# GMAIL_REFRESH_TOKEN=
+# GMAIL_USER=vpittman@beachparkcap.com
 # NOTIFY_NEW_ENGAGEMENT_TO=vpittman@beachparkcap.com

@@ -36,7 +36,9 @@ interface CloudflareEnv {
   DOCUSIGN_WEBHOOK_URL?: string;
   DOCUSIGN_RETURN_URL?: string;
   APP_URL?: string;
-  RESEND_API_KEY?: string;
-  RESEND_FROM_EMAIL?: string;
+  GMAIL_CLIENT_ID?: string;
+  GMAIL_CLIENT_SECRET?: string;
+  GMAIL_REFRESH_TOKEN?: string;
+  GMAIL_USER?: string;
   NOTIFY_NEW_ENGAGEMENT_TO?: string;
 }

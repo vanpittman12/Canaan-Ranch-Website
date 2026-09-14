@@ -107,24 +107,42 @@ After a **public intake create** succeeds, [`lib/notify.ts`](lib/notify.ts) `not
 
 | Field | Value |
 | --- | --- |
+| From | `GMAIL_USER` if set, otherwise `vpittman@beachparkcap.com` (shown as `Canaan Preserve <…>`). Must be the Google account that issued the refresh token. |
 | Primary To | `vpittman@beachparkcap.com` |
 | Also To | `engagements@canaanpreserve.com` (brand inbox) |
 | Body | Engagement reference, buyer legal name, relocation county, tortoise count, admin review link (`/admin/engagements/[id]`) |
 
-**Provider: Resend** (HTTPS `POST https://api.resend.com/emails`). SMTP is not used — this app runs on Cloudflare Workers, which do not have reliable outbound SMTP. No extra npm package; the seam uses `fetch` like the DocuSign live path.
+**Provider: Gmail API** (HTTPS refresh-token grant, then `POST https://gmail.googleapis.com/gmail/v1/users/me/messages/send`). SMTP is not used — Cloudflare Workers cannot open outbound SMTP sockets (ports 25 / 465 / 587), so nodemailer and a Google App Password will not send from this Worker. No extra npm package; the seam uses `fetch` like the DocuSign live path.
 
 | Variable | Role |
 | --- | --- |
-| `RESEND_API_KEY` | Enables live send. Unset / empty = console stub (local and `npm run dev`). **Cloudflare secret** — never commit. |
-| `RESEND_FROM_EMAIL` | Optional From. Default `Canaan Preserve <engagements@canaanpreserve.com>`. Must be a domain verified in Resend. **Cloudflare secret** if set. |
+| `GMAIL_CLIENT_ID` | Google Cloud OAuth client ID. Required with the other two OAuth secrets to enable live send. Unset / incomplete = console stub (local and `npm run dev`). **Cloudflare secret** — never commit. |
+| `GMAIL_CLIENT_SECRET` | OAuth client secret. **Cloudflare secret** — never commit. |
+| `GMAIL_REFRESH_TOKEN` | Long-lived refresh token for `https://www.googleapis.com/auth/gmail.send`. **Cloudflare secret** — never commit. |
+| `GMAIL_USER` | Optional From mailbox. Default `vpittman@beachparkcap.com`. **Cloudflare secret** if set. |
 | `NOTIFY_NEW_ENGAGEMENT_TO` | Optional primary recipient override. Default `vpittman@beachparkcap.com`. The brand inbox is still included. |
 | `APP_URL` | Public origin for the admin review link. Workers `vars` default is `https://canaanpreserve.com`. Locally, falls back to the origin of `DOCUSIGN_RETURN_URL`, then `http://localhost:3000`. |
 
+### One-time Google setup (free personal / Workspace Gmail)
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), create or select a project.
+2. **APIs & Services → Library** → enable **Gmail API**.
+3. **APIs & Services → OAuth consent screen**: External is fine for Van’s own mailbox. Add `vpittman@beachparkcap.com` as a test user. Scope needed later: `https://www.googleapis.com/auth/gmail.send`.
+4. **APIs & Services → Credentials → Create credentials → OAuth client ID**. Application type **Desktop app**. Copy the client ID and client secret.
+5. Get a refresh token with [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/):
+   1. Gear icon → check **Use your own OAuth credentials** → paste the client ID and secret.
+   2. In the left list, open **Gmail API v1** and check `https://www.googleapis.com/auth/gmail.send`.
+   3. **Authorize APIs** and sign in as `vpittman@beachparkcap.com` (or whatever mailbox you set as `GMAIL_USER`).
+   4. **Exchange authorization code for tokens**. Copy **Refresh token**. Do not commit it.
+
 ```bash
-npx wrangler secret put RESEND_API_KEY
-# optional:
-npx wrangler secret put RESEND_FROM_EMAIL
+npx wrangler secret put GMAIL_CLIENT_ID
+npx wrangler secret put GMAIL_CLIENT_SECRET
+npx wrangler secret put GMAIL_REFRESH_TOKEN
+npx wrangler secret put GMAIL_USER
 ```
+
+Set `GMAIL_USER` to the same mailbox that granted access (typically `vpittman@beachparkcap.com`). If an old `RESEND_API_KEY` / `RESEND_FROM_EMAIL` secret is still on the Worker, delete it in the dashboard — it is unused.
 
 ## DocuSign seam
 
@@ -258,7 +276,10 @@ npx wrangler secret put DOCUSIGN_USER_ID
 npx wrangler secret put DOCUSIGN_ACCOUNT_ID
 npx wrangler secret put DOCUSIGN_PRIVATE_KEY
 npx wrangler secret put DOCUSIGN_WEBHOOK_SECRET
-npx wrangler secret put RESEND_API_KEY
+npx wrangler secret put GMAIL_CLIENT_ID
+npx wrangler secret put GMAIL_CLIENT_SECRET
+npx wrangler secret put GMAIL_REFRESH_TOKEN
+npx wrangler secret put GMAIL_USER
 ```
 
 For `DOCUSIGN_PRIVATE_KEY`, paste the full PEM (including `BEGIN` / `END` lines), then Ctrl-D. Wrangler stores the secret; it is never written to git.
