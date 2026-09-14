@@ -14,6 +14,7 @@ const TEMPLATE_DOCX = resolve(
   "public/agreements/Canaan-Preserve-Relocation-Agreement-template.docx",
 );
 const TEMPLATE_ROUTE = resolve(process.cwd(), "app/api/agreement-template/route.ts");
+const PUBLIC_HEADERS = resolve(process.cwd(), "public/_headers");
 
 describe("agreement templates", () => {
   it("ships Van’s uploaded blank agreement as exact Word bytes", () => {
@@ -23,18 +24,21 @@ describe("agreement templates", () => {
     expect(bytes.subarray(0, 2).toString()).toBe("PK");
   });
 
-  it("serves the blank template as a Word attachment, not a PDF redirect", () => {
+  it("307s the blank template to the static Word file, not the yellow PDF", () => {
     const src = readFileSync(TEMPLATE_ROUTE, "utf8");
-    expect(src).toContain("Canaan-Preserve-Relocation-Agreement-template.docx");
-    expect(src).toContain("Content-Disposition");
-    expect(src).toContain("attachment");
-    expect(src).toContain(
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    );
+    const headers = readFileSync(PUBLIC_HEADERS, "utf8");
+    expect(src).toContain("/agreements/Canaan-Preserve-Relocation-Agreement-template.docx");
+    expect(src).toContain("Response.redirect");
+    expect(src).toContain("307");
     expect(src).not.toContain("canaan-preserve-relocation-agreement-template.pdf");
-    expect(src).not.toContain("Response.redirect");
+    expect(src).not.toContain("readFileSync");
+    expect(src).not.toMatch(/from ["']node:fs["']/);
     expect(src).not.toContain("generateTemplateAgreementPdf");
     expect(src).not.toMatch(/from ["']@\/lib\/(pdf|contract)["']/);
+    expect(headers).toContain("/agreements/Canaan-Preserve-Relocation-Agreement-template.docx");
+    expect(headers).toContain(
+      'Content-Disposition: attachment; filename="Canaan-Preserve-Relocation-Agreement-template.docx"',
+    );
   });
 
   it("still builds a populated engagement PDF from generateContractPdf", async () => {
