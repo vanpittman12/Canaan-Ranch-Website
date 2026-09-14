@@ -7,8 +7,10 @@ import {
   BASEMAP,
   CANAAN_SITE,
   MAP_FRAME,
+  MAP_OVERLAY,
   NAUTICAL_MILES_SOUTH,
   SERVICE_AREA_FEATURE,
+  SOUTH_OF_CUTOFF_FEATURE,
   SOUTHERN_LIMIT_LAT,
   SOUTHERN_LIMIT_LINE,
   isInServiceArea,
@@ -19,6 +21,7 @@ import {
   serviceAreaBounds,
   serviceAreaCopy,
   serviceAreaOverlayPath,
+  southOfCutoffOverlayPath,
 } from "./service-area";
 
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
@@ -85,6 +88,14 @@ describe("service area map", () => {
     expect(mapLib.toLowerCase()).not.toContain("lykes");
     expect(mapModule.toLowerCase()).not.toContain("lykes");
     expect(JSON.stringify(SERVICE_AREA_FEATURE).toLowerCase()).not.toContain("lykes");
+    expect(JSON.stringify(SOUTH_OF_CUTOFF_FEATURE).toLowerCase()).not.toContain("lykes");
+    expect(mapModule).toContain("southOfCutoffOverlayPath");
+    expect(mapModule).toContain("SERVICE_PATH");
+    expect(SOUTH_OF_CUTOFF_FEATURE.properties.southernLimitLat).toBe(28.1);
+    expect(southOfCutoffOverlayPath().startsWith("M")).toBe(true);
+    expect(MAP_OVERLAY.fill).toBe("#3f5346");
+    expect(MAP_OVERLAY.outside).toBe("#d5cfc3");
+    expect(MAP_OVERLAY.fill).not.toBe("#7cfc00");
   });
 
   it("shades Florida north of the cutoff, including the panhandle", () => {

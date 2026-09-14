@@ -1,4 +1,5 @@
 import serviceAreaFeature from "./florida-service-area.json";
+import southOfCutoffFeature from "./florida-south-of-cutoff.json";
 
 /** Alachua, FL (city). 100 NM due south ≈ 1.667° of latitude ≈ 28.12°N. */
 export const ALACHUA = { lat: 29.79, lon: -82.5 } as const;
@@ -43,7 +44,9 @@ export const SOUTHERN_LIMIT_LINE = {
 
 export const MAP_OVERLAY = {
   fill: "#3f5346",
-  fillOpacity: 0.42,
+  fillOpacity: 0.58,
+  outside: "#d5cfc3",
+  outsideOpacity: 0.4,
   outline: "#24352a",
   cutoff: "#c4a15a",
 } as const;
@@ -97,6 +100,7 @@ export type ServiceAreaFeature = {
 };
 
 export const SERVICE_AREA_FEATURE = serviceAreaFeature as ServiceAreaFeature;
+export const SOUTH_OF_CUTOFF_FEATURE = southOfCutoffFeature as ServiceAreaFeature;
 
 function mercatorY(lat: number) {
   const radians = (lat * Math.PI) / 180;
@@ -130,10 +134,16 @@ export function ringToPath(ring: number[][]) {
     .join(" ")} Z`;
 }
 
+function featureOverlayPath(feature: ServiceAreaFeature) {
+  return feature.geometry.coordinates.flatMap((polygon) => polygon.map(ringToPath)).join(" ");
+}
+
 export function serviceAreaOverlayPath() {
-  return SERVICE_AREA_FEATURE.geometry.coordinates
-    .flatMap((polygon) => polygon.map(ringToPath))
-    .join(" ");
+  return featureOverlayPath(SERVICE_AREA_FEATURE);
+}
+
+export function southOfCutoffOverlayPath() {
+  return featureOverlayPath(SOUTH_OF_CUTOFF_FEATURE);
 }
 
 function pointInRing(point: readonly [number, number], ring: number[][]) {
