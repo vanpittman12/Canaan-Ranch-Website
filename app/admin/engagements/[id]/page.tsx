@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { StatusBadge } from "@/components/status-badge";
 import { brand } from "@/lib/brand";
 import { describeDocuSignSeam } from "@/lib/docusign";
+import { formatGopherTortoiseCount } from "@/lib/intake-steps";
 import { addOneYear, dealEconomics, formatLongDate, formatUsd } from "@/lib/money";
 import { getEngagement } from "@/lib/store";
 import { buyerNoticeAddress, dealTitle } from "@/lib/types";
@@ -78,7 +79,7 @@ export default async function AdminEngagementPage({
                 <Row label="Notice" value={buyerNoticeAddress(engagement.intake)} />
                 <Row
                   label="Reserved capacity"
-                  value={`${engagement.intake.tortoiseCount} gopher tortoises`}
+                  value={formatGopherTortoiseCount(engagement.intake.tortoiseCount)}
                 />
                 <Row label="Adult rate" value={`${economics.rateFormatted} per adult`} />
                 <Row label="Est. adult total" value={economics.totalFormatted} />

@@ -9,7 +9,7 @@ export function SiteFooter() {
         <div>
           <BrandLockup light />
           <p className="mt-4 text-sm text-cream/80">
-            A {brand.legalName} recipient site. {brand.tagline}
+            {brand.legalName} is the contracting party.
           </p>
           <p className="mt-3 max-w-sm text-sm font-medium text-cream">{brand.fwcStatus}</p>
           <p className="mt-4 text-sm text-cream/70">{formatBrandAddress()}</p>

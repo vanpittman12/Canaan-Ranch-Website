@@ -23,9 +23,10 @@ export function SigningPanel({
       <div>
         <h2 className="type-h2 text-forest">Choose how you will sign</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Download the populated Word agreement first. Usual path: DocuSign after Canaan Preserve
-          accepts. The Canaan Ranch LLP witness is already routed from brand config. Nothing is
-          executed until the team accepts and a signed artifact is on file.
+          Download the populated Word agreement first. After Canaan Preserve Accepts, DocuSign
+          is the usual path, or you can upload a signed copy. The Canaan Ranch LLP witness is
+          already routed from brand config. Nothing is executed until the team accepts and a
+          signed artifact is on file.
         </p>
       </div>
 
@@ -49,7 +50,7 @@ export function SigningPanel({
             />
             <span>
               <span className="block font-medium text-ink">
-                DocuSign after review (usual path)
+                DocuSign after Accept (usual path)
               </span>
               <span className="mt-1 block text-sm leading-6 text-muted">
                 After Canaan Preserve accepts, DocuSign emails the Buyer signatory, Canaan Ranch
