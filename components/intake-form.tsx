@@ -11,7 +11,6 @@ import {
   intakeValuesFromDefaults,
   nextStep,
   previousStep,
-  stepIndex,
   type IntakeWizardStep,
   validateThrough,
 } from "@/lib/intake-steps";
@@ -38,7 +37,7 @@ function Field({
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-col" data-describedby={describedBy}>
       <label htmlFor={name} className="type-label">
         {label}
       </label>
@@ -47,14 +46,14 @@ function Field({
           {hint}
         </p>
       ) : null}
-      <div className="mt-auto" data-describedby={describedBy}>
-        {children}
-        {error ? (
-          <p id={errorId} className="mt-1 text-sm text-terracotta" role="alert">
-            {error}
-          </p>
-        ) : null}
-      </div>
+      {children}
+      <p
+        id={errorId}
+        className={`mt-1 min-h-5 text-sm ${error ? "text-terracotta" : "invisible"}`}
+        role={error ? "alert" : undefined}
+      >
+        {error || "\u00a0"}
+      </p>
     </div>
   );
 }
@@ -125,16 +124,6 @@ export function IntakeForm({
   }
 
   function goTo(target: IntakeWizardStep) {
-    const targetIndex = stepIndex(target);
-    const currentIndex = stepIndex(step);
-    if (targetIndex > currentIndex || target === REVIEW_STEP_ID) {
-      const gate = validateThrough(target === REVIEW_STEP_ID ? REVIEW_STEP_ID : step, values);
-      if (Object.keys(gate).length > 0) {
-        setStepErrors(gate);
-        setStep(firstStepForErrors(gate));
-        return;
-      }
-    }
     setStepErrors({});
     setStep(target);
   }
@@ -230,7 +219,7 @@ export function IntakeForm({
             autoComplete="organization"
           />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           <Field
             name="buyerAttention"
             label="Buyer signatory / attention"
@@ -287,7 +276,7 @@ export function IntakeForm({
             autoComplete="street-address"
           />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid items-start gap-4 sm:grid-cols-3">
           <Field name="buyerCity" label="City" error={errors.buyerCity}>
             <input
               {...controlProps("buyerCity", errors.buyerCity)}
@@ -399,9 +388,9 @@ export function IntakeForm({
         <div>
           <h2 className="type-h2 text-forest">Project and operations</h2>
           <p className="mt-2 text-sm text-muted">
-            County of relocation, donor company affiliation, and optional donor site appear in
-            the reserved-capacity paragraph. Buyer’s authorized agent appears in Parties,
-            Notices, and Buyer responsibilities.
+            Project name is required for tracking. County of relocation and donor company
+            affiliation also appear here. Buyer’s authorized agent appears in Parties, Notices,
+            and Buyer responsibilities.
           </p>
         </div>
         <Field
@@ -421,7 +410,7 @@ export function IntakeForm({
             required
           />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           <Field
             name="authorizedAgentName"
             label="Buyer’s authorized agent name"
@@ -479,18 +468,19 @@ export function IntakeForm({
         </Field>
         <Field
           name="donorSiteName"
-          label="Donor site / project name (optional)"
-          hint="Maps to “Donor site / project” in the reserved-capacity paragraph."
+          label="Project name"
+          hint="Required for tracking. Maps to “Donor site / project” when the Word file has a blank."
           error={errors.donorSiteName}
         >
           <input
             {...controlProps(
               "donorSiteName",
               errors.donorSiteName,
-              "Maps to “Donor site / project” in the reserved-capacity paragraph.",
+              "Required for tracking. Maps to “Donor site / project” when the Word file has a blank.",
             )}
             value={values.donorSiteName}
             onChange={(event) => update("donorSiteName", event.target.value)}
+            required
           />
         </Field>
         <Field
@@ -521,7 +511,7 @@ export function IntakeForm({
             on this form.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           <Field name="buyerWitnessName" label="Buyer witness name" error={errors.buyerWitnessName}>
             <input
               {...controlProps("buyerWitnessName", errors.buyerWitnessName)}
@@ -593,7 +583,7 @@ export function IntakeForm({
               `${values.authorizedAgentName}, ${values.authorizedAgentCompany}`,
             ],
             ["Donor company affiliation", values.donorCompanyAffiliation],
-            ["Donor site", values.donorSiteName || "—"],
+            ["Project name", values.donorSiteName || "—"],
             ["Project description", values.donorSiteDescription || "—"],
           ]}
         />

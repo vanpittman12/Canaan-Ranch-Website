@@ -17,6 +17,7 @@ const posted = {
   authorizedAgentName: "Dana Ruiz",
   authorizedAgentCompany: "Ruiz Environmental",
   donorCompanyAffiliation: "Lennar",
+  donorSiteName: "Harbour tract",
   buyerWitnessName: "Lee Park",
   buyerWitnessEmail: "lee@cypressridge.example",
   sellerWitnessName: "Pat Morales",
@@ -32,6 +33,11 @@ afterEach(() => {
 });
 
 describe("public intake rate lock and seller witness", () => {
+  it("requires project name on public intake", () => {
+    const parsed = intakeSchema.safeParse({ ...posted, donorSiteName: "" });
+    expect(parsed.success).toBe(false);
+  });
+
   it("strips a client-posted perGtRate and locks the brand default", () => {
     const parsed = intakeSchema.safeParse(posted);
     expect(parsed.success).toBe(true);

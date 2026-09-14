@@ -92,7 +92,7 @@ export default async function AdminEngagementPage({
                   value={engagement.intake.donorCompanyAffiliation}
                 />
                 {engagement.intake.donorSiteName ? (
-                  <Row label="Donor site" value={engagement.intake.donorSiteName} />
+                  <Row label="Project name" value={engagement.intake.donorSiteName} />
                 ) : null}
                 <Row
                   label="Buyer witness"

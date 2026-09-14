@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  INTAKE_MINUTES,
   INTAKE_STEPS,
   PREPARE_ITEMS,
   REVIEW_STEP_ID,
@@ -26,8 +27,12 @@ describe("intake wizard", () => {
     expect(previousStep(REVIEW_STEP_ID)).toBe("witness");
   });
 
-  it("lists six existing intake items and no invented schema fields", () => {
-    expect(PREPARE_ITEMS).toHaveLength(6);
+  it("lists existing intake items including required project name and no invented schema fields", () => {
+    expect(INTAKE_MINUTES).toBe(3);
+    expect(PREPARE_ITEMS).toContain("Project name");
+    expect(INTAKE_STEPS.find((step) => step.id === "project")?.fields).toContain(
+      "donorSiteName",
+    );
     const schemaKeys = Object.keys(intakeSchema.shape);
     for (const step of INTAKE_STEPS) {
       for (const field of step.fields) {
@@ -36,7 +41,7 @@ describe("intake wizard", () => {
     }
   });
 
-  it("blocks advance when a required notice field is empty", () => {
+  it("validates required fields on submit, including project name", () => {
     const errors = validateStepFields("notice", {
       buyerLegalName: "Cypress Ridge Holdings LLC",
       buyerAttention: "Avery Cole",
@@ -51,6 +56,9 @@ describe("intake wizard", () => {
     expect(errors.buyerPhone).toBe("This field is required.");
     expect(firstStepForErrors(errors)).toBe("notice");
     expect(validateThrough("review", { tortoiseCount: "2" }).buyerLegalName).toBe(
+      "This field is required.",
+    );
+    expect(validateThrough("review", { tortoiseCount: "2" }).donorSiteName).toBe(
       "This field is required.",
     );
   });
