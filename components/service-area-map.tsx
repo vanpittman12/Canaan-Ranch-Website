@@ -1,23 +1,148 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import type { Map as MapLibreMap, Marker } from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import {
-  CANAAN_SITE,
-  MAP_FRAME,
-  REFERENCE_CITIES,
-  SOUTHERN_LIMIT_LAT,
-  floridaOutlinePath,
-  nauticalMilesToPixels,
-  project,
+  BASEMAP,
+  FLORIDA_BOUNDS,
+  MAP_OVERLAY,
+  MAP_PLACES,
+  SERVICE_AREA_FEATURE,
+  SOUTHERN_LIMIT_LINE,
   serviceAreaCopy,
+  type MapPlace,
 } from "@/lib/service-area";
 
-const CUTOFF = project(-82.5, SOUTHERN_LIMIT_LAT);
-const SITE = project(CANAAN_SITE.lon, CANAAN_SITE.lat);
-const SCALE_NM = [0, 50, 100] as const;
-const SCALE_WIDTH = nauticalMilesToPixels(100);
+function markerClassName(place: MapPlace) {
+  const kind = place.kind ?? "city";
+  return `sa-map-marker sa-map-marker-${kind} sa-map-marker-${place.labelSide}`;
+}
+
+function createPlaceMarker(
+  MarkerCtor: typeof import("maplibre-gl").Marker,
+  place: MapPlace,
+  map: MapLibreMap,
+) {
+  const el = document.createElement("div");
+  el.className = markerClassName(place);
+  el.innerHTML = `<span class="sa-map-marker-dot" aria-hidden="true"></span><span class="sa-map-marker-label">${place.name}</span>`;
+  return new MarkerCtor({ element: el, anchor: "center" }).setLngLat([place.lon, place.lat]).addTo(map);
+}
 
 export function ServiceAreaMap() {
-  const { width, height, mapHeight } = MAP_FRAME;
-  const scaleX = 36;
-  const scaleY = mapHeight + 78;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    let cancelled = false;
+    let map: MapLibreMap | undefined;
+    const markers: Marker[] = [];
+
+    async function mount() {
+      const maplibregl = await import("maplibre-gl");
+      if (cancelled || !containerRef.current) return;
+
+      const instance = new maplibregl.Map({
+        container: containerRef.current,
+        style: BASEMAP.styleUrl,
+        bounds: [
+          [FLORIDA_BOUNDS.west, FLORIDA_BOUNDS.south],
+          [FLORIDA_BOUNDS.east, FLORIDA_BOUNDS.north],
+        ],
+        fitBoundsOptions: { padding: 28, duration: 0 },
+        attributionControl: { compact: true },
+        scrollZoom: false,
+        dragRotate: false,
+        touchPitch: false,
+        pitchWithRotate: false,
+      });
+      map = instance;
+
+      instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+      instance.addControl(new maplibregl.ScaleControl({ maxWidth: 140, unit: "nautical" }), "bottom-right");
+
+      instance.on("error", () => {
+        if (!cancelled && !instance.loaded()) setStatus("error");
+      });
+
+      instance.on("load", () => {
+        if (cancelled) return;
+
+        for (const layer of instance.getStyle().layers ?? []) {
+          if (layer.type === "symbol") {
+            instance.setLayoutProperty(layer.id, "visibility", "none");
+          }
+        }
+
+        instance.addSource("canaan-service-area", {
+          type: "geojson",
+          data: SERVICE_AREA_FEATURE,
+        });
+        instance.addLayer({
+          id: "canaan-service-area-fill",
+          type: "fill",
+          source: "canaan-service-area",
+          paint: {
+            "fill-color": MAP_OVERLAY.fill,
+            "fill-opacity": MAP_OVERLAY.fillOpacity,
+          },
+        });
+        instance.addLayer({
+          id: "canaan-service-area-outline",
+          type: "line",
+          source: "canaan-service-area",
+          paint: {
+            "line-color": MAP_OVERLAY.outline,
+            "line-width": 1.15,
+            "line-opacity": 0.7,
+          },
+        });
+        instance.addSource("canaan-southern-limit", {
+          type: "geojson",
+          data: {
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "LineString",
+              coordinates: [
+                [...SOUTHERN_LIMIT_LINE.west],
+                [...SOUTHERN_LIMIT_LINE.east],
+              ],
+            },
+          },
+        });
+        instance.addLayer({
+          id: "canaan-southern-limit",
+          type: "line",
+          source: "canaan-southern-limit",
+          paint: {
+            "line-color": MAP_OVERLAY.cutoff,
+            "line-width": 2,
+            "line-dasharray": [2.2, 1.6],
+          },
+        });
+
+        for (const place of MAP_PLACES) {
+          markers.push(createPlaceMarker(maplibregl.Marker, place, instance));
+        }
+
+        setStatus("ready");
+      });
+    }
+
+    mount().catch(() => {
+      if (!cancelled) setStatus("error");
+    });
+
+    return () => {
+      cancelled = true;
+      for (const marker of markers) marker.remove();
+      map?.remove();
+    };
+  }, []);
 
   return (
     <section id="service-area" className="border-b border-line bg-paper">
@@ -26,151 +151,40 @@ export function ServiceAreaMap() {
           {serviceAreaCopy.heading}
         </p>
         <h2 className="type-h2 mt-3 max-w-3xl text-forest">{serviceAreaCopy.caption}</h2>
-        <figure className="mt-10 overflow-hidden rounded-[16px] border border-line bg-[#f4f1ea] px-3 py-6 sm:px-8">
-          <svg
-            viewBox={`0 0 ${width} ${height}`}
-            role="img"
-            aria-label={serviceAreaCopy.caption}
-            className="mx-auto h-auto w-full max-w-2xl"
-          >
-            <defs>
-              <clipPath id="canaan-florida-outline">
-                <path d={floridaOutlinePath} />
-              </clipPath>
-            </defs>
-            <rect width={width} height={height} fill="#f4f1ea" />
-            <path d={floridaOutlinePath} fill="#e8dfcc" />
-            <g clipPath="url(#canaan-florida-outline)">
-              <rect x="0" y="0" width={width} height={CUTOFF.y} fill="#3f5346" />
-            </g>
-            <path
-              d={floridaOutlinePath}
-              fill="none"
-              stroke="#24352a"
-              strokeLinejoin="round"
-              strokeWidth="1.75"
+        <figure className="mt-10 overflow-hidden rounded-[16px] border border-line bg-[#e7eee6]">
+          <div className="relative">
+            <div
+              ref={containerRef}
+              role="img"
+              aria-label={serviceAreaCopy.caption}
+              className="sa-basemap h-[min(78vw,40rem)] w-full"
             />
-            <line
-              x1={project(-83.15, SOUTHERN_LIMIT_LAT).x}
-              y1={CUTOFF.y}
-              x2={project(-80.4, SOUTHERN_LIMIT_LAT).x}
-              y2={CUTOFF.y}
-              stroke="#c4a15a"
-              strokeDasharray="5 4"
-              strokeWidth="1.5"
-            />
-
-            {REFERENCE_CITIES.map((city) => {
-              const point = project(city.lon, city.lat);
-              const isAnchor = "anchor" in city && city.anchor;
-              return (
-                <g key={city.name}>
-                  <circle
-                    cx={point.x}
-                    cy={point.y}
-                    r={isAnchor ? 6 : 3.25}
-                    fill={isAnchor ? "#c4a15a" : "#1a1712"}
-                    stroke={isAnchor ? "#24352a" : "#f4f1ea"}
-                    strokeWidth={isAnchor ? 1.5 : 1}
-                  />
-                  <text
-                    x={point.x + city.dx}
-                    y={point.y + city.dy}
-                    fill="#1a1712"
-                    fontFamily="ui-sans-serif, system-ui, sans-serif"
-                    fontSize={isAnchor ? 15 : 13}
-                    fontWeight={isAnchor ? 700 : 500}
-                    textAnchor={"anchorEnd" in city && city.anchorEnd ? "end" : "start"}
-                  >
-                    {city.name}
-                  </text>
-                </g>
-              );
-            })}
-
-            <rect
-              x={SITE.x - 5}
-              y={SITE.y - 5}
-              width="10"
-              height="10"
-              fill="#24352a"
-              stroke="#f4f1ea"
-              strokeWidth="1"
-              transform={`rotate(45 ${SITE.x} ${SITE.y})`}
-            />
-            <text
-              x={SITE.x - 10}
-              y={SITE.y + 22}
-              fill="#24352a"
-              fontFamily="ui-sans-serif, system-ui, sans-serif"
-              fontSize="13"
-              fontWeight="700"
-              textAnchor="end"
-            >
-              {CANAAN_SITE.name}
-            </text>
-
-            <g>
-              <rect x="28" y={mapHeight + 18} width="18" height="12" fill="#3f5346" />
-              <text x="54" y={mapHeight + 29} fill="#1a1712" fontFamily="ui-sans-serif, system-ui, sans-serif" fontSize="13">
+            {status !== "ready" ? (
+              <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted">
+                {status === "error" ? "The Florida map could not load." : serviceAreaCopy.loading}
+              </p>
+            ) : null}
+            <div className="pointer-events-none absolute bottom-3 left-3 max-w-[16rem] rounded-[12px] border border-line bg-paper/95 px-3 py-3 text-[13px] leading-5 text-ink shadow-sm">
+              <p className="flex items-center gap-2">
+                <span className="inline-block h-3 w-4 rounded-[2px] bg-[#3f5346]" aria-hidden="true" />
                 {serviceAreaCopy.legendService}
-              </text>
-              <circle cx="37" cy={mapHeight + 46} r="5.5" fill="#c4a15a" stroke="#24352a" strokeWidth="1.25" />
-              <text x="54" y={mapHeight + 51} fill="#1a1712" fontFamily="ui-sans-serif, system-ui, sans-serif" fontSize="13">
+              </p>
+              <p className="mt-1.5 flex items-center gap-2">
+                <span className="inline-block h-2.5 w-2.5 rounded-full border border-forest bg-brass" aria-hidden="true" />
                 {serviceAreaCopy.legendAnchor}
-              </text>
-              <rect
-                x="31.5"
-                y={mapHeight + 62}
-                width="11"
-                height="11"
-                fill="#24352a"
-                transform={`rotate(45 37 ${mapHeight + 67.5})`}
-              />
-              <text x="54" y={mapHeight + 73} fill="#1a1712" fontFamily="ui-sans-serif, system-ui, sans-serif" fontSize="13">
+              </p>
+              <p className="mt-1.5 flex items-center gap-2">
+                <span
+                  className="inline-block h-2.5 w-2.5 rotate-45 bg-forest"
+                  aria-hidden="true"
+                />
                 {serviceAreaCopy.legendSite}
-              </text>
-            </g>
-
-            <g>
-              <line
-                x1={scaleX}
-                y1={scaleY}
-                x2={scaleX + SCALE_WIDTH}
-                y2={scaleY}
-                stroke="#1a1712"
-                strokeWidth="1.5"
-              />
-              {SCALE_NM.map((nm) => {
-                const x = scaleX + nauticalMilesToPixels(nm);
-                return (
-                  <g key={nm}>
-                    <line x1={x} y1={scaleY - 6} x2={x} y2={scaleY + 6} stroke="#1a1712" strokeWidth="1.5" />
-                    <text
-                      x={x}
-                      y={scaleY + 20}
-                      fill="#6a6156"
-                      fontFamily="ui-sans-serif, system-ui, sans-serif"
-                      fontSize="11"
-                      textAnchor="middle"
-                    >
-                      {nm}
-                    </text>
-                  </g>
-                );
-              })}
-              <text
-                x={scaleX}
-                y={scaleY + 36}
-                fill="#6a6156"
-                fontFamily="ui-sans-serif, system-ui, sans-serif"
-                fontSize="11"
-              >
-                {serviceAreaCopy.scaleLabel}
-              </text>
-            </g>
-          </svg>
-          <figcaption className="mt-4 text-sm leading-6 text-muted">{serviceAreaCopy.caption}</figcaption>
+              </p>
+            </div>
+          </div>
+          <figcaption className="border-t border-line bg-paper px-4 py-3 text-sm leading-6 text-muted sm:px-5">
+            {serviceAreaCopy.caption}
+          </figcaption>
         </figure>
       </div>
     </section>

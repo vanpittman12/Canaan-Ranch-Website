@@ -343,6 +343,82 @@ body {
   );
 }
 
+.sa-basemap .maplibregl-ctrl-attrib {
+  font-size: 10px;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+}
+
+.sa-basemap .maplibregl-ctrl-scale {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  color: var(--ink);
+  font-size: 11px;
+}
+
+.sa-map-marker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.sa-map-marker-left {
+  flex-direction: row-reverse;
+}
+
+.sa-map-marker-top {
+  flex-direction: column-reverse;
+}
+
+.sa-map-marker-bottom {
+  flex-direction: column;
+}
+
+.sa-map-marker-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--white);
+  border-radius: 999px;
+  background: var(--ink);
+}
+
+.sa-map-marker-anchor .sa-map-marker-dot {
+  width: 12px;
+  height: 12px;
+  background: var(--brass);
+  border-color: var(--forest);
+}
+
+.sa-map-marker-site .sa-map-marker-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--forest);
+  border-color: var(--white);
+  transform: rotate(45deg);
+}
+
+.sa-map-marker-label {
+  color: var(--ink);
+  font-family: var(--font-source), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow:
+    0 0 3px var(--white),
+    0 1px 0 var(--white),
+    1px 0 0 var(--white),
+    -1px 0 0 var(--white);
+  white-space: nowrap;
+}
+
+.sa-map-marker-anchor .sa-map-marker-label,
+.sa-map-marker-site .sa-map-marker-label {
+  font-size: 15px;
+  font-weight: 700;
+}
+
 :focus {
   outline: none;
 }
