@@ -119,7 +119,6 @@ export function buildReservationLetterProse(fields: ReservationLetterFields) {
   const throughConsultant = fields.consultantLine
     ? `, through their consultant ${fields.consultantName && fields.consultantCompany ? `${fields.consultantName} of ${fields.consultantCompany}` : fields.consultantLine},`
     : "";
-  const reservedNoun = fields.tortoiseCount === 1 ? "Tortoise" : "Tortoises";
   const paragraphs = [
     `Please be advised that ${fields.buyerLegalName}${throughConsultant} has reserved capacity to relocate up to ${fields.tortoiseCountPhrase} (Gopherus polyphemus) from the ${fields.donorProjectName} donor site in ${countyLine} to ${brand.name}, an FWC Approved Tier 1 Long-Term Recipient Site operated by ${brand.legalName}.`,
     `The reservation period is ${fields.reservationPeriod}. Reserved capacity is stated as tortoise count; acres and Unit number are not collected at intake and are omitted from this letter.`,
@@ -143,7 +142,7 @@ export function buildReservationLetterProse(fields: ReservationLetterFields) {
     ],
     summaryLines: [
       `${fields.donorProjectName} – ${countyLine}`,
-      `Reserved — ${fields.tortoiseCount} ${reservedNoun}`,
+      `Reserved - ${fields.tortoiseCount} Tortoise`,
       `Consultant: ${fields.consultantLine || "—"}`,
       `Engagement: ${fields.reference}`,
     ],
@@ -158,6 +157,35 @@ export function buildReservationLetterProse(fields: ReservationLetterFields) {
 
 export function reservationLetterContainsBannedLegacy(text: string) {
   return /post\s*oak|applied bionomics/i.test(text);
+}
+
+export function buildReservationLetterPlainText(fields: ReservationLetterFields) {
+  const prose = buildReservationLetterProse(fields);
+  return [
+    brand.name,
+    brand.legalName,
+    brand.fwcStatus,
+    "",
+    prose.dateLine,
+    "",
+    ...prose.addressBlock,
+    "",
+    ...prose.reLines,
+    "",
+    prose.salutation,
+    "",
+    ...prose.paragraphs,
+    "",
+    ...prose.summaryLines,
+    "",
+    prose.closing,
+    "",
+    prose.signatoryName,
+    prose.signatoryTitle,
+    prose.onBehalfOf,
+    brand.name,
+    formatBrandAddress(),
+  ].join("\n");
 }
 
 export function applyReservationLetterGenerated(

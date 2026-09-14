@@ -8,6 +8,7 @@ import {
   generateReservationLetterPdf,
   reservationLetterContainsBannedLegacy,
   reservationLetterFilename,
+  buildReservationLetterPlainText,
 } from "./reservation-letter";
 import { emptyReservationLetter, type Engagement, type IntakeFields } from "./types";
 
@@ -141,11 +142,20 @@ describe("reservation letter branding", () => {
     expect(blob).toContain("Hillsborough County, Florida");
     expect(blob).toContain("Canaan Preserve");
     expect(blob).toContain("Tier 1");
-    expect(blob).toContain("Reserved — 17 Tortoises");
+    expect(blob).toContain("Reserved - 17 Tortoise");
     expect(blob).toContain("Consultant: Casey Nguyen, Suncoast Permitting");
     expect(reservationLetterContainsBannedLegacy(blob)).toBe(false);
     expect(blob).not.toContain("Post Oak");
     expect(blob).not.toContain("Applied Bionomics");
+    const plain = buildReservationLetterPlainText(
+      buildReservationLetterFields(engagement({ effectiveDate: "2025-12-03" })),
+    );
+    expect(plain).toContain("December 3, 2025");
+    expect(plain.startsWith("Canaan Preserve")).toBe(true);
+    expect(plain).not.toContain("Applied Bionomics");
+    expect(plain).toContain("Sincerely,");
+    expect(plain).toContain("Andrew Fuddy");
+    expect(plain).toContain("On behalf of Canaan Ranch LLP");
   });
 
   it("writes a PDF that starts with %PDF", async () => {
