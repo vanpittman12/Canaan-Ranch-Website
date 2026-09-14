@@ -127,8 +127,8 @@ The populated engagement PDF is the envelope document. Hidden anchor strings (`/
 | `DOCUSIGN_ENABLED` | `true` selects live send. Default / unset uses the local stub. |
 | `DOCUSIGN_INTEGRATION_KEY` | Integration Key (OAuth client ID) from the developer app |
 | `DOCUSIGN_SECRET_KEY` | Developer-app Secret Key (confidential client). Store it; JWT send still needs an RSA private key. |
-| `DOCUSIGN_USER_ID` | Impersonated user’s API Username (GUID) |
-| `DOCUSIGN_ACCOUNT_ID` | API Account ID (GUID) |
+| `DOCUSIGN_USER_ID` | Impersonated user’s API Username (GUID). Env / Cloudflare secret only — never commit the value. |
+| `DOCUSIGN_ACCOUNT_ID` | API Account ID (GUID). Env / Cloudflare secret only — never commit the value. |
 | `DOCUSIGN_ACCOUNT_BASE_URI` | Default `https://demo.docusign.net` |
 | `DOCUSIGN_AUTH_SERVER` | Default `https://account-d.docusign.com` |
 | `DOCUSIGN_PRIVATE_KEY` | RSA private key PEM for JWT grant (preferred on Workers) |
@@ -141,12 +141,14 @@ Copy [`.env.example`](.env.example) to `.env.local` for Node. Copy [`.dev.vars.e
 
 ### Where to find IDs in DocuSign admin
 
-Van already has the **Integration Key** and **Secret Key** from the developer app. Still needed:
+Van already has the **Integration Key** and **Secret Key** from the developer app. **User ID** and **Account ID** (when forwarded) go into Cloudflare secrets or local `.env.local` / `.dev.vars` only. Do not paste those GUIDs into git, client bundles, or `.env.example`.
+
+To find the IDs in DocuSign admin:
 
 1. Sign in at [https://account-d.docusign.com](https://account-d.docusign.com) (demo) or [https://account.docusign.com](https://account.docusign.com) (production).
 2. Open **Settings → Apps and Keys** (Admin).
-3. **API Account ID** at the top of that page → `DOCUSIGN_ACCOUNT_ID`.
-4. **User ID** for the impersonated sender (same page, or **Users** → the user → **API Username**) → `DOCUSIGN_USER_ID`.
+3. **API Account ID** at the top of that page → inject as `DOCUSIGN_ACCOUNT_ID`.
+4. **User ID** for the impersonated sender (same page, or **Users** → the user → **API Username**) → inject as `DOCUSIGN_USER_ID`.
 5. On the same Integration Key, add an **RSA keypair** (Service Integration / JWT). Put the **private** PEM in `DOCUSIGN_PRIVATE_KEY`. The developer-app Secret Key is not the JWT key.
 6. Grant JWT consent once (the live send error will include the consent URL if this step is missing): scope `signature impersonation`.
 7. In **Connect**, add an HMAC key and a webhook to `https://canaanpreserve.com/api/docusign/webhook` (envelope completed). Store the HMAC key as `DOCUSIGN_WEBHOOK_SECRET`.

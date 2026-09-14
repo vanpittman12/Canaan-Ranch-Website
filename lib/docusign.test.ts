@@ -1,4 +1,6 @@
 import { createHmac, generateKeyPairSync } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { brand, getSellerWitness } from "./brand";
 import {
@@ -118,6 +120,17 @@ describe("DocuSign seam", () => {
     expect(DOCUSIGN_ENV_VARS).toContain("DOCUSIGN_PRIVATE_KEY");
     expect(DOCUSIGN_ENV_VARS).toContain("DOCUSIGN_WEBHOOK_SECRET");
     expect(DOCUSIGN_ENV_VARS).not.toContain(privateKey);
+  });
+
+  it("keeps User ID and Account ID as empty names in committed env examples", () => {
+    const envExample = readFileSync(resolve(process.cwd(), ".env.example"), "utf8");
+    const devVars = readFileSync(resolve(process.cwd(), ".dev.vars.example"), "utf8");
+    const guidAssignment =
+      /DOCUSIGN_(USER_ID|ACCOUNT_ID)=[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+    expect(envExample).toMatch(/^DOCUSIGN_USER_ID=$/m);
+    expect(envExample).toMatch(/^DOCUSIGN_ACCOUNT_ID=$/m);
+    expect(envExample).not.toMatch(guidAssignment);
+    expect(devVars).not.toMatch(guidAssignment);
   });
 
   it("sends a live envelope with JWT auth when DOCUSIGN_ENABLED=true", async () => {
