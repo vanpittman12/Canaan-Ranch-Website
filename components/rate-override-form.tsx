@@ -21,7 +21,7 @@ export function RateOverrideForm({ engagement }: { engagement: Engagement }) {
       {state.error ? <p className="mt-2 text-sm text-terracotta">{state.error}</p> : null}
       <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
         <input
-          className="w-full rounded-lg border border-line bg-paper px-3.5 py-2.5 text-ink outline-none focus:border-forest focus:ring-2 focus:ring-forest/15 sm:max-w-40"
+          className="field-control sm:max-w-40"
           type="number"
           name="perGtRate"
           min={1}

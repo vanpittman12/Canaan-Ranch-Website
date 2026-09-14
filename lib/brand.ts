@@ -4,6 +4,9 @@ export const brand = {
   tagline: "Gopher tortoise relocation recipient site.",
   shortTagline: "Reserve recipient-site capacity with a clear agreement.",
   fwcStatus: "Canaan Preserve is an FWC Approved Tier 1 Long Term Recipient site.",
+  fwcBadge: "FWC Approved Tier 1",
+  fwcRecipientSitesUrl:
+    "https://myfwc.com/license/wildlife/gopher-tortoise-permits/recipient-sites/",
   email: "engagements@canaanpreserve.com",
   phone: "813-390-1044",
   website: "https://canaanpreserve.com",

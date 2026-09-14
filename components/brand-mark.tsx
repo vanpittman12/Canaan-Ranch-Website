@@ -5,8 +5,8 @@ export function BrandMark({
   className?: string;
   light?: boolean;
 }) {
-  const ink = light ? "#F4EEE3" : "#1B3328";
-  const brass = "#B68B3D";
+  const ink = light ? "#EFE6D4" : "#24352A";
+  const brass = "#C4A15A";
 
   return (
     <svg
@@ -18,24 +18,18 @@ export function BrandMark({
     >
       <rect x="2" y="2" width="60" height="60" rx="14" stroke={ink} strokeWidth="2.4" />
       <path
-        d="M12 42c6-10 11-16 20-16s14 6 20 16"
+        d="M18 46c2.2-9 6.4-16 14-16s11.8 7 14 16"
         stroke={ink}
         strokeWidth="2.2"
         strokeLinecap="round"
       />
       <path
-        d="M20 42c4-6 8-10 12-10s8 4 12 10"
+        d="M32 14v16M24 22c2.4 3.2 5.4 5.4 8 6.2C34.6 27.4 37.6 25.2 40 22"
         stroke={brass}
         strokeWidth="2.2"
         strokeLinecap="round"
       />
-      <path
-        d="M32 18v10"
-        stroke={brass}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <circle cx="32" cy="16" r="2.4" fill={brass} />
+      <circle cx="32" cy="14" r="2.2" fill={brass} />
     </svg>
   );
 }

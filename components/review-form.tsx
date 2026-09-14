@@ -12,8 +12,8 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
 
   if (engagement.status !== "pending_review") {
     return (
-      <div className="rounded-2xl border border-line bg-white p-6">
-        <h2 className="font-serif text-2xl text-forest">Review</h2>
+      <div className="surface-card">
+        <h2 className="type-h2 text-forest">Review</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
           This engagement is no longer in the review queue. Decisions can only be recorded while
           the status is pending review. Nothing closes without Accept.
@@ -28,9 +28,9 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
   }
 
   return (
-    <form action={formAction} className="space-y-5 rounded-2xl border border-line bg-white p-6">
+    <form action={formAction} className="surface-card space-y-5">
       <div>
-        <h2 className="font-serif text-2xl text-forest">Team decision</h2>
+        <h2 className="type-h2 text-forest">Team decision</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
           Accept is the only path to execution. If a signed copy is already uploaded, Accept will
           mark the agreement executed. If the client chose DocuSign, Accept sends the stub
@@ -39,14 +39,14 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
         </p>
       </div>
       {state.error ? (
-        <div className="rounded-xl border border-terracotta/30 bg-terracotta/8 px-4 py-3 text-sm text-terracotta">
+        <div className="rounded-[12px] border border-terracotta/30 bg-white px-4 py-3 text-sm text-terracotta">
           {state.error}
         </div>
       ) : null}
       <label className="block">
-        <span className="text-sm font-medium text-ink">Note to file / client</span>
+        <span className="type-label">Note to file / client</span>
         <textarea
-          className="mt-1.5 min-h-28 w-full rounded-lg border border-line bg-paper px-3.5 py-2.5 text-ink outline-none focus:border-forest focus:ring-2 focus:ring-forest/15"
+          className="field-control min-h-28"
           name="note"
           placeholder="Required when requesting changes. Optional for accept or decline."
         />
@@ -89,7 +89,7 @@ function SimulateComplete({ engagementId }: { engagementId: string }) {
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="mt-5 rounded-xl border border-dashed border-brass/50 bg-wheat/50 p-4">
+    <form action={formAction} className="mt-5 rounded-[12px] border border-dashed border-brass bg-cream p-4">
       <p className="text-sm font-medium text-ink">DocuSign stub control</p>
       <p className="mt-1 text-sm text-muted">
         Simulate the webhook that would fire when a signer completes the envelope. This attaches

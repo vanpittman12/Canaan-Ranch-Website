@@ -8,34 +8,48 @@ export function SiteHeader({
   variant?: "public" | "admin";
 }) {
   return (
-    <header className="border-b border-line/80 bg-paper/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-        <Link href="/" className="flex items-center gap-3">
-          <BrandMark className="h-11 w-11" />
-          <span className="leading-tight">
-            <span className="block font-serif text-xl tracking-tight text-forest">
+    <header className="border-b border-line bg-paper">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-8">
+        <Link href="/" className="flex min-w-0 items-center gap-3">
+          <BrandMark className="h-10 w-10 shrink-0" />
+          <span className="min-w-0 leading-tight">
+            <span className="block truncate font-serif text-xl tracking-tight text-forest">
               {brand.name}
             </span>
-            <span className="block text-[11px] uppercase tracking-[0.22em] text-muted">
-              {variant === "admin" ? "Internal review" : "Recipient site"}
+            <span className="block truncate text-[12px] font-semibold uppercase tracking-[0.12em] text-muted">
+              {variant === "admin" ? "Internal review" : brand.legalName}
             </span>
           </span>
         </Link>
-        <nav className="flex items-center gap-5 text-sm text-ink/80">
+        <nav className="flex shrink-0 items-center gap-3 text-sm text-ink sm:gap-5">
           {variant === "admin" ? (
-            <Link href="/admin" className="hover:text-forest">
+            <Link href="/admin" className="inline-flex min-h-11 items-center hover:text-forest">
               Queue
             </Link>
           ) : (
             <>
-              <Link href="/#how-it-works" className="hidden hover:text-forest sm:inline">
+              <Link
+                href="/#how-it-works"
+                className="hidden min-h-11 items-center hover:text-forest md:inline-flex"
+              >
                 How it works
               </Link>
-              <a href="/api/agreement-template" className="hidden hover:text-forest sm:inline">
-                Blank agreement
+              <a
+                href={brand.fwcRecipientSitesUrl}
+                className="hidden min-h-11 items-center hover:text-forest lg:inline-flex"
+                target="_blank"
+                rel="noreferrer"
+              >
+                FWC sites
               </a>
-              <Link href="/intake" className="btn-primary !px-4 !py-2 text-sm">
-                Begin a reservation
+              <a
+                href="/api/agreement-template"
+                className="hidden min-h-11 items-center hover:text-forest sm:inline-flex"
+              >
+                Blank PDF
+              </a>
+              <Link href="/intake" className="btn-primary !px-3 text-sm sm:!px-4">
+                Start intake
               </Link>
             </>
           )}

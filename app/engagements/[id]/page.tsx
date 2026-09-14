@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DocumentDesk } from "@/components/document-desk";
+import { EngagementTimeline } from "@/components/engagement-timeline";
 import { IntakeForm } from "@/components/intake-form";
 import { SigningPanel } from "@/components/signing-panel";
 import { SiteFooter } from "@/components/site-footer";
@@ -52,12 +54,10 @@ export default async function EngagementPage({
       <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8">
         <div className="flex flex-col gap-4 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brass">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
               {engagement.reference}
             </p>
-            <h1 className="mt-2 font-serif text-4xl text-forest">
-              {dealTitle(engagement.intake)}
-            </h1>
+            <h1 className="type-h1 mt-2 text-forest">{dealTitle(engagement.intake)}</h1>
             <p className="mt-2 text-muted">
               {engagement.intake.buyerLegalName} · {engagement.intake.tortoiseCount} GT ·{" "}
               {formatUsd(dealEconomics(engagement.intake).total)} adult-rate total
@@ -66,22 +66,18 @@ export default async function EngagementPage({
           <StatusBadge status={engagement.status} />
         </div>
 
+        <ConfirmationCard engagement={engagement} />
         <StatusCopy engagement={engagement} docusignMode={seam.mode} />
 
         <div className="mt-8 space-y-6">
-          <section className="rounded-2xl border border-forest/20 bg-white p-6">
-            <h2 className="font-serif text-2xl text-forest">Download your agreement</h2>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              The populated Multi-Project Gopher Tortoise Relocation Agreement is available as a
-              PDF. There is no on-screen contract preview. Review the download, then choose a
-              signing path.
-            </p>
-            <a className="btn-primary mt-5" href={contractUrl}>
-              Download populated agreement PDF
-            </a>
-          </section>
+          <DocumentDesk
+            reference={engagement.reference}
+            contractUrl={contractUrl}
+            signedUrl={signedUrl}
+          />
+          <EngagementTimeline engagement={engagement} />
 
-          <div className="rounded-2xl border border-line bg-white p-6">
+          <div className="surface-card">
             {editable ? (
               <SigningPanel engagement={engagement} contractUrl={contractUrl} />
             ) : (
@@ -94,8 +90,8 @@ export default async function EngagementPage({
           </div>
 
           {editable ? (
-            <details className="rounded-2xl border border-line bg-white p-6">
-              <summary className="cursor-pointer font-serif text-2xl text-forest">
+            <details className="surface-card">
+              <summary className="cursor-pointer font-serif text-2xl font-medium text-forest">
                 Edit intake details
               </summary>
               <div className="mt-6">
@@ -110,6 +106,31 @@ export default async function EngagementPage({
   );
 }
 
+function ConfirmationCard({ engagement }: { engagement: Engagement }) {
+  if (engagement.status !== "draft" && engagement.status !== "pending_review") {
+    return null;
+  }
+
+  return (
+    <section className="mt-6 rounded-[16px] border border-line bg-cream p-5">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+        Confirmation
+      </p>
+      <h2 className="type-h2 mt-2 text-forest">{engagement.reference}</h2>
+      <p className="mt-2 text-[17px] leading-[27px] text-ink">
+        {engagement.status === "draft"
+          ? "Intake is saved. Download the populated agreement PDF first, then choose a signing path."
+          : "This engagement is in the Canaan Preserve review queue."}
+      </p>
+      <ol className="mt-4 list-decimal space-y-1 pl-5 text-sm leading-6 text-muted">
+        <li>Download the populated agreement PDF.</li>
+        <li>Choose DocuSign after Accept, or a manual signed PDF.</li>
+        <li>Canaan Preserve reviews. Nothing is executed until Accept and a signed copy are on file.</li>
+      </ol>
+    </section>
+  );
+}
+
 function StatusCopy({
   engagement,
   docusignMode,
@@ -119,11 +140,9 @@ function StatusCopy({
 }) {
   if (engagement.status === "changes_requested") {
     return (
-      <div className="mt-6 rounded-2xl border border-terracotta/25 bg-terracotta/8 p-5">
+      <div className="mt-6 rounded-[16px] border border-terracotta/25 bg-white p-5">
         <p className="font-medium text-terracotta">Canaan Preserve requested changes</p>
-        <p className="mt-2 text-sm leading-6 text-ink/80">
-          {engagement.changeRequestNote}
-        </p>
+        <p className="mt-2 text-sm leading-6 text-ink/80">{engagement.changeRequestNote}</p>
         <p className="mt-3 text-sm text-muted">
           Update the intake if needed, then submit again for review.
         </p>
@@ -133,7 +152,7 @@ function StatusCopy({
 
   if (engagement.status === "pending_review") {
     return (
-      <div className="mt-6 rounded-2xl border border-brass/30 bg-wheat/60 p-5">
+      <div className="mt-6 rounded-[16px] border border-line bg-white p-5">
         <p className="font-medium text-forest">Submitted for review</p>
         <p className="mt-2 text-sm leading-6 text-muted">
           The team has your {engagement.signingMethod === "docusign" ? "DocuSign" : "manual"}{" "}
@@ -147,7 +166,7 @@ function StatusCopy({
 
   if (engagement.status === "declined") {
     return (
-      <div className="mt-6 rounded-2xl border border-line bg-white p-5">
+      <div className="mt-6 rounded-[16px] border border-line bg-white p-5">
         <p className="font-medium text-ink">This engagement was declined</p>
         <p className="mt-2 text-sm leading-6 text-muted">
           {engagement.reviews.at(-1)?.note ||
@@ -159,7 +178,7 @@ function StatusCopy({
 
   if (engagement.status === "accepted") {
     return (
-      <div className="mt-6 rounded-2xl border border-sage/40 bg-sage/10 p-5">
+      <div className="mt-6 rounded-[16px] border border-sage bg-cream p-5">
         <p className="font-medium text-forest">Accepted — awaiting signed artifact</p>
         <p className="mt-2 text-sm leading-6 text-muted">
           {engagement.signingMethod === "docusign"
@@ -172,7 +191,7 @@ function StatusCopy({
 
   if (engagement.status === "executed") {
     return (
-      <div className="mt-6 rounded-2xl border border-forest/20 bg-forest text-cream p-5">
+      <div className="mt-6 rounded-[16px] border border-forest bg-forest p-5 text-cream">
         <p className="font-medium">Agreement executed</p>
         <p className="mt-2 text-sm leading-6 text-cream/80">
           Canaan Preserve accepted this engagement and a signed artifact is on file
@@ -184,15 +203,7 @@ function StatusCopy({
     );
   }
 
-  return (
-    <div className="mt-6 rounded-2xl border border-line bg-white p-5">
-      <p className="font-medium text-forest">Agreement ready to download</p>
-      <p className="mt-2 text-sm leading-6 text-muted">
-        Download the populated PDF to review, choose a signing path, and submit when you are
-        ready. Canaan Preserve Accepts before DocuSign or execution.
-      </p>
-    </div>
-  );
+  return null;
 }
 
 function SubmittedPanel({
@@ -207,7 +218,7 @@ function SubmittedPanel({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-serif text-2xl text-forest">Next steps</h2>
+        <h2 className="type-h2 text-forest">Signing status</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
           Signing method:{" "}
           {engagement.signingMethod === "docusign"

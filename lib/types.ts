@@ -98,6 +98,15 @@ export const STATUS_LABELS: Record<EngagementStatus, string> = {
   executed: "Executed",
 };
 
+export const STATUS_PILL_LABELS: Record<EngagementStatus, string> = {
+  draft: "Draft",
+  pending_review: "Pending",
+  changes_requested: "Changes",
+  declined: "Declined",
+  accepted: "Accepted",
+  executed: "Executed",
+};
+
 export function dealTitle(intake: IntakeFields) {
   if (intake.donorSiteName.trim()) {
     return intake.donorSiteName.trim();
