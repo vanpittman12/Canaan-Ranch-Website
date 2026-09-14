@@ -17,6 +17,14 @@ const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
 const intakePage = readFileSync(path.join(process.cwd(), "app/intake/page.tsx"), "utf8");
 const footer = readFileSync(path.join(process.cwd(), "components/site-footer.tsx"), "utf8");
+const signingPanel = readFileSync(
+  path.join(process.cwd(), "components/signing-panel.tsx"),
+  "utf8",
+);
+const timeline = readFileSync(
+  path.join(process.cwd(), "components/engagement-timeline.tsx"),
+  "utf8",
+);
 const mark = readFileSync(path.join(process.cwd(), "components/brand-mark.tsx"), "utf8");
 const markAsset = readFileSync(path.join(process.cwd(), "lib/brand-mark-asset.ts"), "utf8");
 const lockup = readFileSync(path.join(process.cwd(), "components/brand-lockup.tsx"), "utf8");
@@ -90,6 +98,16 @@ describe("site builder visual lock", () => {
     expect(landing.match(/\{brand\.fwcValueProp\}/g)).toHaveLength(1);
     expect(landing).toContain("Word/DOCX");
     expect(landing).not.toContain("Download the PDF");
+    expect(landing).toContain("DocuSign is the usual path");
+    expect(landing).toContain("download the Word agreement and upload a signed copy");
+    expect(landing.toLowerCase()).not.toContain("this demo");
+    expect(landing.toLowerCase()).not.toContain("go-live");
+    expect(signingPanel).toContain("DocuSign after Accept (usual path)");
+    expect(signingPanel.toLowerCase()).not.toContain("this demo");
+    expect(signingPanel.toLowerCase()).not.toContain("go-live");
+    expect(timeline).toContain("DocuSign after Accept is the usual path");
+    expect(timeline.toLowerCase()).not.toContain("this demo");
+    expect(timeline.toLowerCase()).not.toContain("go-live");
     expect(landing).toContain("adult /");
     expect(landing).toContain("juvenile");
     expect(brand.fwcValueProp).toContain("FWC Approved Tier 1 Long-Term Recipient Site");

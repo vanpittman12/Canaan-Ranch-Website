@@ -14,7 +14,7 @@ const stages = [
   {
     id: "signing",
     title: "Choose signing",
-    body: "After Accept, this demo can send the Word agreement through DocuSign. You can also download it and upload a signed copy.",
+    body: "DocuSign after Accept is the usual path. You can also download the Word agreement and upload a signed copy.",
   },
   {
     id: "review",

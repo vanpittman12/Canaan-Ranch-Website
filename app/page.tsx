@@ -26,7 +26,7 @@ const steps = [
   {
     n: "04",
     title: "Canaan Preserve Accepts, then sign",
-    body: "Review happens first. After Accept, this demo can send the Word agreement through DocuSign, or you can download it and upload a signed copy. Production DocuSign is confirmed at go-live. Nothing is executed until Accept and a signed copy are on file.",
+    body: "Review happens first. After Accept, DocuSign is the usual path. You can also download the Word agreement and upload a signed copy. Nothing is executed until Accept and a signed copy are on file.",
   },
 ];
 
