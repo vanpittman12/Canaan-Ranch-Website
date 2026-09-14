@@ -101,6 +101,7 @@ describe("new engagement notify seam", () => {
   it("stubs when only some Gmail secrets are set", async () => {
     process.env.GMAIL_CLIENT_ID = "partial-client";
     process.env.GMAIL_USER = DEFAULT_GMAIL_USER;
+    vi.spyOn(console, "info").mockImplementation(() => {});
     const fetchMock = vi.fn();
 
     const result = await notifyNewEngagement(notice, { fetch: fetchMock });
