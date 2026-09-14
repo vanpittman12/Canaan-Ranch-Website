@@ -1,6 +1,8 @@
 import { dateOnly } from "./money";
 import type {
   ArtifactSource,
+  DocuSignEnvelopeStatus,
+  DocuSignMode,
   Engagement,
   EngagementStatus,
   ReviewDecision,
@@ -146,7 +148,7 @@ export function applyDocuSignSent(
   engagement: Engagement,
   envelopeId: string,
   message: string,
-  mode: "stub" | "live_placeholder",
+  mode: DocuSignMode,
   recipients = engagement.docusign.recipients,
 ): Engagement {
   const now = new Date().toISOString();
@@ -165,9 +167,27 @@ export function applyDocuSignSent(
   };
 }
 
+export function applyDocuSignStatus(
+  engagement: Engagement,
+  status: DocuSignEnvelopeStatus,
+  message?: string,
+): Engagement {
+  const now = new Date().toISOString();
+  return {
+    ...engagement,
+    docusign: {
+      ...engagement.docusign,
+      status,
+      lastMessage: message ?? engagement.docusign.lastMessage,
+    },
+    updatedAt: now,
+  };
+}
+
 export function applyDocuSignCompleted(
   engagement: Engagement,
   artifact: SignedArtifact,
+  message?: string,
 ): Engagement {
   if (engagement.status !== "accepted" && engagement.status !== "executed") {
     throw new EngagementError(
@@ -187,7 +207,11 @@ export function applyDocuSignCompleted(
       ...engagement.docusign,
       status: "completed",
       completedAt: now,
-      lastMessage: "DocuSign stub: envelope marked complete. Signed artifact attached.",
+      lastMessage:
+        message ??
+        (engagement.docusign.mode === "live"
+          ? "DocuSign: envelope completed. Signed artifact attached."
+          : "DocuSign stub: envelope marked complete. Signed artifact attached."),
     },
   };
 }

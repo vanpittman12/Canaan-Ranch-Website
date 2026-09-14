@@ -56,9 +56,19 @@ describe("file store", () => {
     const saved = await fileStore.saveEngagement({
       ...created,
       status: "pending_review",
+      docusign: {
+        ...created.docusign,
+        envelopeId: "env-lookup-1",
+        status: "sent",
+      },
     });
     expect(saved.status).toBe("pending_review");
+    expect(saved.docusign.envelopeId).toBe("env-lookup-1");
     expect(saved.updatedAt >= created.updatedAt).toBe(true);
+    const byEnvelope = (await fileStore.listEngagements()).find(
+      (item) => item.docusign.envelopeId === "env-lookup-1",
+    );
+    expect(byEnvelope?.id).toBe(created.id);
 
     const bytes = new Uint8Array([1, 2, 3, 4]);
     await fileStore.putUpload(`${created.id}-signed.pdf`, bytes);

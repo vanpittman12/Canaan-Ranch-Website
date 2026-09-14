@@ -11,6 +11,14 @@ export async function getEngagement(id: string) {
   return (await getStore()).getEngagement(id);
 }
 
+export async function getEngagementByEnvelopeId(envelopeId: string) {
+  if (!envelopeId) {
+    return null;
+  }
+  const items = await listEngagements();
+  return items.find((item) => item.docusign.envelopeId === envelopeId) ?? null;
+}
+
 export async function createEngagementRecord(intake: IntakeFields) {
   return (await getStore()).createEngagementRecord(intake);
 }

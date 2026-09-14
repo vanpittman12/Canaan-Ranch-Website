@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import { brand, formatBrandAddress } from "./brand";
 import { buildContract, buildTemplateEngagement, type ContractDocument } from "./contract";
+import { DOCUSIGN_ANCHORS } from "./docusign";
 import type { Engagement } from "./types";
 
 const PAGE_WIDTH = 612;
@@ -147,7 +148,12 @@ async function drawDocument(
 
   const columnWidth = (maxWidth - 24) / 2;
   const startY = y;
-  drawSignatureColumn(page, contract.sellerBlock, MARGIN, startY, serif, sans, ink, muted);
+  drawSignatureColumn(page, contract.sellerBlock, MARGIN, startY, serif, sans, ink, muted, {
+    authorized: DOCUSIGN_ANCHORS.seller_signer.sign,
+    authorizedDate: DOCUSIGN_ANCHORS.seller_signer.date,
+    witness: DOCUSIGN_ANCHORS.seller_witness.sign,
+    witnessDate: DOCUSIGN_ANCHORS.seller_witness.date,
+  });
   drawSignatureColumn(
     page,
     contract.buyerBlock,
@@ -157,6 +163,12 @@ async function drawDocument(
     sans,
     ink,
     muted,
+    {
+      authorized: DOCUSIGN_ANCHORS.buyer_signer.sign,
+      authorizedDate: DOCUSIGN_ANCHORS.buyer_signer.date,
+      witness: DOCUSIGN_ANCHORS.buyer_witness.sign,
+      witnessDate: DOCUSIGN_ANCHORS.buyer_witness.date,
+    },
   );
 
   if (options?.watermark) {
@@ -224,6 +236,12 @@ function drawSignatureColumn(
   sans: PDFFont,
   ink: ReturnType<typeof rgb>,
   muted: ReturnType<typeof rgb>,
+  anchors?: {
+    authorized?: string;
+    authorizedDate?: string;
+    witness?: string;
+    witnessDate?: string;
+  },
 ) {
   let cursor = y;
   lines.forEach((line, index) => {
@@ -234,8 +252,43 @@ function drawSignatureColumn(
       font: index === 0 ? serif : sans,
       color: index === 0 ? ink : muted,
     });
+    const anchor = signatureAnchorForLine(line, anchors);
+    if (anchor) {
+      page.drawText(anchor, {
+        x,
+        y: cursor,
+        size: 1,
+        font: sans,
+        color: rgb(1, 1, 1),
+      });
+    }
     cursor -= 18;
   });
+}
+
+function signatureAnchorForLine(
+  line: string,
+  anchors?: {
+    authorized?: string;
+    authorizedDate?: string;
+    witness?: string;
+    witnessDate?: string;
+  },
+) {
+  const value = line.trim().toLowerCase();
+  if (value.startsWith("authorized signature")) {
+    return anchors?.authorized;
+  }
+  if (value.startsWith("witness signature")) {
+    return anchors?.witness;
+  }
+  if (value.startsWith("witness date")) {
+    return anchors?.witnessDate;
+  }
+  if (value.startsWith("date:")) {
+    return anchors?.authorizedDate;
+  }
+  return undefined;
 }
 
 export async function generateContractPdf(engagement: Engagement) {

@@ -50,7 +50,7 @@ Seller-side, the same every time, and **not** on the public intake form.
 | `CANAAN_WITNESS_NAME` | `Andrew Fuddy` |
 | `CANAAN_WITNESS_EMAIL` | `witness@canaanpreserve.com` |
 
-DocuSign stub routing still includes this fixed witness.
+DocuSign routing always includes this fixed witness (stub and live).
 
 ### Useful scripts
 
@@ -94,33 +94,62 @@ Adult vs juvenile is not collected at intake. The $3,000 juvenile price stays in
 1. Buyer may download the blank agreement template from the landing page or intake.
 2. Buyer completes intake (legal name, notice / signatory, reserved capacity, project/ops fields, Buyer witness only).
 3. Submit generates the Multi-Project Gopher Tortoise Relocation Agreement. The buyer downloads the populated PDF to review.
-4. Usual path is **Accept, then DocuSign** (Buyer witness email plus the fixed Canaan witness are recorded on the stub envelope routing). Manual PDF remains a fallback. Contract and signed PDFs require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
+4. Usual path is **Accept, then DocuSign**. After Accept the envelope goes to the Buyer signer, Canaan Ranch LLP signer, the Buyer witness from intake, and the fixed Canaan witness. Manual PDF remains a fallback. Contract and signed PDFs require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
 5. Team reviews at `/admin`:
-   - **Accept** — if DocuSign, send the stub envelope; if a signed file is already present, status becomes **Executed**.
+   - **Accept** — if DocuSign, send the envelope (live API when `DOCUSIGN_ENABLED=true`, otherwise the local stub); if a signed file is already present, status becomes **Executed**.
    - **Request changes** — buyer can edit and resubmit.
    - **Decline** — closed without execution.
-6. After Accept, status becomes **Executed** only when a signed artifact is present (manual upload, or the admin “Simulate DocuSign signed” stub control). The Effective Date is stamped from that signature completion.
+6. After Accept, status becomes **Executed** only when a signed artifact is present (manual upload, DocuSign Connect / polling when live, or the admin “Simulate DocuSign signed” stub control). The Effective Date is stamped from that signature completion.
 
 ## DocuSign seam
 
-Live DocuSign API calls are **not** made. Integration lives in [`lib/docusign.ts`](lib/docusign.ts).
+Integration lives in [`lib/docusign.ts`](lib/docusign.ts). Code reads credentials from the environment only — never commit secrets.
+
+When `DOCUSIGN_ENABLED` is not `true` (default), `sendEnvelope()` stores a `stub-…` envelope ID and makes **no** DocuSign API call. The admin **Simulate DocuSign signed** control still works for testing.
+
+When `DOCUSIGN_ENABLED=true`, Accept sends a live envelope: JWT grant, then `Envelopes:create` with the populated agreement PDF. Connect (`POST /api/docusign/webhook`) and polling (`Refresh envelope status`, plus `GET /api/docusign/return?engagementId=…`) mark the engagement executed when DocuSign reports completed.
+
+### Recipient roles
+
+| Role | Source | DocuSign routing |
+| --- | --- | --- |
+| `buyer_signer` | Intake: Buyer attention + email | Routing order 1 |
+| `buyer_witness` | Intake: Buyer witness name + email | Routing order 2 |
+| `seller_signer` | Brand: Andrew V. Pittman, Jr. / `engagements@canaanpreserve.com` | Routing order 3 |
+| `seller_witness` | Brand/env: Andrew Fuddy / `witness@canaanpreserve.com` (not on the public form) | Routing order 4 |
+
+The populated engagement PDF is the envelope document. Hidden anchor strings (`/sn_buyer/`, `/wit_buyer/`, `/sn_seller/`, `/wit_seller/`) place Sign Here and Date Signed tabs.
+
+### Environment variables
 
 | Variable | Role |
 | --- | --- |
-| `DOCUSIGN_ENABLED` | `true` selects the live placeholder. Default / unset uses the local stub. |
-| `DOCUSIGN_INTEGRATION_KEY` | Integration key (OAuth client ID) |
-| `DOCUSIGN_USER_ID` | Impersonated user GUID |
-| `DOCUSIGN_ACCOUNT_ID` | Account GUID |
-| `DOCUSIGN_ACCOUNT_BASE_URI` | e.g. `https://demo.docusign.net` |
-| `DOCUSIGN_AUTH_SERVER` | e.g. `https://account-d.docusign.com` |
-| `DOCUSIGN_PRIVATE_KEY` | RSA private key PEM for JWT grant |
-| `DOCUSIGN_PRIVATE_KEY_PATH` | Alternative path to that PEM |
-| `DOCUSIGN_WEBHOOK_SECRET` | For verifying Connect / webhook callbacks |
-| `DOCUSIGN_RETURN_URL` | Post-sign return URL |
+| `DOCUSIGN_ENABLED` | `true` selects live send. Default / unset uses the local stub. |
+| `DOCUSIGN_INTEGRATION_KEY` | Integration Key (OAuth client ID) from the developer app |
+| `DOCUSIGN_SECRET_KEY` | Developer-app Secret Key (confidential client). Store it; JWT send still needs an RSA private key. |
+| `DOCUSIGN_USER_ID` | Impersonated user’s API Username (GUID) |
+| `DOCUSIGN_ACCOUNT_ID` | API Account ID (GUID) |
+| `DOCUSIGN_ACCOUNT_BASE_URI` | Default `https://demo.docusign.net` |
+| `DOCUSIGN_AUTH_SERVER` | Default `https://account-d.docusign.com` |
+| `DOCUSIGN_PRIVATE_KEY` | RSA private key PEM for JWT grant (preferred on Workers) |
+| `DOCUSIGN_PRIVATE_KEY_PATH` | Local-only path to that PEM |
+| `DOCUSIGN_WEBHOOK_SECRET` | DocuSign Connect HMAC key for `/api/docusign/webhook` |
+| `DOCUSIGN_WEBHOOK_URL` | Optional Connect URL. If unset, derived as `{origin}/api/docusign/webhook` from `DOCUSIGN_RETURN_URL` |
+| `DOCUSIGN_RETURN_URL` | Post-sign return, e.g. `https://canaanpreserve.com/api/docusign/return` |
 
-When `DOCUSIGN_ENABLED` is not `true`, `sendEnvelope()` stores a `stub-…` envelope ID and a clear message that no API call was made.
+Copy [`.env.example`](.env.example) to `.env.local` for Node. Copy [`.dev.vars.example`](.dev.vars.example) to `.dev.vars` for `npm run preview`. Do not commit either file.
 
-When `DOCUSIGN_ENABLED=true`, `sendEnvelopeLive()` is the insertion point for JWT auth and `Envelopes:create`. It still does **not** call DocuSign; it throws if you have not implemented that function.
+### Where to find IDs in DocuSign admin
+
+Van already has the **Integration Key** and **Secret Key** from the developer app. Still needed:
+
+1. Sign in at [https://account-d.docusign.com](https://account-d.docusign.com) (demo) or [https://account.docusign.com](https://account.docusign.com) (production).
+2. Open **Settings → Apps and Keys** (Admin).
+3. **API Account ID** at the top of that page → `DOCUSIGN_ACCOUNT_ID`.
+4. **User ID** for the impersonated sender (same page, or **Users** → the user → **API Username**) → `DOCUSIGN_USER_ID`.
+5. On the same Integration Key, add an **RSA keypair** (Service Integration / JWT). Put the **private** PEM in `DOCUSIGN_PRIVATE_KEY`. The developer-app Secret Key is not the JWT key.
+6. Grant JWT consent once (the live send error will include the consent URL if this step is missing): scope `signature impersonation`.
+7. In **Connect**, add an HMAC key and a webhook to `https://canaanpreserve.com/api/docusign/webhook` (envelope completed). Store the HMAC key as `DOCUSIGN_WEBHOOK_SECRET`.
 
 ## Data
 
@@ -193,7 +222,25 @@ npx wrangler secret put CANAAN_WITNESS_NAME
 npx wrangler secret put CANAAN_WITNESS_EMAIL
 ```
 
-Leave DocuSign as the stub. Do **not** set `DOCUSIGN_ENABLED=true` until `sendEnvelopeLive()` is implemented.
+DocuSign secrets (Manager injects these at deploy; the app only reads `process.env`):
+
+```bash
+npx wrangler secret put DOCUSIGN_INTEGRATION_KEY
+npx wrangler secret put DOCUSIGN_SECRET_KEY
+npx wrangler secret put DOCUSIGN_USER_ID
+npx wrangler secret put DOCUSIGN_ACCOUNT_ID
+npx wrangler secret put DOCUSIGN_PRIVATE_KEY
+npx wrangler secret put DOCUSIGN_WEBHOOK_SECRET
+```
+
+For `DOCUSIGN_PRIVATE_KEY`, paste the full PEM (including `BEGIN` / `END` lines), then Ctrl-D. Wrangler stores the secret; it is never written to git.
+
+Non-secret DocuSign defaults live in `wrangler.jsonc` `vars` (`DOCUSIGN_ENABLED=false`, demo base URI and auth server). To go live after User ID + Account ID are filled in:
+
+1. Set the secrets above.
+2. Change `DOCUSIGN_ENABLED` to `true` in the Worker **Settings → Variables** (or `npx wrangler secret put DOCUSIGN_ENABLED` with value `true`).
+3. Set `DOCUSIGN_RETURN_URL` to `https://canaanpreserve.com/api/docusign/return`.
+4. Keep the stub path by leaving `DOCUSIGN_ENABLED` unset/false until those IDs are ready.
 
 `STORAGE_ADAPTER=cloudflare` is already set in `wrangler.jsonc` `vars`.
 

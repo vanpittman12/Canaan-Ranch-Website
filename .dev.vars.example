@@ -6,3 +6,14 @@ ADMIN_PASSWORD=canaan-admin
 ADMIN_SESSION_SECRET=canaan-preserve-dev-session-secret
 CANAAN_WITNESS_NAME=Andrew Fuddy
 CANAAN_WITNESS_EMAIL=witness@canaanpreserve.com
+DOCUSIGN_ENABLED=false
+DOCUSIGN_ACCOUNT_BASE_URI=https://demo.docusign.net
+DOCUSIGN_AUTH_SERVER=https://account-d.docusign.com
+DOCUSIGN_RETURN_URL=http://localhost:3000/api/docusign/return
+# Leave the following empty locally unless testing live send:
+# DOCUSIGN_INTEGRATION_KEY=
+# DOCUSIGN_SECRET_KEY=
+# DOCUSIGN_USER_ID=
+# DOCUSIGN_ACCOUNT_ID=
+# DOCUSIGN_PRIVATE_KEY=
+# DOCUSIGN_WEBHOOK_SECRET=

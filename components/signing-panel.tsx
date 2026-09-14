@@ -52,9 +52,9 @@ export function SigningPanel({
                 DocuSign after review (usual path)
               </span>
               <span className="mt-1 block text-sm leading-6 text-muted">
-                After Canaan Preserve accepts, the stub envelope routes to the Buyer signatory,
-                Canaan Ranch LLP signatory, the Buyer witness from intake, and the fixed Canaan
-                Ranch LLP witness. No live DocuSign API calls are made.
+                After Canaan Preserve accepts, DocuSign emails the Buyer signatory, Canaan Ranch
+                LLP signatory, the Buyer witness from intake, and the fixed Canaan Ranch LLP
+                witness.
               </span>
             </span>
           </label>

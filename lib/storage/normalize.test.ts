@@ -34,4 +34,29 @@ describe("engagement normalize", () => {
     expect(engagement.docusign.status).toBe("not_sent");
     expect(engagement.docusign.recipients).toEqual([]);
   });
+
+  it("maps a legacy live_placeholder DocuSign mode to live", () => {
+    const engagement = normalizeEngagement({
+      id: "eng-1",
+      reference: "CP-2026-TEST",
+      status: "accepted",
+      intake: { buyerLegalName: "Suncoast" },
+      signingMethod: "docusign",
+      signedArtifact: null,
+      docusign: {
+        mode: "live_placeholder",
+        envelopeId: "env-1",
+        status: "sent",
+      },
+      reviews: [],
+      changeRequestNote: null,
+      createdAt: "2026-04-01T00:00:00.000Z",
+      updatedAt: "2026-04-01T00:00:00.000Z",
+      submittedAt: null,
+      acceptedAt: null,
+      executedAt: null,
+    });
+    expect(engagement.docusign.mode).toBe("live");
+    expect(engagement.docusign.envelopeId).toBe("env-1");
+  });
 });

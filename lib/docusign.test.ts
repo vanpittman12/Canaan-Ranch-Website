@@ -1,6 +1,20 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { createHmac, generateKeyPairSync } from "node:crypto";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { brand, getSellerWitness } from "./brand";
-import { buildEnvelopeRecipients, describeDocuSignSeam, sendEnvelope } from "./docusign";
+import {
+  buildEnvelopeDefinition,
+  buildEnvelopeRecipients,
+  createJwtAssertion,
+  describeDocuSignSeam,
+  DOCUSIGN_ENV_VARS,
+  getLiveEnvelopeStatus,
+  isCompleteEnvelopeStatus,
+  missingLiveConfigVars,
+  parseConnectPayload,
+  resetDocuSignTokenCache,
+  sendEnvelope,
+  verifyConnectSignature,
+} from "./docusign";
 import type { EnvelopeRecipient, IntakeFields } from "./types";
 
 const recipients: EnvelopeRecipient[] = [
@@ -11,27 +25,67 @@ const recipients: EnvelopeRecipient[] = [
 ];
 
 const originalEnv = { ...process.env };
+const { privateKey } = generateKeyPairSync("rsa", {
+  modulusLength: 2048,
+  privateKeyEncoding: { type: "pkcs8", format: "pem" },
+  publicKeyEncoding: { type: "spki", format: "pem" },
+});
+
+function liveEnv() {
+  process.env.DOCUSIGN_ENABLED = "true";
+  process.env.DOCUSIGN_INTEGRATION_KEY = "ik-test";
+  process.env.DOCUSIGN_SECRET_KEY = "ds-secret-not-a-pem";
+  process.env.DOCUSIGN_USER_ID = "user-guid";
+  process.env.DOCUSIGN_ACCOUNT_ID = "account-guid";
+  process.env.DOCUSIGN_ACCOUNT_BASE_URI = "https://demo.docusign.net";
+  process.env.DOCUSIGN_AUTH_SERVER = "https://account-d.docusign.com";
+  process.env.DOCUSIGN_PRIVATE_KEY = privateKey;
+  process.env.DOCUSIGN_RETURN_URL = "https://canaanpreserve.com/api/docusign/return";
+  process.env.DOCUSIGN_WEBHOOK_SECRET = "connect-hmac";
+}
+
+function sendInput() {
+  return {
+    engagementId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    reference: "CP-2026-TEST",
+    recipients,
+    document: {
+      name: "CP-2026-TEST-canaan-preserve-agreement.pdf",
+      bytes: new Uint8Array([37, 80, 68, 70, 45, 49]),
+    },
+  };
+}
 
 afterEach(() => {
   process.env = { ...originalEnv };
   delete process.env.DOCUSIGN_ENABLED;
+  delete process.env.DOCUSIGN_INTEGRATION_KEY;
+  delete process.env.DOCUSIGN_SECRET_KEY;
+  delete process.env.DOCUSIGN_USER_ID;
+  delete process.env.DOCUSIGN_ACCOUNT_ID;
+  delete process.env.DOCUSIGN_ACCOUNT_BASE_URI;
+  delete process.env.DOCUSIGN_AUTH_SERVER;
+  delete process.env.DOCUSIGN_PRIVATE_KEY;
+  delete process.env.DOCUSIGN_PRIVATE_KEY_PATH;
+  delete process.env.DOCUSIGN_WEBHOOK_SECRET;
+  delete process.env.DOCUSIGN_WEBHOOK_URL;
+  delete process.env.DOCUSIGN_RETURN_URL;
   delete process.env.CANAAN_WITNESS_NAME;
   delete process.env.CANAAN_WITNESS_EMAIL;
+  resetDocuSignTokenCache();
 });
 
 describe("DocuSign seam", () => {
   it("defaults to a local stub and never claims network access", async () => {
     delete process.env.DOCUSIGN_ENABLED;
+    const fetchMock = vi.fn();
     const seam = describeDocuSignSeam();
     expect(seam.mode).toBe("stub");
     expect(seam.makesNetworkCalls).toBe(false);
 
-    const result = await sendEnvelope({
-      engagementId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-      reference: "CP-2026-TEST",
-      recipients,
-    });
+    const result = await sendEnvelope(sendInput(), { fetch: fetchMock });
 
+    expect(fetchMock).not.toHaveBeenCalled();
     expect(result.mode).toBe("stub");
     expect(result.status).toBe("sent");
     expect(result.envelopeId.startsWith("stub-")).toBe(true);
@@ -42,14 +96,106 @@ describe("DocuSign seam", () => {
   });
 
   it("refuses live mode without credentials and still makes no API call", async () => {
+    const fetchMock = vi.fn();
     process.env.DOCUSIGN_ENABLED = "true";
-    await expect(
-      sendEnvelope({
-        engagementId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-        reference: "CP-2026-TEST",
-        recipients,
-      }),
-    ).rejects.toThrow(/No API call was made/i);
+    process.env.DOCUSIGN_SECRET_KEY = "only-the-developer-app-secret";
+    await expect(sendEnvelope(sendInput(), { fetch: fetchMock })).rejects.toThrow(
+      /No API call was made/i,
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(missingLiveConfigVars()).toEqual(
+      expect.arrayContaining([
+        "DOCUSIGN_INTEGRATION_KEY",
+        "DOCUSIGN_USER_ID",
+        "DOCUSIGN_ACCOUNT_ID",
+        "DOCUSIGN_PRIVATE_KEY or DOCUSIGN_PRIVATE_KEY_PATH",
+      ]),
+    );
+  });
+
+  it("lists env-only secret names and never embeds credential values", () => {
+    expect(DOCUSIGN_ENV_VARS).toContain("DOCUSIGN_SECRET_KEY");
+    expect(DOCUSIGN_ENV_VARS).toContain("DOCUSIGN_PRIVATE_KEY");
+    expect(DOCUSIGN_ENV_VARS).toContain("DOCUSIGN_WEBHOOK_SECRET");
+    expect(DOCUSIGN_ENV_VARS).not.toContain(privateKey);
+  });
+
+  it("sends a live envelope with JWT auth when DOCUSIGN_ENABLED=true", async () => {
+    liveEnv();
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/oauth/token")) {
+        const body = String(init?.body ?? "");
+        expect(body).toContain("urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer");
+        expect(body).toContain("assertion=");
+        return new Response(
+          JSON.stringify({ access_token: "tok-live", token_type: "Bearer", expires_in: 3600 }),
+          { status: 200 },
+        );
+      }
+      if (url.endsWith("/envelopes")) {
+        const payload = JSON.parse(String(init?.body ?? "{}")) as ReturnType<
+          typeof buildEnvelopeDefinition
+        >;
+        expect(init?.headers).toMatchObject({
+          Authorization: "Bearer tok-live",
+        });
+        expect(payload.documents[0]?.documentBase64).toBe(
+          Buffer.from(sendInput().document.bytes).toString("base64"),
+        );
+        expect(payload.recipients.signers.map((signer) => signer.roleName)).toEqual([
+          "buyer_signer",
+          "seller_signer",
+          "buyer_witness",
+          "seller_witness",
+        ]);
+        expect(payload.eventNotification?.url).toBe(
+          "https://canaanpreserve.com/api/docusign/webhook",
+        );
+        return new Response(JSON.stringify({ envelopeId: "env-live-1", status: "sent" }), {
+          status: 201,
+        });
+      }
+      throw new Error(`Unexpected URL ${url}`);
+    });
+
+    const seam = describeDocuSignSeam();
+    expect(seam.mode).toBe("live");
+    expect(seam.makesNetworkCalls).toBe(true);
+    expect(seam.missingLiveVars).toEqual([]);
+
+    const result = await sendEnvelope(sendInput(), { fetch: fetchMock });
+    expect(result.mode).toBe("live");
+    expect(result.envelopeId).toBe("env-live-1");
+    expect(result.message).toMatch(/DocuSign live/i);
+    expect(result.message).toContain("buyer_witness: Lee Park <lee@ridge.example>");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not treat a non-PEM DOCUSIGN_SECRET_KEY as a JWT private key", () => {
+    process.env.DOCUSIGN_ENABLED = "true";
+    process.env.DOCUSIGN_INTEGRATION_KEY = "ik-test";
+    process.env.DOCUSIGN_USER_ID = "user-guid";
+    process.env.DOCUSIGN_ACCOUNT_ID = "account-guid";
+    process.env.DOCUSIGN_SECRET_KEY = "app-secret-only";
+    expect(missingLiveConfigVars()).toContain("DOCUSIGN_PRIVATE_KEY or DOCUSIGN_PRIVATE_KEY_PATH");
+    expect(describeDocuSignSeam().makesNetworkCalls).toBe(false);
+  });
+
+  it("builds JWT claims from env placeholders only", () => {
+    liveEnv();
+    const jwt = createJwtAssertion(privateKey, 1_700_000_000);
+    const [, payload] = jwt.split(".");
+    const claims = JSON.parse(Buffer.from(payload!, "base64url").toString("utf8")) as {
+      iss: string;
+      sub: string;
+      aud: string;
+      scope: string;
+    };
+    expect(claims.iss).toBe("ik-test");
+    expect(claims.sub).toBe("user-guid");
+    expect(claims.aud).toBe("account-d.docusign.com");
+    expect(claims.scope).toBe("signature impersonation");
   });
 
   it("routes Buyer and Canaan Ranch LLP signers plus Buyer witness and the fixed Canaan witness", () => {
@@ -96,5 +242,55 @@ describe("DocuSign seam", () => {
       name: "Jordan Blake",
       email: "jordan.blake@canaanpreserve.example",
     });
+  });
+});
+
+describe("DocuSign Connect and polling", () => {
+  it("verifies HMAC signatures and parses JSON or XML payloads", () => {
+    const body = JSON.stringify({
+      event: "envelope-completed",
+      data: { envelopeId: "env-1", envelopeSummary: { status: "completed" } },
+    });
+    const secret = "connect-hmac";
+    const header = createHmac("sha256", secret).update(body, "utf8").digest("base64");
+    expect(verifyConnectSignature(body, header, secret)).toBe(true);
+    expect(verifyConnectSignature(body, "nope", secret)).toBe(false);
+    expect(parseConnectPayload(body)).toEqual({
+      envelopeId: "env-1",
+      status: "completed",
+      event: "envelope-completed",
+    });
+    expect(
+      parseConnectPayload("<EnvelopeStatus><EnvelopeID>env-xml</EnvelopeID><Status>Completed</Status></EnvelopeStatus>"),
+    ).toEqual({
+      envelopeId: "env-xml",
+      status: "Completed",
+      event: null,
+    });
+    expect(isCompleteEnvelopeStatus("completed")).toBe(true);
+    expect(isCompleteEnvelopeStatus("envelope-completed")).toBe(true);
+    expect(isCompleteEnvelopeStatus("sent")).toBe(false);
+  });
+
+  it("polls envelope status through the live API", async () => {
+    liveEnv();
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/oauth/token")) {
+        return new Response(JSON.stringify({ access_token: "tok-poll", expires_in: 3600 }), {
+          status: 200,
+        });
+      }
+      if (url.endsWith("/envelopes/env-live-1")) {
+        return new Response(JSON.stringify({ envelopeId: "env-live-1", status: "completed" }), {
+          status: 200,
+        });
+      }
+      throw new Error(`Unexpected URL ${url}`);
+    });
+
+    const snapshot = await getLiveEnvelopeStatus("env-live-1", { fetch: fetchMock });
+    expect(snapshot).toEqual({ envelopeId: "env-live-1", status: "completed" });
+    expect(isCompleteEnvelopeStatus(snapshot.status)).toBe(true);
   });
 });

@@ -136,7 +136,7 @@ function StatusCopy({
   docusignMode,
 }: {
   engagement: Engagement;
-  docusignMode: "stub" | "live_placeholder";
+  docusignMode: "stub" | "live";
 }) {
   if (engagement.status === "changes_requested") {
     return (

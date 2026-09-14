@@ -1,7 +1,12 @@
 "use client";
 
 import { useActionState } from "react";
-import { reviewEngagement, simulateDocuSignComplete, type AdminActionState } from "@/app/actions/admin";
+import {
+  refreshDocuSignStatus,
+  reviewEngagement,
+  simulateDocuSignComplete,
+  type AdminActionState,
+} from "@/app/actions/admin";
 import type { Engagement } from "@/lib/types";
 
 const initialState: AdminActionState = {};
@@ -21,7 +26,12 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
         {engagement.status === "accepted" &&
         engagement.signingMethod === "docusign" &&
         engagement.docusign.envelopeId ? (
-          <SimulateComplete engagementId={engagement.id} />
+          <>
+            {engagement.docusign.mode === "live" ? (
+              <RefreshStatus engagementId={engagement.id} />
+            ) : null}
+            <SimulateComplete engagementId={engagement.id} />
+          </>
         ) : null}
       </div>
     );
@@ -33,9 +43,9 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
         <h2 className="type-h2 text-forest">Team decision</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
           Accept is the only path to execution. If a signed copy is already uploaded, Accept will
-          mark the agreement executed. If the client chose DocuSign, Accept sends the stub
-          envelope to the Buyer signer, Canaan Ranch LLP signer, the Buyer witness, and the
-          fixed Canaan Ranch LLP witness.
+          mark the agreement executed. If the client chose DocuSign, Accept sends the envelope
+          to the Buyer signer, Canaan Ranch LLP signer, the Buyer witness, and the fixed Canaan
+          Ranch LLP witness.
         </p>
       </div>
       {state.error ? (
@@ -80,6 +90,24 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
           Decline
         </button>
       </div>
+    </form>
+  );
+}
+
+function RefreshStatus({ engagementId }: { engagementId: string }) {
+  const action = refreshDocuSignStatus.bind(null, engagementId);
+  const [state, formAction, pending] = useActionState(action, initialState);
+
+  return (
+    <form action={formAction} className="mt-5 rounded-[12px] border border-line bg-cream p-4">
+      <p className="text-sm font-medium text-ink">Refresh DocuSign status</p>
+      <p className="mt-1 text-sm text-muted">
+        Poll DocuSign for this envelope if Connect has not marked it complete yet.
+      </p>
+      {state.error ? <p className="mt-2 text-sm text-terracotta">{state.error}</p> : null}
+      <button className="btn-secondary mt-3" type="submit" disabled={pending}>
+        {pending ? "Checking…" : "Refresh envelope status"}
+      </button>
     </form>
   );
 }

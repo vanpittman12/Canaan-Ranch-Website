@@ -10,7 +10,14 @@ import {
   sessionCookieOptions,
   verifyAdminSession,
 } from "@/lib/auth";
-import { sendEnvelope, buildStubSignedFilename, buildEnvelopeRecipients } from "@/lib/docusign";
+import {
+  sendEnvelope,
+  buildStubSignedFilename,
+  buildEnvelopeRecipients,
+  getLiveEnvelopeStatus,
+  isDocuSignEnabled,
+} from "@/lib/docusign";
+import { syncLiveEnvelope } from "@/lib/docusign-complete";
 import {
   applyDocuSignCompleted,
   applyDocuSignSent,
@@ -18,7 +25,7 @@ import {
   artifactFromUpload,
   EngagementError,
 } from "@/lib/engagement";
-import { generateStubSignedPdf } from "@/lib/pdf";
+import { generateContractPdf, generateStubSignedPdf } from "@/lib/pdf";
 import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
 import type { ReviewDecision } from "@/lib/types";
 
@@ -78,6 +85,10 @@ export async function reviewEngagement(
         engagementId: next.id,
         reference: next.reference,
         recipients: buildEnvelopeRecipients(next.intake),
+        document: {
+          name: `${next.reference}-canaan-preserve-agreement.pdf`,
+          bytes: await generateContractPdf(next),
+        },
       });
       next = applyDocuSignSent(
         next,
@@ -119,7 +130,7 @@ export async function simulateDocuSignComplete(
     return { error: "This engagement is not on the DocuSign path." };
   }
   if (!engagement.docusign.envelopeId) {
-    return { error: "No stub envelope has been sent yet." };
+    return { error: "No envelope has been sent yet." };
   }
 
   try {
@@ -144,6 +155,46 @@ export async function simulateDocuSignComplete(
         error instanceof EngagementError
           ? error.message
           : "Unable to simulate DocuSign completion.",
+    };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/engagements/${engagementId}`);
+  revalidatePath(`/engagements/${engagementId}`);
+  redirect(`/admin/engagements/${engagementId}`);
+}
+
+export async function refreshDocuSignStatus(
+  engagementId: string,
+  previousState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  void previousState;
+  void formData;
+  await requireAdmin();
+  const engagement = await getEngagement(engagementId);
+  if (!engagement) {
+    return { error: "Engagement not found." };
+  }
+  if (engagement.status !== "accepted" && engagement.status !== "executed") {
+    return { error: "Envelope status can be refreshed only after accept." };
+  }
+  if (engagement.signingMethod !== "docusign") {
+    return { error: "This engagement is not on the DocuSign path." };
+  }
+  if (!engagement.docusign.envelopeId) {
+    return { error: "No envelope has been sent yet." };
+  }
+  if (!isDocuSignEnabled() || engagement.docusign.mode !== "live") {
+    return { error: "Live envelope polling is available only when DOCUSIGN_ENABLED=true." };
+  }
+
+  try {
+    const snapshot = await getLiveEnvelopeStatus(engagement.docusign.envelopeId);
+    await syncLiveEnvelope(engagement, snapshot.status);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Unable to refresh DocuSign status.",
     };
   }
 

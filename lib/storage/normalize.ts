@@ -6,7 +6,9 @@ export type StoredIntake = Partial<IntakeFields> & { effectiveDate?: string };
 export type StoredEngagement = Omit<Engagement, "intake" | "effectiveDate" | "docusign"> & {
   effectiveDate?: string | null;
   intake: StoredIntake;
-  docusign?: Partial<Engagement["docusign"]>;
+  docusign?: Partial<Omit<Engagement["docusign"], "mode">> & {
+    mode?: Engagement["docusign"]["mode"] | "live_placeholder";
+  };
 };
 
 export function normalizeIntake(intake: StoredIntake): IntakeFields {
@@ -42,7 +44,7 @@ export function normalizeEngagement(raw: StoredEngagement): Engagement {
     effectiveDate: raw.effectiveDate ?? legacyDate,
     intake: normalizeIntake(raw.intake),
     docusign: {
-      mode: raw.docusign?.mode ?? "stub",
+      mode: raw.docusign?.mode === "live" || raw.docusign?.mode === "live_placeholder" ? "live" : "stub",
       envelopeId: raw.docusign?.envelopeId ?? null,
       status: raw.docusign?.status ?? "not_sent",
       sentAt: raw.docusign?.sentAt ?? null,
