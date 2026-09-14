@@ -34,14 +34,14 @@ export function SandhillHabitat() {
         <Longleaf x={760} y={10} height={560} trunk={12} crown={1.45} color={FOREST} />
         <Longleaf x={1008} y={-20} height={590} trunk={14} crown={1.65} color={FOREST} />
         <Longleaf x={1236} y={0} height={570} trunk={13} crown={1.5} color={PINE} />
-        <Burrow x={1176} y={500} />
         <g>
           <WiregrassClump x={36} y={560} scale={1.6} color={BRASS} />
           <WiregrassClump x={150} y={572} scale={1.4} color={WHEAT} />
           <WiregrassClump x={268} y={564} scale={1.5} color={BRASS} />
           <WiregrassClump x={860} y={548} scale={1.45} color={WHEAT} />
           <WiregrassClump x={1024} y={568} scale={1.7} color={BRASS} />
-          <WiregrassClump x={1120} y={540} scale={1.55} color={WHEAT} />
+          <WiregrassClump x={1148} y={552} scale={1.8} color={WHEAT} />
+          <WiregrassClump x={1260} y={564} scale={1.5} color={BRASS} />
           <WiregrassClump x={1370} y={556} scale={1.4} color={WHEAT} />
         </g>
       </svg>
@@ -106,15 +106,22 @@ function Longleaf({
         strokeLinecap="round"
       />
       <g transform={`scale(${crown})`}>
-        <ellipse cx="0" cy="4" rx="20" ry="14" fill={color} />
-        <ellipse cx="-32" cy="20" rx="16" ry="12" fill={color} opacity="0.9" />
-        <ellipse cx="34" cy="24" rx="17" ry="12" fill={color} opacity="0.9" />
-        {[-48, -30, -14, 0, 16, 32, 48].map((dx) => (
+        {[-48, -32, -16, 0, 16, 32, 48].map((dx) => (
           <path
-            key={dx}
-            d={`M${dx * 0.15} 6 Q${dx * 0.6} ${-28 - Math.abs(dx) * 0.15} ${dx} ${-10 - Math.abs(dx) * 0.08}`}
+            key={`high-${dx}`}
+            d={`M0 14 Q${dx * 0.4} ${-10 - Math.abs(dx) * 0.08} ${dx} ${-22 - Math.abs(dx) * 0.1}`}
             stroke={color}
-            strokeWidth="2"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            fill="none"
+          />
+        ))}
+        {[-36, -18, 18, 36].map((dx) => (
+          <path
+            key={`mid-${dx}`}
+            d={`M0 32 Q${dx * 0.45} 12 ${dx} ${-4}`}
+            stroke={color}
+            strokeWidth="1.9"
             strokeLinecap="round"
             fill="none"
           />
@@ -180,18 +187,6 @@ function WiregrassClump({
         strokeLinecap="round"
         fill="none"
       />
-    </g>
-  );
-}
-
-function Burrow({ x, y }: { x: number; y: number }) {
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      <path
-        d="M-96 32 C-50 -20 20 -28 108 22 C58 44 12 50 -28 46 C-54 43 -78 38 -96 32Z"
-        fill={WHEAT}
-      />
-      <path d="M-12 14 C12 -12 40 -10 50 16 C32 26 10 26 -8 18Z" fill={FOREST} />
     </g>
   );
 }

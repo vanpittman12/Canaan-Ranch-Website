@@ -68,6 +68,7 @@ describe("site builder visual lock", () => {
     expect(habitat).toContain("Longleaf");
     expect(habitat).toContain("WiregrassClump");
     expect(habitat).not.toContain("HabitatTortoise");
+    expect(habitat).not.toContain("Burrow");
     expect(habitat).not.toContain("Pasco");
     expect(css).toContain(".habitat-sky");
     expect(css).toContain(".habitat-ground");
