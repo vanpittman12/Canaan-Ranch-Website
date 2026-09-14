@@ -95,7 +95,10 @@ describe("site builder visual lock", () => {
     expect(landing).toContain("{brand.habitatLine}");
     expect(landing).toContain("{brand.fwcValueProp}");
     expect(landing).toContain("{brand.intakeInvite}");
-    expect(landing.match(/\{brand\.fwcValueProp\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.fwcValueProp\}/g)).toHaveLength(2);
+    expect(landing.match(/\{brand\.intakeInvite\}/g)).toHaveLength(2);
+    expect(landing).not.toContain("Start relocation intake for a clear recipient-site agreement.");
+    expect(landing).not.toContain("is the contracting party. Intake produces");
     expect(landing).toContain("Word/DOCX");
     expect(landing).not.toContain("Download the PDF");
     expect(landing).toContain("DocuSign is the usual path");
@@ -110,13 +113,18 @@ describe("site builder visual lock", () => {
     expect(timeline.toLowerCase()).not.toContain("go-live");
     expect(landing).toContain("adult /");
     expect(landing).toContain("juvenile");
-    expect(brand.fwcValueProp).toContain("FWC Approved Tier 1 Long-Term Recipient Site");
+    expect(brand.fwcValueProp).toBe(
+      "Canaan Preserve is an FWC Approved Tier 1 recipient site and therefore has the lowest mitigation requirements, saving our clients money. Review our template agreement and fill out our intake form to automatically generate a signature-ready relocation agreement to get your project moving as quickly as possible.",
+    );
     expect(brand.fwcValueProp).toContain("signature-ready");
     expect(brand.fwcStatus).toContain("Long-Term");
+    expect(brand.intakeInvite).toBe(
+      "Fill out our intake form to automatically populate the relocation agreement and expedite the reservation letter process.",
+    );
     expect(brand.intakeInvite).toContain("intake form");
-    expect(brand.intakeInvite).toContain("capacity reservation");
-    expect(brand.intakeInvite).toContain("Accepts");
-    expect(brand.intakeInvite).not.toContain("reservation letter");
+    expect(brand.intakeInvite).toContain("reservation letter");
+    expect(brand.intakeInvite).not.toContain("capacity reservation");
+    expect(brand.intakeInvite).not.toContain("Accepts");
     expect(intakePage).toContain("Have these agreement details ready");
     expect(intakePage).not.toContain("existing agreement details");
     expect(footer).toContain("is the contracting party");
