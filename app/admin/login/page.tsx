@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default async function AdminLoginPage() {
   const jar = await cookies();
-  if (verifyAdminSession(jar.get(ADMIN_COOKIE)?.value)) {
+  if (await verifyAdminSession(jar.get(ADMIN_COOKIE)?.value)) {
     redirect("/admin");
   }
 

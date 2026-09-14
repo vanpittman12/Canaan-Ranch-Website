@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "canaan-preserve",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-13",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "STORAGE_ADAPTER": "cloudflare"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "canaan-preserve"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "ENGAGEMENTS",
+      "database_name": "canaan-preserve",
+      // Replace after `npx wrangler d1 create canaan-preserve` (or run scripts/cloudflare-provision.mjs).
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "UPLOADS",
+      "bucket_name": "canaan-preserve-uploads"
+    }
+  ]
+  // After the first successful deploy, attach canaanpreserve.com from the
+  // Cloudflare dashboard (Workers → canaan-preserve → Settings → Domains &
+  // Routes → Add → Custom Domain). Optionally uncomment:
+  // "routes": [{ "pattern": "canaanpreserve.com", "custom_domain": true }]
+}

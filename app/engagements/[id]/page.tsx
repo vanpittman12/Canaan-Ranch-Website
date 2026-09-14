@@ -41,9 +41,9 @@ export default async function EngagementPage({
 
   const seam = describeDocuSignSeam();
   const editable = canCustomerEdit(engagement.status);
-  const contractUrl = documentDownloadPath(engagement.id, "contract");
+  const contractUrl = await documentDownloadPath(engagement.id, "contract");
   const signedUrl = engagement.signedArtifact
-    ? documentDownloadPath(engagement.id, "signed")
+    ? await documentDownloadPath(engagement.id, "signed")
     : null;
 
   return (

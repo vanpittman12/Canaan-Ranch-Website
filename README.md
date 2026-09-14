@@ -55,11 +55,16 @@ DocuSign stub routing still includes this fixed witness.
 ### Useful scripts
 
 ```bash
-npm run dev      # Next.js App Router, TypeScript, Turbopack
-npm run build    # Production build
-npm run start    # Serve the production build
-npm test         # Status machine, economics, and agreement mapping tests
-npm run lint     # ESLint
+npm run dev              # Next.js App Router, TypeScript, Turbopack (file store)
+npm run build            # Production build
+npm run start            # Serve the production build
+npm test                 # Status machine, economics, and agreement mapping tests
+npm run lint             # ESLint
+npm run preview          # OpenNext build + local Workers runtime (D1 + R2)
+npm run deploy           # OpenNext build + deploy to Cloudflare Workers
+npm run db:migrate       # Apply D1 migrations to the remote database
+npm run db:migrate:local # Apply D1 migrations to the local preview database
+npm run cf:provision     # Create D1 + R2 and write the database id into wrangler.jsonc
 ```
 
 ## Intake → agreement mapping
@@ -119,8 +124,134 @@ When `DOCUSIGN_ENABLED=true`, `sendEnvelopeLive()` is the insertion point for JW
 
 ## Data
 
-Engagements are stored in `data/engagements.json`. Uploaded and stub-signed PDFs live in `data/uploads/`. This is a single-instance local store, not a hosted database.
+Storage is selected by `STORAGE_ADAPTER`:
+
+| Value | Used when | Engagements | Signed PDFs |
+| --- | --- | --- | --- |
+| `file` (default) | `npm run dev` / `npm run start` | `data/engagements.json` | `data/uploads/` |
+| `cloudflare` | Workers deploy and `npm run preview` | Cloudflare D1 (`ENGAGEMENTS`) | Cloudflare R2 (`UPLOADS`) |
+
+`npm run dev` stays on the file store unless you set `STORAGE_ADAPTER=cloudflare` in `.env.local`. Product behavior is the same on both adapters.
+
+## Deploy to Cloudflare (`canaanpreserve.com`)
+
+The app runs on **Cloudflare Workers** via [OpenNext](https://opennext.js.org/cloudflare) (`@opennextjs/cloudflare`). It is **not** a Vercel app. Van already owns `canaanpreserve.com` on Cloudflare.
+
+This cloud agent environment does **not** have a Cloudflare login or API token, so it cannot deploy. Van (or anyone with the Cloudflare account) completes the steps below once.
+
+### 0. Prerequisites
+
+- Node 20+
+- Access to the Cloudflare account that owns `canaanpreserve.com`
+- This repo cloned (`main` or this branch after merge)
+
+```bash
+npm install
+npx wrangler login
+```
+
+`wrangler login` opens a browser. Approve access for the Canaan Cloudflare account.
+
+### 1. Create D1 and R2
+
+Either run the helper:
+
+```bash
+npm run cf:provision
+```
+
+Or create the resources by hand:
+
+```bash
+npx wrangler d1 create canaan-preserve
+npx wrangler r2 bucket create canaan-preserve-uploads
+```
+
+Copy the printed `database_id` into [`wrangler.jsonc`](wrangler.jsonc) (`d1_databases[0].database_id`). Then apply the schema:
+
+```bash
+npm run db:migrate          # remote D1 (CI=1 skips the confirm prompt)
+npm run db:migrate:local    # local D1 for `npm run preview`
+cp .dev.vars.example .dev.vars
+```
+
+### 2. Set secrets
+
+Required in production (the Worker will throw without them):
+
+```bash
+npx wrangler secret put ADMIN_PASSWORD
+npx wrangler secret put ADMIN_SESSION_SECRET
+```
+
+Use a long random string for `ADMIN_SESSION_SECRET` (for example `openssl rand -base64 48`).
+
+Optional (defaults are Andrew Fuddy / `witness@canaanpreserve.com`):
+
+```bash
+npx wrangler secret put CANAAN_WITNESS_NAME
+npx wrangler secret put CANAAN_WITNESS_EMAIL
+```
+
+Leave DocuSign as the stub. Do **not** set `DOCUSIGN_ENABLED=true` until `sendEnvelopeLive()` is implemented.
+
+`STORAGE_ADAPTER=cloudflare` is already set in `wrangler.jsonc` `vars`.
+
+### 3. Deploy the Worker
+
+```bash
+npm run deploy
+```
+
+This runs `opennextjs-cloudflare build` then `opennextjs-cloudflare deploy`. Wrangler prints a `*.workers.dev` URL when it succeeds. Confirm `/` and `/intake` load on that URL before attaching the custom domain.
+
+### 4. Attach `canaanpreserve.com`
+
+In the Cloudflare dashboard (same account that already owns the zone):
+
+1. Open **Workers & Pages**.
+2. Select the **canaan-preserve** Worker.
+3. **Settings → Domains & Routes → Add → Custom Domain**.
+4. Enter `canaanpreserve.com` and confirm.
+
+Cloudflare creates the DNS record and certificate. If add fails because a CNAME (or other record) already exists on the apex:
+
+1. Open **DNS → Records** for `canaanpreserve.com`.
+2. Delete the conflicting apex record (often a CNAME to another host, or a leftover `100::` placeholder).
+3. Retry **Add → Custom Domain**.
+
+`www` is a different hostname. To send `www.canaanpreserve.com` to the apex:
+
+1. Add a proxied DNS `A` record for `www` pointing to `192.0.2.0` (originless placeholder).
+2. Create a Redirect Rule: `www.canaanpreserve.com` → `https://canaanpreserve.com`.
+
+Optional later: uncomment the `routes` / `custom_domain` block in `wrangler.jsonc` so future CLI deploys keep the domain attached.
+
+### 5. Alternative: connect GitHub (no laptop deploy)
+
+If Van prefers dashboard deploys instead of `npm run deploy`:
+
+1. Cloudflare dashboard → **Workers & Pages → Create → Connect to Git**.
+2. Authorize GitHub and select `vanpittman12/Canaan-Ranch-Website`.
+3. Production branch: `main`.
+4. Build command: `npx @opennextjs/cloudflare build`
+5. Deploy command: `npx @opennextjs/cloudflare deploy`
+6. In **Settings → Bindings**, add:
+   - D1: name `ENGAGEMENTS` → database `canaan-preserve`
+   - R2: name `UPLOADS` → bucket `canaan-preserve-uploads`
+7. In **Settings → Variables and Secrets**, add the same secrets as step 2, plus `STORAGE_ADAPTER=cloudflare` if it is not coming from `wrangler.jsonc`.
+8. Attach `canaanpreserve.com` as in step 4.
+
+Workers Builds also needs those values as **build** variables/secrets if the Next.js build reads them during static generation. Admin/session secrets are runtime-only.
+
+### Local vs Cloudflare
+
+| Command | Runtime | Storage |
+| --- | --- | --- |
+| `npm run dev` | Next.js / Node | File (`data/`) |
+| `npm run preview` | Workerd (local) | Local D1 + R2 |
+| `npm run deploy` | Cloudflare Workers | Remote D1 + R2 |
 
 ## Stack
 
-Next.js App Router, TypeScript, Tailwind CSS, Zod, pdf-lib, cookie-based admin session.
+Next.js App Router, TypeScript, Tailwind CSS, Zod, pdf-lib, cookie-based admin session, OpenNext on Cloudflare Workers, D1, R2.

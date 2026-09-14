@@ -3,7 +3,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { writeFile } from "node:fs/promises";
 import {
   ADMIN_COOKIE,
   createAdminSession,
@@ -20,7 +19,7 @@ import {
   EngagementError,
 } from "@/lib/engagement";
 import { generateStubSignedPdf } from "@/lib/pdf";
-import { getEngagement, getStoredUploadPath, saveEngagement } from "@/lib/store";
+import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
 import type { ReviewDecision } from "@/lib/types";
 
 export type AdminActionState = {
@@ -29,7 +28,7 @@ export type AdminActionState = {
 
 export async function requireAdmin() {
   const jar = await cookies();
-  if (!verifyAdminSession(jar.get(ADMIN_COOKIE)?.value)) {
+  if (!(await verifyAdminSession(jar.get(ADMIN_COOKIE)?.value))) {
     redirect("/admin/login");
   }
 }
@@ -44,7 +43,7 @@ export async function loginAdmin(
   }
 
   const jar = await cookies();
-  jar.set(ADMIN_COOKIE, createAdminSession(), sessionCookieOptions());
+  jar.set(ADMIN_COOKIE, await createAdminSession(), sessionCookieOptions());
   redirect("/admin");
 }
 
@@ -126,7 +125,7 @@ export async function simulateDocuSignComplete(
   try {
     const storedName = `${engagement.id}-signed.pdf`;
     const bytes = await generateStubSignedPdf(engagement);
-    await writeFile(getStoredUploadPath(storedName), bytes);
+    await putUpload(storedName, bytes);
 
     const next = applyDocuSignCompleted(
       engagement,

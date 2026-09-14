@@ -8,7 +8,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const jar = await cookies();
-  const authed = verifyAdminSession(jar.get(ADMIN_COOKIE)?.value);
+  const authed = await verifyAdminSession(jar.get(ADMIN_COOKIE)?.value);
   if (authed) {
     await requireAdmin();
   }

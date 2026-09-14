@@ -2,8 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { writeFile } from "node:fs/promises";
-import path from "node:path";
 import {
   applySignedArtifact,
   applySubmit,
@@ -14,9 +12,10 @@ import {
 import {
   createEngagementRecord,
   getEngagement,
-  getStoredUploadPath,
+  putUpload,
   saveEngagement,
 } from "@/lib/store";
+import { originalFileName } from "@/lib/storage/names";
 import {
   flattenZodErrors,
   formDataToObject,
@@ -129,14 +128,12 @@ export async function uploadSignedCopy(
   }
 
   const storedName = `${engagement.id}-signed.pdf`;
-  const dest = getStoredUploadPath(storedName);
-  const bytes = Buffer.from(await file.arrayBuffer());
-  await writeFile(dest, bytes);
+  await putUpload(storedName, new Uint8Array(await file.arrayBuffer()));
 
   const next = applySignedArtifact(
     engagement,
     artifactFromUpload({
-      filename: path.basename(file.name) || storedName,
+      filename: originalFileName(file.name),
       storedName,
       source: "manual_upload",
       mimeType: "application/pdf",
