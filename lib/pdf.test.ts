@@ -6,8 +6,8 @@ import { generateContractPdf } from "./pdf";
 import { buildTemplateEngagement } from "./contract";
 
 const BLANK_DOCX_SHA256 =
-  "885785bbb9bec94f10c66755e3239717193311893eda5e64a0d8330e4072605e";
-const BLANK_DOCX_SIZE = 66690;
+  "0eb11197f8e2097ca18bab315ba557e4a3939d6eab20e354b9357aa7af0c362f";
+const BLANK_DOCX_SIZE = 66615;
 
 const TEMPLATE_DOCX = resolve(
   process.cwd(),
