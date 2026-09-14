@@ -11,6 +11,7 @@ import {
   intakeValuesFromDefaults,
   nextStep,
   previousStep,
+  stepIndex,
   type IntakeWizardStep,
   validateThrough,
 } from "@/lib/intake-steps";

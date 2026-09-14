@@ -107,14 +107,13 @@ export function validateThrough(
   stepId: IntakeWizardStep,
   values: Record<string, string>,
 ): Record<string, string> {
-  const through =
-    stepId === REVIEW_STEP_ID
-      ? INTAKE_STEPS
-      : INTAKE_STEPS.slice(0, stepIndex(stepId) + 1);
-  return through.reduce(
-    (acc, item) => ({ ...acc, ...validateStepFields(item.id, values) }),
-    {} as Record<string, string>,
-  );
+  const last =
+    stepId === REVIEW_STEP_ID ? INTAKE_STEPS.length - 1 : stepIndex(stepId);
+  const errors: Record<string, string> = {};
+  for (let index = 0; index <= last; index += 1) {
+    Object.assign(errors, validateStepFields(INTAKE_STEPS[index].id, values));
+  }
+  return errors;
 }
 
 export function validateStepFields(
