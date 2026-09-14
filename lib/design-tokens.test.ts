@@ -134,9 +134,19 @@ describe("site builder visual lock", () => {
     expect(css).toContain(".habitat-scrim");
   });
 
-  it("links official FWC recipient-site guidance", () => {
+  it("links official FWC mitigation table for Tier 1 value", () => {
     expect(brand.fwcRecipientSitesUrl).toBe(
-      "https://myfwc.com/license/wildlife/gopher-tortoise-permits/recipient-sites/",
+      "https://myfwc.com/license/wildlife/gopher-tortoise-permits/mitigation/#table",
     );
+    expect(brand.fwcMitigationLinkLabel).toBe("Why Tier 1 matters (FWC mitigation)");
+    expect(landing).toContain("{brand.fwcRecipientSitesUrl}");
+    expect(header).toContain("{brand.fwcRecipientSitesUrl}");
+    expect(footer).toContain("{brand.fwcRecipientSitesUrl}");
+    expect(landing).toContain("{brand.fwcMitigationLinkLabel}");
+    expect(header).toContain("{brand.fwcMitigationLinkLabel}");
+    expect(footer).toContain("{brand.fwcMitigationLinkLabel}");
+    expect(landing).not.toContain("recipient-sites/");
+    expect(header).not.toContain("FWC sites");
+    expect(footer).not.toContain("FWC recipient-site guidance");
   });
 });

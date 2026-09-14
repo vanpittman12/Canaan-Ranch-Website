@@ -32,7 +32,7 @@ export function SiteHeader({
                 target="_blank"
                 rel="noreferrer"
               >
-                FWC sites
+                {brand.fwcMitigationLinkLabel}
               </a>
               <a
                 href="/api/agreement-template"

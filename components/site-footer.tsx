@@ -27,7 +27,7 @@ export function SiteFooter() {
             target="_blank"
             rel="noreferrer"
           >
-            FWC recipient-site guidance
+            {brand.fwcMitigationLinkLabel}
           </a>
           <Link href="/admin/login" className="inline-flex min-h-11 items-center hover:text-cream">
             Team sign in

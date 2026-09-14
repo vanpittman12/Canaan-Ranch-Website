@@ -122,7 +122,7 @@ export default function Home() {
               target="_blank"
               rel="noreferrer"
             >
-              FWC recipient-site guidance
+              {brand.fwcMitigationLinkLabel}
             </a>
           </div>
         </section>

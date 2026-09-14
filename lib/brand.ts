@@ -11,8 +11,10 @@ export const brand = {
   intakeInvite:
     "Fill out our intake form to populate the relocation agreement. After Canaan Preserve Accepts, your capacity reservation is confirmed.",
   fwcBadge: "FWC Approved Tier 1",
+  /** FWC mitigation table explaining why Tier 1 recipient sites have lower requirements. */
   fwcRecipientSitesUrl:
-    "https://myfwc.com/license/wildlife/gopher-tortoise-permits/recipient-sites/",
+    "https://myfwc.com/license/wildlife/gopher-tortoise-permits/mitigation/#table",
+  fwcMitigationLinkLabel: "Why Tier 1 matters (FWC mitigation)",
   email: "vpittman@beachparkcap.com",
   phone: "813-390-1044",
   website: "https://canaanpreserve.com",
