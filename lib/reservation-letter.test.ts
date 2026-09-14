@@ -68,7 +68,9 @@ describe("reservation letter fields", () => {
   it("maps intake field names and does not require acres or unit", () => {
     const fields = buildReservationLetterFields(engagement());
     expect(fields.buyerLegalName).toBe(intake.buyerLegalName);
+    expect(fields.consultantName).toBe(intake.authorizedAgentName);
     expect(fields.consultantCompany).toBe(intake.authorizedAgentCompany);
+    expect(fields.consultantLine).toBe("Casey Nguyen, Suncoast Permitting");
     expect(fields.donorProjectName).toBe(intake.donorSiteName);
     expect(fields.donorCounty).toBe(intake.relocationCounty);
     expect(fields.tortoiseCount).toBe(17);
@@ -96,6 +98,7 @@ describe("reservation letter fields", () => {
   it("keeps a draft period when Accept happens before Effective Date is known", () => {
     const fields = buildReservationLetterFields(engagement());
     expect(fields.effectiveDate).toBeNull();
+    expect(fields.reservationPeriod).toMatch(/date of permit issuance/);
     expect(fields.reservationPeriod).toMatch(/Effective Date \+ 1 year/);
     expect(fields.reservationPeriod).toMatch(/Seller signs/);
   });
@@ -106,7 +109,7 @@ describe("reservation letter fields", () => {
 });
 
 describe("reservation letter branding", () => {
-  it("issues a Canaan Preserve / Canaan Ranch LLP FWC acceptance letter", () => {
+  it("issues a Canaan Preserve FWC acceptance letter to Tallahassee, signed by Fuddy on behalf of Canaan Ranch LLP", () => {
     const prose = buildReservationLetterProse(buildReservationLetterFields(engagement()));
     const blob = [
       prose.title,
@@ -114,24 +117,35 @@ describe("reservation letter branding", () => {
       prose.site,
       prose.signatoryName,
       prose.signatoryTitle,
+      prose.onBehalfOf,
       ...prose.addressBlock,
       ...prose.reLines,
+      ...prose.summaryLines,
       prose.salutation,
       ...prose.paragraphs,
     ].join("\n");
     expect(prose.title).toBe("Gopher Tortoise Acceptance Letter");
     expect(prose.issuer).toBe("Canaan Ranch LLP");
     expect(prose.site).toBe("Canaan Preserve");
-    expect(prose.signatoryName).toBe("Andrew V. Pittman, Jr.");
+    expect(prose.addressBlock[0]).toBe("Gopher Tortoise Conservation Program");
+    expect(prose.addressBlock.join("\n")).toContain("620 South Meridian Street");
+    expect(prose.addressBlock.join("\n")).toContain("Tallahassee, Florida 32399-1600");
+    expect(prose.salutation).toBe("Dear Gopher Tortoise Conservation Program:");
+    expect(prose.signatoryName).toBe("Andrew Fuddy");
+    expect(prose.signatoryTitle).toBe("Senior Ecologist/Principal");
+    expect(prose.onBehalfOf).toBe("On behalf of Canaan Ranch LLP");
     expect(blob).toContain("Suncoast Land Partners LLC");
-    expect(blob).toContain("Suncoast Permitting");
+    expect(blob).toMatch(/through their consultant Casey Nguyen of Suncoast Permitting/);
+    expect(blob).toContain("has reserved capacity to relocate up to seventeen (17) gopher tortoises");
     expect(blob).toContain("Harbour tract");
-    expect(blob).toContain("Hillsborough");
-    expect(blob).toContain("seventeen (17) gopher tortoises");
+    expect(blob).toContain("Hillsborough County, Florida");
+    expect(blob).toContain("Canaan Preserve");
+    expect(blob).toContain("Tier 1");
+    expect(blob).toContain("Reserved — 17 Tortoises");
+    expect(blob).toContain("Consultant: Casey Nguyen, Suncoast Permitting");
     expect(reservationLetterContainsBannedLegacy(blob)).toBe(false);
     expect(blob).not.toContain("Post Oak");
     expect(blob).not.toContain("Applied Bionomics");
-    expect(blob).not.toContain("Andrew Fuddy");
   });
 
   it("writes a PDF that starts with %PDF", async () => {

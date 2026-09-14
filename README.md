@@ -115,7 +115,7 @@ After a **public intake create** succeeds, [`lib/notify.ts`](lib/notify.ts) `not
 
 ### Reservation letter email (admin send hold)
 
-The FWC-style **Gopher Tortoise Acceptance Letter** is generated from intake (`buyerLegalName`, `authorizedAgentCompany`, `donorSiteName`, `relocationCounty`, `tortoiseCount`) after Accept, then refreshed when the Seller signs (Effective Date + 1 year). Acres / Unit # are not on intake and do not block generation. State lives on the engagement JSON payload (`reservationLetter`: draft generated → awaiting send approval → sent with timestamp).
+The FWC-style **Gopher Tortoise Acceptance Letter** is generated from intake (`buyerLegalName`, `authorizedAgentName`, `authorizedAgentCompany`, `donorSiteName`, `relocationCounty`, `tortoiseCount`) after Accept, then refreshed when the Seller signs (Effective Date + 1 year). It is addressed to the FWC Gopher Tortoise Conservation Program in Tallahassee, advises that the buyer through their consultant has reserved capacity at Canaan Preserve (Tier 1), and is signed by Andrew Fuddy, Senior Ecologist/Principal, on behalf of Canaan Ranch LLP. Acres / Unit # are not on intake and do not block generation. State lives on the engagement JSON payload (`reservationLetter`: draft generated → awaiting send approval → sent with timestamp).
 
 | Field | Value |
 | --- | --- |
