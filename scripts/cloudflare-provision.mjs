@@ -81,5 +81,8 @@ Next:
   # optional:
   npx wrangler secret put CANAAN_WITNESS_NAME
   npx wrangler secret put CANAAN_WITNESS_EMAIL
+  npx wrangler secret put RESEND_API_KEY
+  # optional:
+  npx wrangler secret put RESEND_FROM_EMAIL
   npm run deploy
 `);
