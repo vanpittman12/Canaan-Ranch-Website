@@ -3,9 +3,13 @@ export const brand = {
   legalName: "Canaan Ranch LLP",
   tagline: "Gopher tortoise relocation recipient site.",
   lockupLine: "Recipient site",
-  habitatLine: "the ecologically pristine recipient site in Florida",
+  habitatLine: "The most ecologically pristine recipient site in Florida",
   shortTagline: "Reserve recipient-site capacity with a clear agreement.",
   fwcStatus: "Canaan Preserve is an FWC Approved Tier 1 Long Term Recipient site.",
+  fwcValueProp:
+    "Canaan Preserve is an FWC approved Tier 1 recipient site and therefore has the lowest mitigation requirements, saving our clients money. Review our template agreement and fill out our intake form to automatically generate a signature ready relocation agreement to get your project moving as quickly as possible.",
+  intakeInvite:
+    "Fill out our intake form to automatically populate the relocation agreement and expedite the reservation letter process.",
   fwcBadge: "FWC Approved Tier 1",
   fwcRecipientSitesUrl:
     "https://myfwc.com/license/wildlife/gopher-tortoise-permits/recipient-sites/",

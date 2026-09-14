@@ -63,7 +63,9 @@ export default function Home() {
                 is the contracting party. Intake, a downloadable agreement, signature, and a
                 human review before anything closes.
               </p>
-              <p className="mt-4 text-sm font-medium leading-6 text-cream">{brand.fwcStatus}</p>
+              <p className="mt-4 max-w-xl text-sm font-medium leading-6 text-cream">
+                {brand.fwcValueProp}
+              </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">
                   Start relocation intake
@@ -114,8 +116,7 @@ export default function Home() {
             <div>
               <FwcBadge />
               <p className="mt-3 max-w-2xl text-[17px] leading-[27px] text-ink">
-                {brand.fwcStatus} Eligibility and recipient-site rules are published by the Florida
-                Fish and Wildlife Conservation Commission.
+                {brand.fwcValueProp}
               </p>
             </div>
             <a
@@ -133,9 +134,7 @@ export default function Home() {
           <div className="rounded-[16px] border border-line bg-forest px-8 py-12 text-cream sm:px-14">
             <h2 className="type-h2 max-w-xl text-cream">Ready to reserve capacity.</h2>
             <p className="mt-4 max-w-xl text-[17px] leading-[27px] text-cream/80">
-              Review the blank agreement first if you like, then start intake. Canaan Preserve
-              reviews and Accepts first; the usual path is then DocuSign. Manual signature remains
-              available as a fallback.
+              {brand.intakeInvite}
             </p>
             <p className="mt-4 text-sm font-medium text-cream">
               {formatUsd(brand.defaultPerGtRate)} per adult · {formatUsd(brand.juvenileRate)} per
