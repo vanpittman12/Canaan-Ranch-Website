@@ -93,10 +93,11 @@ describe("site builder visual lock", () => {
     expect(brand.habitatLine).toContain("Florida");
     expect(brand.habitatLine.toLowerCase()).not.toMatch(/\bcounty\b/);
     expect(landing).toContain("{brand.habitatLine}");
-    expect(landing).toContain("{brand.fwcValueProp}");
+    expect(landing).toContain("{brand.heroSlogan}");
     expect(landing).toContain("{brand.intakeInvite}");
-    expect(landing.match(/\{brand\.fwcValueProp\}/g)).toHaveLength(2);
+    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(2);
     expect(landing.match(/\{brand\.intakeInvite\}/g)).toHaveLength(2);
+    expect(landing).toContain("FwcSavingsModule");
     expect(landing).not.toContain("Start relocation intake for a clear recipient-site agreement.");
     expect(landing).not.toContain("is the contracting party. Intake produces");
     expect(landing).toContain("Word/DOCX");
@@ -113,10 +114,12 @@ describe("site builder visual lock", () => {
     expect(timeline.toLowerCase()).not.toContain("go-live");
     expect(landing).toContain("adult /");
     expect(landing).toContain("juvenile");
-    expect(brand.fwcValueProp).toBe(
-      "Canaan Preserve is an FWC Approved Tier 1 recipient site and therefore has the lowest mitigation requirements, saving our clients money. Review our template agreement and fill out our intake form to automatically generate a signature-ready relocation agreement to get your project moving as quickly as possible.",
+    expect(brand.heroSlogan).toBe(
+      "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
-    expect(brand.fwcValueProp).toContain("signature-ready");
+    expect(brand.heroSlogan).toContain("Long Term Tier 1");
+    expect(landing).not.toContain("lowest mitigation");
+    expect(landing).not.toContain("saving our clients money");
     expect(brand.fwcStatus).toContain("Long-Term");
     expect(brand.intakeInvite).toBe(
       "Fill out our intake form to automatically populate the relocation agreement and expedite the reservation letter process.",

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FwcBadge } from "@/components/fwc-badge";
+import { FwcSavingsModule } from "@/components/fwc-savings";
 import { SandhillHabitat } from "@/components/sandhill-habitat";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -47,19 +48,19 @@ export default function Home() {
       <main>
         <section className="relative overflow-hidden border-b border-line bg-forest-deep text-cream">
           <SandhillHabitat />
-          <div className="relative mx-auto w-full max-w-6xl px-5 pt-16 sm:px-8 lg:min-h-[34rem] lg:pt-24">
-            <div className="max-w-2xl">
+          <div className="relative mx-auto w-full max-w-6xl px-5 pt-16 pb-12 sm:px-8 lg:min-h-[34rem] lg:pt-24">
+            <div className="max-w-3xl">
               <p className="text-[13px] font-semibold tracking-wide text-brass">
                 {brand.habitatLine}
               </p>
               <div className="mt-4">
                 <FwcBadge onForest />
               </div>
-              <h1 className="type-h1 mt-5 max-w-xl text-cream">
-                {brand.intakeInvite}
+              <h1 className="type-h1 mt-5 max-w-3xl text-cream">
+                {brand.heroSlogan}
               </h1>
               <p className="mt-6 max-w-xl text-[17px] leading-[27px] text-cream/85">
-                {brand.fwcValueProp}
+                {brand.intakeInvite}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">
@@ -72,16 +73,21 @@ export default function Home() {
               </div>
             </div>
 
-            <dl className="mt-16 grid gap-px overflow-hidden rounded-t-[16px] border border-b-0 border-line/30 bg-forest-deep/80 sm:grid-cols-4">
-              {facts.map((fact) => (
-                <div key={fact.label} className="bg-forest px-5 py-5">
-                  <dt className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
-                    {fact.label}
-                  </dt>
-                  <dd className="mt-2 font-medium text-cream">{fact.value}</dd>
-                </div>
-              ))}
-            </dl>
+            <div className="mt-16 overflow-hidden rounded-[16px] border border-line/30">
+              <dl className="grid gap-px bg-forest-deep/80 sm:grid-cols-4">
+                {facts.map((fact) => (
+                  <div key={fact.label} className="bg-forest px-5 py-5">
+                    <dt className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+                      {fact.label}
+                    </dt>
+                    <dd className="mt-2 font-medium text-cream">{fact.value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="border-t border-line bg-paper px-5 py-8 text-ink sm:px-8">
+                <FwcSavingsModule />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -111,7 +117,7 @@ export default function Home() {
             <div>
               <FwcBadge />
               <p className="mt-3 max-w-2xl text-[17px] leading-[27px] text-ink">
-                {brand.fwcValueProp}
+                {brand.heroSlogan}
               </p>
             </div>
             <a
