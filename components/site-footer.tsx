@@ -7,7 +7,9 @@ export function SiteFooter() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-10 sm:flex-row sm:items-end sm:justify-between sm:px-8">
         <div>
           <p className="font-serif text-2xl">{brand.name}</p>
-          <p className="mt-2 max-w-sm text-sm text-cream/75">{brand.tagline}</p>
+          <p className="mt-2 text-sm text-cream/80">
+            A {brand.legalName} recipient site. {brand.tagline}
+          </p>
           <p className="mt-3 max-w-sm text-sm font-medium text-cream">{brand.fwcStatus}</p>
           <p className="mt-4 text-sm text-cream/70">{formatBrandAddress()}</p>
           <p className="text-sm text-cream/70">
@@ -15,10 +17,18 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="flex flex-col items-start gap-2 text-sm text-cream/70 sm:items-end">
-          <Link href="/intake" className="hover:text-cream">
-            Client intake
+          <Link href="/intake" className="inline-flex min-h-11 items-center hover:text-cream">
+            Start relocation intake
           </Link>
-          <Link href="/admin/login" className="hover:text-cream">
+          <a
+            href={brand.fwcRecipientSitesUrl}
+            className="inline-flex min-h-11 items-center hover:text-cream"
+            target="_blank"
+            rel="noreferrer"
+          >
+            FWC recipient-site guidance
+          </a>
+          <Link href="/admin/login" className="inline-flex min-h-11 items-center hover:text-cream">
             Team sign in
           </Link>
           <p className="pt-2 text-xs text-cream/50">

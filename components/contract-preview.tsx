@@ -7,10 +7,10 @@ export function ContractPreview({ engagement }: { engagement: Engagement }) {
   return (
     <article className="contract-sheet">
       <header className="border-b border-line pb-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brass">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
           {contract.subtitle}
         </p>
-        <h2 className="mt-2 font-serif text-3xl text-forest sm:text-4xl">{contract.title}</h2>
+        <h2 className="type-h2 mt-2 text-forest">{contract.title}</h2>
         <p className="mt-3 text-sm text-muted">
           {contract.reference} · Effective {contract.effectiveDate} · Expires {contract.expirationDate}
         </p>

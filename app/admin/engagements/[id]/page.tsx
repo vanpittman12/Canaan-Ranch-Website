@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/app/actions/admin";
-import { ContractPreview } from "@/components/contract-preview";
+import { DocumentDesk } from "@/components/document-desk";
 import { RateOverrideForm } from "@/components/rate-override-form";
 import { ReviewForm } from "@/components/review-form";
 import { SiteHeader } from "@/components/site-header";
@@ -37,10 +37,10 @@ export default async function AdminEngagementPage({
         </Link>
         <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brass">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
               {engagement.reference}
             </p>
-            <h1 className="mt-2 font-serif text-4xl text-forest">
+            <h1 className="type-h1 mt-2 text-forest">
               {dealTitle(engagement.intake)}
             </h1>
             <p className="mt-2 text-muted">
@@ -52,8 +52,8 @@ export default async function AdminEngagementPage({
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="space-y-6">
-            <section className="rounded-2xl border border-line bg-white p-6">
-              <h2 className="font-serif text-2xl text-forest">Intake</h2>
+            <section className="surface-card">
+              <h2 className="type-h2 text-forest">Intake</h2>
               <dl className="mt-4 grid gap-3 text-sm">
                 <Row
                   label="Effective"
@@ -111,8 +111,8 @@ export default async function AdminEngagementPage({
               <RateOverrideForm engagement={engagement} />
             </section>
 
-            <section className="rounded-2xl border border-line bg-white p-6">
-              <h2 className="font-serif text-2xl text-forest">Seller (static)</h2>
+            <section className="surface-card">
+              <h2 className="type-h2 text-forest">Seller (static)</h2>
               <dl className="mt-4 grid gap-3 text-sm">
                 <Row label="Entity" value={brand.legalName} />
                 <Row label="Brand" value={brand.name} />
@@ -130,8 +130,8 @@ export default async function AdminEngagementPage({
               </dl>
             </section>
 
-            <section className="rounded-2xl border border-line bg-white p-6">
-              <h2 className="font-serif text-2xl text-forest">Signature</h2>
+            <section className="surface-card">
+              <h2 className="type-h2 text-forest">Signature</h2>
               <dl className="mt-4 grid gap-3 text-sm">
                 <Row label="Method" value={engagement.signingMethod ?? "Not selected"} />
                 <Row
@@ -175,8 +175,8 @@ export default async function AdminEngagementPage({
             <ReviewForm engagement={engagement} />
 
             {engagement.reviews.length > 0 ? (
-              <section className="rounded-2xl border border-line bg-white p-6">
-                <h2 className="font-serif text-2xl text-forest">Decision history</h2>
+              <section className="surface-card">
+                <h2 className="type-h2 text-forest">Decision history</h2>
                 <ol className="mt-4 space-y-4">
                   {engagement.reviews.map((review) => (
                     <li key={review.reviewedAt} className="text-sm">
@@ -193,7 +193,15 @@ export default async function AdminEngagementPage({
               </section>
             ) : null}
           </div>
-          <ContractPreview engagement={engagement} />
+          <DocumentDesk
+            reference={engagement.reference}
+            contractUrl={`/api/engagements/${engagement.id}/contract`}
+            signedUrl={
+              engagement.signedArtifact
+                ? `/api/engagements/${engagement.id}/signed`
+                : null
+            }
+          />
         </div>
       </main>
     </div>

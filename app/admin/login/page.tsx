@@ -16,10 +16,10 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-cream px-5 py-16">
-      <div className="w-full max-w-md rounded-[1.75rem] border border-line bg-white p-8 shadow-[0_20px_50px_rgba(28,24,18,0.06)]">
+    <main className="flex min-h-screen items-center justify-center bg-paper px-5 py-16">
+      <div className="surface-card w-full max-w-md p-8">
         <BrandMark className="h-12 w-12" />
-        <h1 className="mt-5 font-serif text-3xl text-forest">Canaan Preserve team</h1>
+        <h1 className="type-h2 mt-5 text-forest">Canaan Preserve team</h1>
         <p className="mt-2 text-sm leading-6 text-muted">
           Review queue access. Local default password is documented in the README
           (<code className="text-ink">canaan-admin</code>) unless{" "}

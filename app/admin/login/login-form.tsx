@@ -11,14 +11,15 @@ export function LoginForm() {
   return (
     <form action={formAction} className="mt-8 space-y-4">
       {state.error ? (
-        <p className="rounded-xl border border-terracotta/30 bg-terracotta/8 px-4 py-3 text-sm text-terracotta">
+        <p className="rounded-[12px] border border-terracotta/30 bg-white px-4 py-3 text-sm text-terracotta">
           {state.error}
         </p>
       ) : null}
-      <label className="block">
-        <span className="text-sm font-medium text-ink">Password</span>
+      <label className="block" htmlFor="password">
+        <span className="type-label">Password</span>
         <input
-          className="mt-1.5 w-full rounded-lg border border-line bg-paper px-3.5 py-2.5 text-ink outline-none focus:border-forest focus:ring-2 focus:ring-forest/15"
+          id="password"
+          className="field-control"
           type="password"
           name="password"
           autoComplete="current-password"

@@ -19,7 +19,7 @@ export function UploadSigned({
   return (
     <form
       action={formAction}
-      className={compact ? "rounded-xl border border-dashed border-line bg-cream/40 p-4" : "space-y-4"}
+      className={compact ? "rounded-[12px] border border-dashed border-line bg-cream p-4" : "space-y-4"}
     >
       <div className={compact ? "" : ""}>
         <p className="font-medium text-ink">
@@ -43,7 +43,7 @@ export function UploadSigned({
       ) : null}
       <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
         <input
-          className="text-sm file:mr-3 file:rounded-full file:border-0 file:bg-forest file:px-4 file:py-2 file:text-sm file:font-medium file:text-cream"
+          className="text-sm file:mr-3 file:min-h-11 file:rounded-[12px] file:border-0 file:bg-forest file:px-4 file:py-2 file:text-sm file:font-medium file:text-cream"
           type="file"
           name="signedPdf"
           accept="application/pdf,.pdf"

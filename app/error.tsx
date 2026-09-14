@@ -1,20 +1,26 @@
-import Link from "next/link";
+"use client";
+
 import { EmptyState } from "@/components/empty-state";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
-export default function NotFound() {
+export default function ErrorPage({
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   return (
     <>
       <SiteHeader />
       <main className="mx-auto w-full max-w-3xl px-5 py-24 sm:px-8">
         <EmptyState
-          title="That page is not on the preserve."
-          body="The engagement may have been mistyped, or the page does not exist."
+          title="Something stopped this page."
+          body="Try again, or return to intake if you were reserving capacity."
           action={
-            <Link href="/" className="btn-primary">
-              Return home
-            </Link>
+            <button className="btn-primary" type="button" onClick={reset}>
+              Try again
+            </button>
           }
         />
       </main>

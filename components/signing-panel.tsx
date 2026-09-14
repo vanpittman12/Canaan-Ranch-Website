@@ -21,17 +21,16 @@ export function SigningPanel({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-serif text-2xl text-forest">Choose how you will sign</h2>
+        <h2 className="type-h2 text-forest">Choose how you will sign</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Download the populated agreement PDF to review first. Usual path: DocuSign after Canaan
-          Preserve accepts. The Canaan Ranch LLP witness is already routed from brand config. The
-          agreement is not sent or closed from this screen. Nothing is executed until the team
-          accepts and a signed artifact is on file.
+          Download the populated agreement PDF first. Usual path: DocuSign after Canaan Preserve
+          accepts. The Canaan Ranch LLP witness is already routed from brand config. Nothing is
+          executed until the team accepts and a signed artifact is on file.
         </p>
       </div>
 
       {state.error ? (
-        <div className="rounded-xl border border-terracotta/30 bg-terracotta/8 px-4 py-3 text-sm text-terracotta">
+        <div className="rounded-[12px] border border-terracotta/30 bg-white px-4 py-3 text-sm text-terracotta">
           {state.error}
         </div>
       ) : null}

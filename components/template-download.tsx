@@ -9,7 +9,7 @@ export function TemplateDownloadButton({
 }) {
   const styles =
     variant === "dark"
-      ? "inline-flex items-center justify-center rounded-full border border-cream/35 px-5 py-3 text-[0.95rem] font-semibold text-cream transition hover:bg-white/10"
+      ? "btn-secondary border-cream/35 bg-transparent text-cream"
       : variant === "primary"
         ? "btn-primary"
         : "btn-secondary";
