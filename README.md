@@ -93,13 +93,38 @@ Adult vs juvenile is not collected at intake. The $3,000 juvenile price stays in
 
 1. Buyer may download the blank agreement template from the landing page or intake.
 2. Buyer completes intake (legal name, notice / signatory, reserved capacity, project/ops fields, Buyer witness only).
-3. Submit generates the Multi-Project Gopher Tortoise Relocation Agreement. The buyer downloads the populated PDF to review.
+3. Submit generates the Multi-Project Gopher Tortoise Relocation Agreement. The buyer downloads the populated PDF to review. A successful public create also calls `notifyNewEngagement` so Van is emailed (intake still succeeds if that send fails).
 4. Usual path is **Accept, then DocuSign**. After Accept the envelope goes to the Buyer signer, Canaan Ranch LLP signer, the Buyer witness from intake, and the fixed Canaan witness. Manual PDF remains a fallback. Contract and signed PDFs require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
 5. Team reviews at `/admin`:
    - **Accept** — if DocuSign, send the envelope (live API when `DOCUSIGN_ENABLED=true`, otherwise the local stub); if a signed file is already present, status becomes **Executed**.
    - **Request changes** — buyer can edit and resubmit.
    - **Decline** — closed without execution.
 6. After Accept, status becomes **Executed** only when a signed artifact is present (manual upload, DocuSign Connect / polling when live, or the admin “Simulate DocuSign signed” stub control). The Effective Date is stamped from that signature completion.
+
+## New-engagement email
+
+After a **public intake create** succeeds, [`lib/notify.ts`](lib/notify.ts) `notifyNewEngagement` emails Van. The intake response is never blocked by a notify failure — errors are logged and the buyer still lands on the new engagement.
+
+| Field | Value |
+| --- | --- |
+| Primary To | `vpittman@beachparkcap.com` |
+| Also To | `engagements@canaanpreserve.com` (brand inbox) |
+| Body | Engagement reference, buyer legal name, relocation county, tortoise count, admin review link (`/admin/engagements/[id]`) |
+
+**Provider: Resend** (HTTPS `POST https://api.resend.com/emails`). SMTP is not used — this app runs on Cloudflare Workers, which do not have reliable outbound SMTP. No extra npm package; the seam uses `fetch` like the DocuSign live path.
+
+| Variable | Role |
+| --- | --- |
+| `RESEND_API_KEY` | Enables live send. Unset / empty = console stub (local and `npm run dev`). **Cloudflare secret** — never commit. |
+| `RESEND_FROM_EMAIL` | Optional From. Default `Canaan Preserve <engagements@canaanpreserve.com>`. Must be a domain verified in Resend. **Cloudflare secret** if set. |
+| `NOTIFY_NEW_ENGAGEMENT_TO` | Optional primary recipient override. Default `vpittman@beachparkcap.com`. The brand inbox is still included. |
+| `APP_URL` | Public origin for the admin review link. Workers `vars` default is `https://canaanpreserve.com`. Locally, falls back to the origin of `DOCUSIGN_RETURN_URL`, then `http://localhost:3000`. |
+
+```bash
+npx wrangler secret put RESEND_API_KEY
+# optional:
+npx wrangler secret put RESEND_FROM_EMAIL
+```
 
 ## DocuSign seam
 
@@ -233,6 +258,7 @@ npx wrangler secret put DOCUSIGN_USER_ID
 npx wrangler secret put DOCUSIGN_ACCOUNT_ID
 npx wrangler secret put DOCUSIGN_PRIVATE_KEY
 npx wrangler secret put DOCUSIGN_WEBHOOK_SECRET
+npx wrangler secret put RESEND_API_KEY
 ```
 
 For `DOCUSIGN_PRIVATE_KEY`, paste the full PEM (including `BEGIN` / `END` lines), then Ctrl-D. Wrangler stores the secret; it is never written to git.

@@ -9,6 +9,7 @@ import {
   canCustomerEdit,
   EngagementError,
 } from "@/lib/engagement";
+import { persistAndNotifyNewEngagement } from "@/lib/notify";
 import {
   createEngagementRecord,
   getEngagement,
@@ -41,7 +42,9 @@ export async function createEngagement(
     };
   }
 
-  const engagement = await createEngagementRecord(publicIntakeFields(parsed.data));
+  const engagement = await persistAndNotifyNewEngagement(() =>
+    createEngagementRecord(publicIntakeFields(parsed.data)),
+  );
   redirect(`/engagements/${engagement.id}`);
 }
 

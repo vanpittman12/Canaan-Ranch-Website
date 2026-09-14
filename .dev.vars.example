@@ -17,3 +17,9 @@ DOCUSIGN_RETURN_URL=http://localhost:3000/api/docusign/return
 # DOCUSIGN_ACCOUNT_ID=
 # DOCUSIGN_PRIVATE_KEY=
 # DOCUSIGN_WEBHOOK_SECRET=
+
+# New-engagement email (Resend). Unset = console stub. Never commit a real key.
+APP_URL=http://localhost:3000
+# RESEND_API_KEY=
+# RESEND_FROM_EMAIL=
+# NOTIFY_NEW_ENGAGEMENT_TO=vpittman@beachparkcap.com

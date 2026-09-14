@@ -35,4 +35,8 @@ interface CloudflareEnv {
   DOCUSIGN_WEBHOOK_SECRET?: string;
   DOCUSIGN_WEBHOOK_URL?: string;
   DOCUSIGN_RETURN_URL?: string;
+  APP_URL?: string;
+  RESEND_API_KEY?: string;
+  RESEND_FROM_EMAIL?: string;
+  NOTIFY_NEW_ENGAGEMENT_TO?: string;
 }
