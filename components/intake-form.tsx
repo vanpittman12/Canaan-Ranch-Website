@@ -38,7 +38,7 @@ function Field({
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <label htmlFor={name} className="type-label">
         {label}
       </label>
@@ -47,12 +47,14 @@ function Field({
           {hint}
         </p>
       ) : null}
-      <div data-describedby={describedBy}>{children}</div>
-      {error ? (
-        <p id={errorId} className="mt-1 text-sm text-terracotta" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <div className="mt-auto" data-describedby={describedBy}>
+        {children}
+        {error ? (
+          <p id={errorId} className="mt-1 text-sm text-terracotta" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -341,7 +343,7 @@ export function IntakeForm({
             No deposits required.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           <Field
             name="tortoiseCount"
             label="Reserved capacity (gopher tortoise count)"
