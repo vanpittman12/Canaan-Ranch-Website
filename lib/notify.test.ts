@@ -10,9 +10,13 @@ import {
   newEngagementRecipients,
   notifyFromAddress,
   notifyNewEngagement,
+  notifyReservationLetter,
   persistAndNotifyNewEngagement,
   publicAppOrigin,
+  reservationLetterRecipients,
+  RESERVATION_LETTER_NOTIFY_TO,
   toNewEngagementNotice,
+  buildReservationLetterEmail,
 } from "./notify";
 
 const originalEnv = { ...process.env };
@@ -276,6 +280,63 @@ describe("new engagement notify seam", () => {
     delete process.env.APP_URL;
     process.env.DOCUSIGN_RETURN_URL = "https://canaanpreserve.com/api/docusign/return";
     expect(publicAppOrigin()).toBe("https://canaanpreserve.com");
+  });
+
+  it("emails Van and the buyer notice address for the reservation letter", async () => {
+    setGmailSecrets();
+    const fetchMock = mockGmailSendSuccess();
+    const attachment = {
+      filename: "CP-2026-TEST-gopher-tortoise-acceptance-letter.pdf",
+      mimeType: "application/pdf",
+      bytes: new Uint8Array([37, 80, 68, 70]),
+    };
+    const email = buildReservationLetterEmail({
+      reference: notice.reference,
+      buyerLegalName: notice.buyerLegalName,
+      buyerEmail: notice.buyerEmail,
+      donorProjectName: notice.projectName,
+      attachment,
+    });
+    expect(email.to).toEqual([RESERVATION_LETTER_NOTIFY_TO, notice.buyerEmail]);
+    expect(reservationLetterRecipients(RESERVATION_LETTER_NOTIFY_TO)).toEqual([
+      RESERVATION_LETTER_NOTIFY_TO,
+    ]);
+
+    const result = await notifyReservationLetter(email, { fetch: fetchMock });
+    expect(result).toEqual({ mode: "gmail", sent: true });
+    const sendBody = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as { raw: string };
+    const rfc2822 = decodeGmailRaw(sendBody.raw);
+    expect(rfc2822).toContain(`To: ${RESERVATION_LETTER_NOTIFY_TO}, ${notice.buyerEmail}`);
+    expect(rfc2822).toContain("Content-Disposition: attachment");
+    expect(rfc2822).toContain(attachment.filename);
+    expect(rfc2822).toContain("multipart/mixed");
+    expect(rfc2822).toContain("admin send approval");
+  });
+
+  it("stubs reservation-letter send when Gmail secrets are unset", async () => {
+    clearGmailSecrets();
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    const fetchMock = vi.fn();
+    const result = await notifyReservationLetter(
+      buildReservationLetterEmail({
+        reference: notice.reference,
+        buyerLegalName: notice.buyerLegalName,
+        buyerEmail: notice.buyerEmail,
+        donorProjectName: notice.projectName,
+        attachment: {
+          filename: "letter.pdf",
+          mimeType: "application/pdf",
+          bytes: new Uint8Array([1]),
+        },
+      }),
+      { fetch: fetchMock },
+    );
+    expect(result).toEqual({ mode: "stub", sent: true });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(info).toHaveBeenCalledWith(
+      "[notify] stub: reservation letter email (Gmail OAuth secrets unset)",
+      expect.objectContaining({ to: [RESERVATION_LETTER_NOTIFY_TO, notice.buyerEmail] }),
+    );
   });
 
   it("maps an engagement record onto the notice payload", () => {

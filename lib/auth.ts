@@ -3,7 +3,7 @@ const MAX_AGE_SECONDS = 60 * 60 * 12;
 const DOCUMENT_TOKEN_TTL_MS = 2 * 60 * 60 * 1000;
 const encoder = new TextEncoder();
 
-export type DocumentKind = "contract" | "signed";
+export type DocumentKind = "contract" | "signed" | "letter";
 
 function sessionSecret() {
   const secret = process.env.ADMIN_SESSION_SECRET;

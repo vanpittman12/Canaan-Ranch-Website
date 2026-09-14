@@ -15,6 +15,8 @@ export type DocuSignEnvelopeStatus =
   | "delivered"
   | "completed"
   | "voided";
+export type ReservationLetterStatus = "none" | "draft" | "awaiting_send" | "sent";
+export type ReservationLetterSource = "accept" | "seller_sign" | "manual";
 
 export interface IntakeFields {
   buyerLegalName: string;
@@ -71,6 +73,20 @@ export interface ReviewRecord {
   reviewer: string;
 }
 
+export interface ReservationLetter {
+  status: ReservationLetterStatus;
+  generatedAt: string | null;
+  refreshedAt: string | null;
+  sendApprovedAt: string | null;
+  sentAt: string | null;
+  storedName: string | null;
+  filename: string | null;
+  letterDate: string | null;
+  source: ReservationLetterSource | null;
+  notifyMode: "stub" | "gmail" | null;
+  lastError: string | null;
+}
+
 export interface Engagement {
   id: string;
   reference: string;
@@ -81,6 +97,7 @@ export interface Engagement {
   signingMethod: SigningMethod | null;
   signedArtifact: SignedArtifact | null;
   docusign: DocuSignState;
+  reservationLetter: ReservationLetter;
   reviews: ReviewRecord[];
   changeRequestNote: string | null;
   createdAt: string;
@@ -95,7 +112,7 @@ export const STATUS_LABELS: Record<EngagementStatus, string> = {
   pending_review: "Pending review",
   changes_requested: "Changes requested",
   declined: "Declined",
-  accepted: "Accepted — awaiting signature",
+  accepted: "Awaiting seller signature",
   executed: "Executed",
 };
 
@@ -104,9 +121,32 @@ export const STATUS_PILL_LABELS: Record<EngagementStatus, string> = {
   pending_review: "Pending",
   changes_requested: "Changes",
   declined: "Declined",
-  accepted: "Accepted",
+  accepted: "Awaiting seller",
   executed: "Executed",
 };
+
+export const LETTER_STATUS_LABELS: Record<ReservationLetterStatus, string> = {
+  none: "Not generated",
+  draft: "Draft generated",
+  awaiting_send: "Awaiting send approval",
+  sent: "Sent",
+};
+
+export function emptyReservationLetter(): ReservationLetter {
+  return {
+    status: "none",
+    generatedAt: null,
+    refreshedAt: null,
+    sendApprovedAt: null,
+    sentAt: null,
+    storedName: null,
+    filename: null,
+    letterDate: null,
+    source: null,
+    notifyMode: null,
+    lastError: null,
+  };
+}
 
 export function dealTitle(intake: IntakeFields) {
   if (intake.donorSiteName.trim()) {

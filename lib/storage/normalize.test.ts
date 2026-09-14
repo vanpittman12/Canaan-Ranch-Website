@@ -58,5 +58,7 @@ describe("engagement normalize", () => {
     });
     expect(engagement.docusign.mode).toBe("live");
     expect(engagement.docusign.envelopeId).toBe("env-1");
+    expect(engagement.reservationLetter.status).toBe("none");
+    expect(engagement.reservationLetter.sentAt).toBeNull();
   });
 });

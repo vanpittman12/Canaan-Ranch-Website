@@ -96,10 +96,11 @@ Adult vs juvenile is not collected at intake. The $3,000 juvenile price stays in
 3. Submit fills Van’s Word agreement (`public/agreements/Canaan-Preserve-Relocation-Agreement-template.docx`) with intake fields. The buyer downloads that populated DOCX to review — not a separately authored PDF from `lib/contract.ts`. A successful public create also calls `notifyNewEngagement` so Van is emailed (intake still succeeds if that send fails).
 4. Usual path is **Accept, then DocuSign**. After Accept the envelope goes to the Buyer signer, Canaan Ranch LLP signer, the Buyer witness from intake, and the fixed Canaan witness. The envelope document is the populated DOCX. Manual signed upload remains a fallback. Contract and signed files require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
 5. Team reviews at `/admin`:
-   - **Accept** — if DocuSign, send the envelope (live API when `DOCUSIGN_ENABLED=true`, otherwise the local stub); if a signed file is already present, status becomes **Executed**.
+   - **Accept** — if DocuSign, send the envelope (live API when `DOCUSIGN_ENABLED=true`, otherwise the local stub). Accept is **not** complete. Status stays **Awaiting seller signature**. A reservation-letter draft is generated from intake and is **not** emailed.
    - **Request changes** — buyer can edit and resubmit.
    - **Decline** — closed without execution.
-6. After Accept, status becomes **Executed** only when a signed artifact is present (manual upload, DocuSign Connect / polling when live, or the admin “Simulate DocuSign signed” stub control). The Effective Date is stamped from that signature completion.
+6. Status becomes **Executed** only when the Seller has signed: DocuSign envelope complete (Connect / polling / stub “Simulate DocuSign signed”), or a complete manual signed copy after Accept. The Effective Date is stamped from that signature completion. The reservation letter is refreshed if the Effective Date or intake fields changed.
+7. **Send reservation letter** is an admin checkbox. Checking it emails the letter PDF to Van (`vpittman@beachparkcap.com`) and the buyer notice email via the existing Gmail notify path. Generation never sends mail.
 
 ## New-engagement email
 
@@ -111,6 +112,16 @@ After a **public intake create** succeeds, [`lib/notify.ts`](lib/notify.ts) `not
 | Primary To | `vpittman@beachparkcap.com` |
 | Also To | `brand.email` when it differs from the primary To. During testing `brand.email` is also `vpittman@beachparkcap.com`, so notify sends a single To (no duplicate). `engagements@canaanpreserve.com` is not a live inbox. |
 | Body | Reference, project name, buyer contact (name / attention / email / phone / address), county, tortoise count, authorized agent, donor affiliation, project description, buyer witness, admin review link. Operational fields stay in this email and admin — they are not stuffed into Van’s Word file. |
+
+### Reservation letter email (admin send hold)
+
+The FWC-style **Gopher Tortoise Acceptance Letter** is generated from intake (`buyerLegalName`, `authorizedAgentName`, `authorizedAgentCompany`, `donorSiteName`, `relocationCounty`, `tortoiseCount`) after Accept, then refreshed when the Seller signs (Effective Date + 1 year). It is addressed to the FWC Gopher Tortoise Conservation Program in Tallahassee, advises that the buyer through their consultant has reserved capacity at Canaan Preserve (Tier 1), and is signed by Andrew Fuddy, Senior Ecologist/Principal, on behalf of Canaan Ranch LLP. Acres / Unit # are not on intake and do not block generation. State lives on the engagement JSON payload (`reservationLetter`: draft generated → awaiting send approval → sent with timestamp).
+
+| Field | Value |
+| --- | --- |
+| When generated | After Accept (draft). Regenerated on envelope complete / seller-sign if the Effective Date or fields changed. |
+| When emailed | Only after admin checks **Send reservation letter** on `/admin/engagements/[id]`. |
+| To | `vpittman@beachparkcap.com` and `intake.buyerEmail` (deduped). Same Gmail API path as new-engagement notify, with the PDF attached. |
 
 **Provider: Gmail API** (HTTPS refresh-token grant, then `POST https://gmail.googleapis.com/gmail/v1/users/me/messages/send`). SMTP is not used — Cloudflare Workers cannot open outbound SMTP sockets (ports 25 / 465 / 587), so nodemailer and a Google App Password will not send from this Worker. No extra npm package; the seam uses `fetch` like the DocuSign live path.
 

@@ -1,4 +1,4 @@
-import type { Engagement, IntakeFields } from "../types";
+import { emptyReservationLetter, type Engagement, type IntakeFields } from "../types";
 
 export function emptyDocuSign(): Engagement["docusign"] {
   return {
@@ -34,6 +34,7 @@ export function createEmptyEngagement(intake: IntakeFields): Engagement {
     signingMethod: null,
     signedArtifact: null,
     docusign: emptyDocuSign(),
+    reservationLetter: emptyReservationLetter(),
     reviews: [],
     changeRequestNote: null,
     createdAt: now,

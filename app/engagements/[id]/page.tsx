@@ -179,11 +179,11 @@ function StatusCopy({
   if (engagement.status === "accepted") {
     return (
       <div className="mt-6 rounded-[16px] border border-sage bg-cream p-5">
-        <p className="font-medium text-forest">Accepted — awaiting signed artifact</p>
+        <p className="font-medium text-forest">Awaiting seller signature</p>
         <p className="mt-2 text-sm leading-6 text-muted">
           {engagement.signingMethod === "docusign"
-            ? `DocuSign is in ${docusignMode} mode. Envelope ${engagement.docusign.envelopeId ?? "is pending"}. ${engagement.docusign.lastMessage ?? ""}`
-            : "Upload the signed PDF to complete execution. Accept has been recorded; the agreement is not executed until the file is on file."}
+            ? `Accept is recorded. The engagement stays pending until Van/seller signs on DocuSign. Envelope ${engagement.docusign.envelopeId ?? "is pending"} (${docusignMode}). ${engagement.docusign.lastMessage ?? ""}`
+            : "Accept is recorded. Upload the signed PDF to complete execution. The agreement is not done until the seller-signed file is on file."}
         </p>
       </div>
     );

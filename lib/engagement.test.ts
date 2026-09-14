@@ -6,9 +6,17 @@ import {
   applySubmit,
   artifactFromUpload,
   canSubmitForReview,
+  isAwaitingSellerSignature,
+  isOpenEngagement,
   nextStatusAfterAccept,
 } from "./engagement";
-import type { Engagement, IntakeFields } from "./types";
+import {
+  emptyReservationLetter,
+  STATUS_LABELS,
+  STATUS_PILL_LABELS,
+  type Engagement,
+  type IntakeFields,
+} from "./types";
 
 const intake: IntakeFields = {
   buyerLegalName: "Suncoast Land Partners LLC",
@@ -51,6 +59,7 @@ function draft(): Engagement {
       lastMessage: null,
       recipients: [],
     },
+    reservationLetter: emptyReservationLetter(),
     reviews: [],
     changeRequestNote: null,
     createdAt: "2026-04-01T00:00:00.000Z",
@@ -91,6 +100,20 @@ describe("engagement status machine", () => {
     expect(accepted.executedAt).toBeNull();
     expect(accepted.effectiveDate).toBeNull();
     expect(nextStatusAfterAccept(false)).toBe("accepted");
+    expect(STATUS_LABELS.accepted).toBe("Awaiting seller signature");
+    expect(STATUS_PILL_LABELS.accepted).toBe("Awaiting seller");
+    expect(isAwaitingSellerSignature(accepted.status)).toBe(true);
+    expect(isOpenEngagement(accepted.status)).toBe(true);
+    expect(isOpenEngagement("executed")).toBe(false);
+  });
+
+  it("does not execute a DocuSign engagement on Accept even if a file is already on file", () => {
+    const pending = applySubmit(draft(), "docusign");
+    const withFile = applySignedArtifact(pending, artifact());
+    const accepted = applyReview(withFile, "accept", "");
+    expect(accepted.status).toBe("accepted");
+    expect(accepted.executedAt).toBeNull();
+    expect(nextStatusAfterAccept(true, "docusign")).toBe("accepted");
   });
 
   it("executes on accept when a signed artifact is already present", () => {

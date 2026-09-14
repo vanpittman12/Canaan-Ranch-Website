@@ -49,13 +49,23 @@ export type NewEngagementNotice = {
   buyerWitnessEmail: string;
 };
 
+export type EmailAttachment = {
+  filename: string;
+  mimeType: string;
+  bytes: Uint8Array;
+};
+
 export type NewEngagementEmail = {
   from: string;
   to: string[];
   subject: string;
   text: string;
   html: string;
+  attachments?: EmailAttachment[];
 };
+
+export const RESERVATION_LETTER_NOTIFY_TO = "vpittman@beachparkcap.com";
+const MIXED_BOUNDARY = "canaan-preserve-mixed";
 
 export type NotifyResult = {
   mode: NotifyMode;
@@ -112,6 +122,16 @@ export function newEngagementRecipients() {
   const recipients = [primary];
   if (brand.email && brand.email !== primary) {
     recipients.push(brand.email);
+  }
+  return recipients;
+}
+
+/** Van plus the buyer notice email. Dedupes if they are the same mailbox. */
+export function reservationLetterRecipients(buyerNoticeEmail: string) {
+  const recipients = [RESERVATION_LETTER_NOTIFY_TO];
+  const buyer = buyerNoticeEmail.trim();
+  if (buyer && buyer.toLowerCase() !== RESERVATION_LETTER_NOTIFY_TO.toLowerCase()) {
+    recipients.push(buyer);
   }
   return recipients;
 }
@@ -225,14 +245,45 @@ export function buildNewEngagementEmail(notice: NewEngagementNotice): NewEngagem
   };
 }
 
-export function buildRfc2822Message(email: NewEngagementEmail): string {
-  const lines = [
-    `From: ${email.from}`,
-    `To: ${email.to.join(", ")}`,
-    `Subject: ${encodeMimeHeader(email.subject)}`,
-    "MIME-Version: 1.0",
-    `Content-Type: multipart/alternative; boundary="${MIME_BOUNDARY}"`,
+export function buildReservationLetterEmail(input: {
+  reference: string;
+  buyerLegalName: string;
+  buyerEmail: string;
+  donorProjectName: string;
+  attachment: EmailAttachment;
+}): NewEngagementEmail {
+  const subject = `Canaan Preserve reservation letter — ${input.reference}`;
+  const text = [
+    `The Gopher Tortoise Acceptance Letter for ${input.reference} is attached.`,
     "",
+    `Buyer: ${input.buyerLegalName}`,
+    `Buyer notice email: ${input.buyerEmail}`,
+    `Donor project: ${input.donorProjectName || "—"}`,
+    "",
+    "This email was sent after admin send approval. Generation does not send mail.",
+  ].join("\n");
+  const html = [
+    `<p>The Gopher Tortoise Acceptance Letter for <strong>${escapeHtml(input.reference)}</strong> is attached.</p>`,
+    "<ul>",
+    `<li><strong>Buyer:</strong> ${escapeHtml(input.buyerLegalName)}</li>`,
+    `<li><strong>Buyer notice email:</strong> ${escapeHtml(input.buyerEmail)}</li>`,
+    `<li><strong>Donor project:</strong> ${escapeHtml(input.donorProjectName || "—")}</li>`,
+    "</ul>",
+    "<p>This email was sent after admin send approval.</p>",
+  ].join("");
+
+  return {
+    from: notifyFromAddress(),
+    to: reservationLetterRecipients(input.buyerEmail),
+    subject,
+    text,
+    html,
+    attachments: [input.attachment],
+  };
+}
+
+export function buildRfc2822Message(email: NewEngagementEmail): string {
+  const alternative = [
     `--${MIME_BOUNDARY}`,
     'Content-Type: text/plain; charset="UTF-8"',
     "Content-Transfer-Encoding: 8bit",
@@ -244,9 +295,47 @@ export function buildRfc2822Message(email: NewEngagementEmail): string {
     "",
     email.html,
     `--${MIME_BOUNDARY}--`,
-    "",
+  ].join("\r\n");
+
+  const hasAttachments = Boolean(email.attachments?.length);
+  const headers = [
+    `From: ${email.from}`,
+    `To: ${email.to.join(", ")}`,
+    `Subject: ${encodeMimeHeader(email.subject)}`,
+    "MIME-Version: 1.0",
   ];
-  return lines.join("\r\n");
+
+  if (!hasAttachments) {
+    return [
+      ...headers,
+      `Content-Type: multipart/alternative; boundary="${MIME_BOUNDARY}"`,
+      "",
+      alternative,
+      "",
+    ].join("\r\n");
+  }
+
+  const parts = [
+    ...headers,
+    `Content-Type: multipart/mixed; boundary="${MIXED_BOUNDARY}"`,
+    "",
+    `--${MIXED_BOUNDARY}`,
+    `Content-Type: multipart/alternative; boundary="${MIME_BOUNDARY}"`,
+    "",
+    alternative,
+  ];
+  for (const attachment of email.attachments ?? []) {
+    parts.push(
+      `--${MIXED_BOUNDARY}`,
+      `Content-Type: ${attachment.mimeType}; name="${sanitizeFilename(attachment.filename)}"`,
+      "Content-Transfer-Encoding: base64",
+      `Content-Disposition: attachment; filename="${sanitizeFilename(attachment.filename)}"`,
+      "",
+      wrapBase64(bytesToBase64(attachment.bytes)),
+    );
+  }
+  parts.push(`--${MIXED_BOUNDARY}--`, "");
+  return parts.join("\r\n");
 }
 
 export function toGmailRaw(rfc2822: string): string {
@@ -272,11 +361,38 @@ export async function notifyNewEngagement(
   }
 
   try {
-    await sendViaGmail(email, http);
+    await sendNotifyEmail(email, http);
     return { mode: "gmail", sent: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to send email.";
     console.error("[notify] new engagement email failed", error);
+    return { mode: "gmail", sent: false, error: message };
+  }
+}
+
+/**
+ * Send the reservation letter after admin send approval. Stub when Gmail
+ * secrets are unset (local). Live Gmail failures are returned, not thrown.
+ */
+export async function notifyReservationLetter(
+  email: NewEngagementEmail,
+  http: NotifyHttp = defaultHttp(),
+): Promise<NotifyResult> {
+  if (!isEmailNotifyEnabled()) {
+    console.info("[notify] stub: reservation letter email (Gmail OAuth secrets unset)", {
+      to: email.to,
+      subject: email.subject,
+      filename: email.attachments?.[0]?.filename,
+    });
+    return { mode: "stub", sent: true };
+  }
+
+  try {
+    await sendNotifyEmail(email, http);
+    return { mode: "gmail", sent: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to send email.";
+    console.error("[notify] reservation letter email failed", error);
     return { mode: "gmail", sent: false, error: message };
   }
 }
@@ -290,7 +406,7 @@ export async function persistAndNotifyNewEngagement<T extends EngagementLike>(
   return engagement;
 }
 
-async function sendViaGmail(email: NewEngagementEmail, http: NotifyHttp) {
+export async function sendNotifyEmail(email: NewEngagementEmail, http: NotifyHttp) {
   const secrets = readGmailOAuthSecrets();
   if (!secrets) {
     throw new Error("Gmail OAuth secrets are not set.");
@@ -381,4 +497,20 @@ function utf8ToBase64(value: string) {
 
 function utf8ToBase64Url(value: string) {
   return utf8ToBase64(value).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/g, "");
+}
+
+function bytesToBase64(bytes: Uint8Array) {
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary);
+}
+
+function wrapBase64(value: string) {
+  return value.replace(/(.{76})/g, "$1\r\n").trim();
+}
+
+function sanitizeFilename(value: string) {
+  return value.replace(/["\r\n]/g, "");
 }

@@ -13,6 +13,7 @@ import {
   type DocuSignHttp,
 } from "./docusign";
 import { persistExecutedAgreement } from "./executed-agreement";
+import { persistReservationLetter } from "./reservation-letter-persist";
 import { putUpload, saveEngagement } from "./store";
 import type { Engagement } from "./types";
 
@@ -50,7 +51,8 @@ export async function syncLiveEnvelope(
       fromEnvelope,
     );
     await persistExecutedAgreement(next);
-    return saveEngagement(next);
+    const withLetter = await persistReservationLetter(next, "seller_sign");
+    return saveEngagement(withLetter);
   }
 
   const mapped = normalizeEnvelopeStatus(status);
