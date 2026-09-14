@@ -52,16 +52,17 @@ describe("site builder visual lock", () => {
     expect(icon).not.toContain("TORTOISE");
     expect(header).toContain("BrandLockup");
     expect(brand.lockupLine).toBe("Recipient site");
-    expect(brand.habitatLine.toLowerCase()).toContain("florida");
-    expect(brand.habitatLine.toLowerCase()).toContain("longleaf");
-    expect(brand.habitatLine.toLowerCase()).toContain("wiregrass");
+    expect(brand.habitatLine.toLowerCase()).toBe("longleaf pine & wiregrass");
   });
 
-  it("does not invent a Pasco County marketing location", () => {
+  it("omits a place or county from the hero habitat line", () => {
     for (const surface of marketingSurfaces) {
       expect(surface.toLowerCase()).not.toContain("pasco");
     }
+    expect(brand.habitatLine.toLowerCase()).not.toContain("florida");
     expect(brand.habitatLine.toLowerCase()).not.toMatch(/\bcounty\b/);
+    expect(brand.habitatLine.toLowerCase()).toContain("longleaf");
+    expect(brand.habitatLine.toLowerCase()).toContain("wiregrass");
   });
 
   it("draws longleaf pine and wiregrass on the sandhill without a cartoon tortoise", () => {
