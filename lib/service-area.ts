@@ -12,26 +12,27 @@ export const serviceAreaCopy = {
   legendAnchor: "Alachua",
   legendSite: "Canaan Preserve",
   scaleLabel: "Nautical miles",
-  loading: "Loading the Florida map…",
-  attribution: "© OpenFreeMap © OpenMapTiles © OpenStreetMap contributors",
+  attribution: "© OpenStreetMap contributors",
 } as const;
 
 /**
- * Real geographic basemap — OpenFreeMap vector tiles, no API key.
- * Liberty style reads as a street/terrain map of Florida, not a schematic.
+ * Real geographic basemap: static OpenStreetMap Mapnik mosaic of Florida
+ * (z=8 tiles, no API key). Pixel bounds match MAP_FRAME exactly.
  */
 export const BASEMAP = {
-  provider: "OpenFreeMap",
-  styleUrl: "https://tiles.openfreemap.org/styles/liberty",
+  provider: "OpenStreetMap",
+  src: "/maps/florida-basemap.jpg",
   attribution: serviceAreaCopy.attribution,
 } as const;
 
-/** Whole-state frame so the peninsula, Keys, and panhandle are all visible. */
-export const FLORIDA_BOUNDS = {
-  west: -87.65,
-  south: 24.52,
-  east: -79.95,
-  north: 31.05,
+/** Pixel-exact Web Mercator frame of `public/maps/florida-basemap.jpg`. */
+export const MAP_FRAME = {
+  west: -87.7203369140625,
+  east: -79.9200439453125,
+  north: 31.123496964067296,
+  south: 24.42214378185897,
+  width: 1420,
+  height: 1380,
 } as const;
 
 /** West/east coast intersections of the 28.1°N cutoff with mainland Florida. */
@@ -60,13 +61,13 @@ export type MapPlace = {
 
 /** Major-city labels with large, high-contrast type on the real basemap. */
 export const REFERENCE_CITIES: readonly MapPlace[] = [
-  { name: "Pensacola", lat: 30.42, lon: -87.22, labelSide: "right" },
+  { name: "Pensacola", lat: 30.42, lon: -87.22, labelSide: "bottom" },
   { name: "Tallahassee", lat: 30.44, lon: -84.28, labelSide: "bottom" },
   { name: "Jacksonville", lat: 30.33, lon: -81.66, labelSide: "right" },
   { name: "Alachua", lat: ALACHUA.lat, lon: ALACHUA.lon, labelSide: "left", kind: "anchor" },
   { name: "Gainesville", lat: 29.65, lon: -82.32, labelSide: "right" },
   { name: "Orlando", lat: 28.54, lon: -81.38, labelSide: "right" },
-  { name: "Dade City", lat: 28.36, lon: -82.2, labelSide: "right" },
+  { name: "Dade City", lat: 28.36, lon: -82.2, labelSide: "left" },
   { name: "Tampa", lat: 27.95, lon: -82.46, labelSide: "left" },
   { name: "Miami", lat: 25.76, lon: -80.19, labelSide: "left" },
 ];
@@ -97,8 +98,42 @@ export type ServiceAreaFeature = {
 
 export const SERVICE_AREA_FEATURE = serviceAreaFeature as ServiceAreaFeature;
 
+function mercatorY(lat: number) {
+  const radians = (lat * Math.PI) / 180;
+  return Math.log(Math.tan(Math.PI / 4 + radians / 2));
+}
+
+export function project(lon: number, lat: number) {
+  const { west, east, north, south, width, height } = MAP_FRAME;
+  return {
+    x: ((lon - west) / (east - west)) * width,
+    y: ((mercatorY(north) - mercatorY(lat)) / (mercatorY(north) - mercatorY(south))) * height,
+  };
+}
+
+export function nauticalMilesToPixels(nm: number) {
+  const here = project(ALACHUA.lon, ALACHUA.lat);
+  const south = project(ALACHUA.lon, ALACHUA.lat - nm / 60);
+  return Math.abs(south.y - here.y);
+}
+
 export function latitudeToNmSouthOfAlachua(lat: number) {
   return (ALACHUA.lat - lat) * 60;
+}
+
+export function ringToPath(ring: number[][]) {
+  return `${ring
+    .map(([lon, lat], index) => {
+      const { x, y } = project(lon, lat);
+      return `${index === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join(" ")} Z`;
+}
+
+export function serviceAreaOverlayPath() {
+  return SERVICE_AREA_FEATURE.geometry.coordinates
+    .flatMap((polygon) => polygon.map(ringToPath))
+    .join(" ");
 }
 
 function pointInRing(point: readonly [number, number], ring: number[][]) {
@@ -148,4 +183,19 @@ export function serviceAreaBounds() {
     }
   }
   return { west, east, south, north };
+}
+
+export function labelOffset(place: MapPlace) {
+  const isEmphatic = place.kind === "anchor" || place.kind === "site";
+  const step = isEmphatic ? 14 : 11;
+  switch (place.labelSide) {
+    case "left":
+      return { dx: -step, dy: 4, anchor: "end" as const };
+    case "right":
+      return { dx: step, dy: 4, anchor: "start" as const };
+    case "top":
+      return { dx: 0, dy: -12, anchor: "middle" as const };
+    case "bottom":
+      return { dx: 0, dy: 16, anchor: "middle" as const };
+  }
 }

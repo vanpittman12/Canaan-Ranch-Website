@@ -5,20 +5,24 @@ import { brand } from "./brand";
 import {
   ALACHUA,
   BASEMAP,
+  MAP_FRAME,
   NAUTICAL_MILES_SOUTH,
   SERVICE_AREA_FEATURE,
   SOUTHERN_LIMIT_LAT,
   SOUTHERN_LIMIT_LINE,
   isInServiceArea,
   latitudeToNmSouthOfAlachua,
+  nauticalMilesToPixels,
+  project,
   serviceAreaBounds,
   serviceAreaCopy,
+  serviceAreaOverlayPath,
 } from "./service-area";
 
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
 const mapModule = readFileSync(path.join(process.cwd(), "components/service-area-map.tsx"), "utf8");
 const mapLib = readFileSync(path.join(process.cwd(), "lib/service-area.ts"), "utf8");
-const mapCss = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
+const basemap = readFileSync(path.join(process.cwd(), "public/maps/florida-basemap.jpg"));
 
 describe("service area map", () => {
   it("uses Van’s Alachua anchor and ~100 NM southern cutoff", () => {
@@ -36,7 +40,9 @@ describe("service area map", () => {
     expect(mapModule).toContain("legendAnchor");
     expect(mapModule).toContain("SOUTHERN_LIMIT_LINE");
     expect(mapModule).toContain("MAP_PLACES");
-    expect(mapModule).toContain("SERVICE_AREA_FEATURE");
+    expect(mapModule).toContain("serviceAreaOverlayPath");
+    expect(mapModule).toContain("nauticalMilesToPixels");
+    expect(nauticalMilesToPixels(100)).toBeGreaterThan(40);
     expect(mapLib).toContain("Tallahassee");
     expect(mapLib).toContain("Jacksonville");
     expect(mapLib).toContain("Pensacola");
@@ -50,21 +56,30 @@ describe("service area map", () => {
     expect(mapModule).not.toContain("#8fd14f");
   });
 
-  it("embeds a real OpenFreeMap / MapLibre Florida basemap, not a schematic outline", () => {
+  it("embeds a real OpenStreetMap Florida basemap, not a schematic outline", () => {
     expect(landing).toContain("<ServiceAreaMap");
     expect(landing.indexOf("<ProgramOffer")).toBeLessThan(landing.indexOf("<ServiceAreaMap"));
     expect(landing.indexOf("<ServiceAreaMap")).toBeLessThan(landing.indexOf('id="how-it-works"'));
     expect(mapModule).toContain('id="service-area"');
-    expect(mapModule).toContain("maplibre-gl");
-    expect(mapModule).toContain("BASEMAP.styleUrl");
-    expect(BASEMAP.provider).toBe("OpenFreeMap");
-    expect(BASEMAP.styleUrl).toBe("https://tiles.openfreemap.org/styles/liberty");
-    expect(mapLib).toContain("tiles.openfreemap.org/styles/liberty");
+    expect(mapModule).toContain("BASEMAP.src");
+    expect(mapModule).toContain("next/image");
+    expect(BASEMAP.provider).toBe("OpenStreetMap");
+    expect(BASEMAP.src).toBe("/maps/florida-basemap.jpg");
+    expect(basemap.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff]))).toBe(true);
+    expect(basemap.byteLength).toBeGreaterThan(80_000);
+    expect(mapLib).toContain("/maps/florida-basemap.jpg");
+    expect(mapLib).toContain("OpenStreetMap");
     expect(mapLib).not.toContain("floridaOutlinePath");
     expect(mapModule).not.toContain("floridaOutlinePath");
+    expect(mapModule).not.toContain("maplibre");
     expect(mapLib).not.toContain("FLORIDA_OUTLINE");
     expect(SERVICE_AREA_FEATURE.geometry.coordinates[0][0].length).toBeGreaterThan(500);
-    expect(mapCss).toContain(".sa-map-marker");
+    expect(serviceAreaOverlayPath().startsWith("M")).toBe(true);
+    const alachua = project(ALACHUA.lon, ALACHUA.lat);
+    expect(alachua.x).toBeGreaterThan(0);
+    expect(alachua.x).toBeLessThan(MAP_FRAME.width);
+    expect(alachua.y).toBeGreaterThan(0);
+    expect(alachua.y).toBeLessThan(MAP_FRAME.height);
     expect(mapLib.toLowerCase()).not.toContain("lykes");
     expect(mapModule.toLowerCase()).not.toContain("lykes");
     expect(JSON.stringify(SERVICE_AREA_FEATURE).toLowerCase()).not.toContain("lykes");
