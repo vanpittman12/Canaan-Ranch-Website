@@ -101,6 +101,7 @@ describe("site builder visual lock", () => {
     expect(landing.match(/\{brand\.heroLead\}/g)).toHaveLength(1);
     expect(landing.match(/\{brand\.flowInvite\}/g)).toHaveLength(1);
     expect(landing).toContain("FwcSavingsModule");
+    expect(landing).toContain("ProgramOffer");
     expect(landing).not.toContain("Start relocation intake for a clear recipient-site agreement.");
     expect(landing).not.toContain("is the contracting party. Intake produces");
     expect(landing).not.toContain("reservation letter");

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FwcBadge } from "@/components/fwc-badge";
 import { FwcSavingsModule } from "@/components/fwc-savings";
+import { ProgramOffer } from "@/components/program-offer";
 import { SandhillHabitat } from "@/components/sandhill-habitat";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -90,6 +91,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <ProgramOffer />
 
         <section id="how-it-works" className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
           <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
