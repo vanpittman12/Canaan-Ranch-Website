@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import {
   refreshDocuSignStatus,
+  resendDocuSign,
   reviewEngagement,
   simulateDocuSignComplete,
   type AdminActionState,
@@ -23,6 +24,11 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
           This engagement is no longer in the review queue. Decisions can only be recorded while
           the status is pending review. Nothing closes without Accept.
         </p>
+        {engagement.status === "accepted" &&
+        engagement.signingMethod === "docusign" &&
+        !engagement.docusign.envelopeId ? (
+          <ResendDocuSign engagement={engagement} />
+        ) : null}
         {engagement.status === "accepted" &&
         engagement.signingMethod === "docusign" &&
         engagement.docusign.envelopeId ? (
@@ -130,3 +136,26 @@ function SimulateComplete({ engagementId }: { engagementId: string }) {
     </form>
   );
 }
+
+function ResendDocuSign({ engagement }: { engagement: Engagement }) {
+  const action = resendDocuSign.bind(null, engagement.id);
+  const [state, formAction, pending] = useActionState(action, initialState);
+
+  return (
+    <form action={formAction} className="mt-5 rounded-[12px] border border-terracotta/30 bg-cream p-4">
+      <p className="text-sm font-medium text-ink">Resend DocuSign</p>
+      <p className="mt-1 text-sm text-muted">
+        Accept already saved, but no envelope was created. Retry sending the populated
+        agreement to DocuSign without changing engagement status.
+      </p>
+      {engagement.docusign.lastMessage ? (
+        <p className="mt-2 text-sm text-terracotta">{engagement.docusign.lastMessage}</p>
+      ) : null}
+      {state.error ? <p className="mt-2 text-sm text-terracotta">{state.error}</p> : null}
+      <button className="btn-primary mt-3" type="submit" disabled={pending}>
+        {pending ? "Sending…" : "Resend DocuSign"}
+      </button>
+    </form>
+  );
+}
+

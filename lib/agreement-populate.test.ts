@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { strFromU8, unzipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import {
   AGREEMENT_FIELD_MAP,
@@ -24,6 +25,7 @@ import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
 import type { Engagement, IntakeFields } from "./types";
 
 const TEMPLATE_DOCX = resolve(process.cwd(), BLANK_AGREEMENT_PUBLIC_FILE);
+const VAN_ORIGINAL_DOCX = resolve(process.cwd(), "content/agreements/van-original.docx");
 const CONTRACT_ROUTE = resolve(process.cwd(), "app/api/engagements/[id]/contract/route.ts");
 const ADMIN_ACTIONS = resolve(process.cwd(), "app/actions/admin.ts");
 
@@ -144,6 +146,55 @@ describe("Van’s Word agreement populate", () => {
     const blankText = extractDocxPlainText(blank);
     expect(blankText).not.toContain(DOCUSIGN_ANCHORS.buyer_signer.sign);
     expect(blankText).toContain("Responsible party entity name");
+    // Public blank currently uses plain "Witness Signature"; Van’s original uses Witness 1/2.
+    expect(blankText).toMatch(/Witness(?:\s*1)?\s+Signature/);
+  });
+
+  it("places all eight DocuSign anchors on Van’s real signature labels without vanish", () => {
+    const allEight = [
+      DOCUSIGN_ANCHORS.buyer_signer.sign,
+      DOCUSIGN_ANCHORS.buyer_signer.date,
+      DOCUSIGN_ANCHORS.seller_signer.sign,
+      DOCUSIGN_ANCHORS.seller_signer.date,
+      DOCUSIGN_ANCHORS.buyer_witness.sign,
+      DOCUSIGN_ANCHORS.buyer_witness.date,
+      DOCUSIGN_ANCHORS.seller_witness.sign,
+      DOCUSIGN_ANCHORS.seller_witness.date,
+    ];
+
+    // Public blank download template (Witness Signature ×2).
+    const publicBlank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
+    const publicPopulated = populateAgreementDocx(publicBlank, engagement());
+    const publicText = extractDocxPlainText(publicPopulated);
+    const publicXml = strFromU8(unzipSync(publicPopulated)["word/document.xml"]!);
+    for (const anchor of allEight) {
+      expect(publicText).toContain(anchor);
+      expect(publicText.split(anchor).length - 1).toBe(1);
+      expect(extractDocxPlainText(publicBlank)).not.toContain(anchor);
+    }
+    expect(publicXml).not.toContain("<w:vanish");
+    expect(publicXml).toContain('w:val="FFFFFF"');
+
+    // Van’s real original fixture (Witness 1 Signature ×2 + Witness 2 ignored).
+    const vanOriginal = new Uint8Array(readFileSync(VAN_ORIGINAL_DOCX));
+    const vanTextBlank = extractDocxPlainText(vanOriginal);
+    expect(vanTextBlank).toContain("Witness 1 Signature");
+    expect(vanTextBlank).toContain("Witness 2 Signature");
+
+    const vanPopulated = populateAgreementDocx(vanOriginal, engagement());
+    const vanText = extractDocxPlainText(vanPopulated);
+    const vanXml = strFromU8(unzipSync(vanPopulated)["word/document.xml"]!);
+    for (const anchor of allEight) {
+      expect(vanText).toContain(anchor);
+      expect(vanText.split(anchor).length - 1).toBe(1);
+    }
+    expect(vanXml).not.toContain("<w:vanish");
+    expect(vanXml).toContain('w:val="FFFFFF"');
+    // Labels may be split across w:t runs in Van’s OOXML — assert via joined plain text.
+    expect(vanText).toMatch(/Witness 1 Signature\s*\/wit_seller\//);
+    expect(vanText).toMatch(/By: Name: Andrew V\. Pittman, Jr\.\s*\/sn_seller\//);
+    expect(vanText).toMatch(/By: Morgan Hale\s*\/sn_buyer\//);
+    expect(vanText).toMatch(/Witness 1 Signature\s*\/wit_buyer\//);
   });
 
   it("serves the populated Word bytes for buyer download and DocuSign", async () => {
@@ -179,11 +230,17 @@ describe("Van’s Word agreement populate", () => {
     expect(populateSrc).not.toMatch(/from ["']\.\/docusign["']/);
     expect(populateSrc).toContain("POPULATED_ZIP_LEVEL");
     expect(populateSrc).toContain("loadBlankAgreementParts");
+    // Anchor run markup must not use vanish (comment mentions are fine).
+    expect(populateSrc).not.toMatch(/<w:rPr><w:vanish/);
+    expect(populateSrc).toContain("Witness(?:\\s*1)?");
 
     const adminSrc = readFileSync(ADMIN_ACTIONS, "utf8");
+    // Accept must persist before DocuSign send so a 400 cannot roll back to Pending.
     expect(adminSrc.indexOf("await saveEngagement(next)")).toBeLessThan(
-      adminSrc.indexOf("generatePopulatedAgreement(next)"),
+      adminSrc.indexOf("sendDocuSignForEngagement"),
     );
+    expect(adminSrc).toContain("resendDocuSign");
+    expect(adminSrc).toContain("DocuSign send failed after Accept");
   });
 
   it("documents the Word blanks that intake cannot fill yet", () => {

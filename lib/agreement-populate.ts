@@ -200,7 +200,10 @@ function isPrintedNameLabel(text: string) {
 }
 
 function isWitnessSignatureParagraph(text: string) {
-  return text.replace(/\s+/g, " ").trim() === "Witness Signature";
+  // Van’s Word file labels blocks "Witness 1 Signature" / "Witness 2 Signature".
+  // Product rule: one witness per party — map only Witness 1 (or plain "Witness Signature").
+  const compact = text.replace(/\s+/g, " ").trim();
+  return /^(Witness(?:\s*1)?\s+Signature)$/i.test(compact);
 }
 
 function anchorsForParagraph(text: string, witnessSignatureIndex: number) {
@@ -258,10 +261,13 @@ function preserveSpaceAttr(rawAttrs: string, text: string) {
 }
 
 function appendHiddenAnchors(paragraph: string, anchors: string[]) {
+  // DocuSign AutoPlace must see the anchor string in the converted document.
+  // <w:vanish/> is often stripped on DOCX→PDF conversion, so use 1pt white text
+  // without vanish (populated copy only; blank download stays anchor-free).
   const runs = anchors
     .map(
       (anchor) =>
-        `<w:r><w:rPr><w:vanish/><w:color w:val="FFFFFF"/><w:sz w:val="2"/></w:rPr><w:t xml:space="preserve">${encodeXml(anchor)}</w:t></w:r>`,
+        `<w:r><w:rPr><w:color w:val="FFFFFF"/><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr><w:t xml:space="preserve">${encodeXml(anchor)}</w:t></w:r>`,
     )
     .join("");
   return paragraph.replace(/<\/w:p>/, `${runs}</w:p>`);

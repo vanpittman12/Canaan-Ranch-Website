@@ -28,7 +28,7 @@ import {
 import { generatePopulatedAgreement } from "@/lib/agreement-populate";
 import { generateStubSignedPdf } from "@/lib/pdf";
 import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
-import type { ReviewDecision } from "@/lib/types";
+import type { Engagement, ReviewDecision } from "@/lib/types";
 
 export type AdminActionState = {
   error?: string;
@@ -79,36 +79,102 @@ export async function reviewEngagement(
 
   const note = String(formData.get("note") ?? "");
 
+  let next;
   try {
-    let next = applyReview(engagement, decision, note);
-    // Persist Accept before DOCX populate + DocuSign so a Worker CPU limit on
-    // regenerate does not leave the engagement stuck in Pending.
+    next = applyReview(engagement, decision, note);
+    // Persist Accept before DOCX populate + DocuSign so a Worker CPU limit or
+    // DocuSign 400 does not roll status back to Pending.
     await saveEngagement(next);
-    if (decision === "accept" && next.signingMethod === "docusign") {
-      const populated = await generatePopulatedAgreement(next);
-      const sent = await sendEnvelope({
-        engagementId: next.id,
-        reference: next.reference,
-        recipients: buildEnvelopeRecipients(next.intake),
-        document: {
-          name: populated.filename,
-          bytes: populated.bytes,
-          fileExtension: populated.fileExtension,
-        },
-      });
-      next = applyDocuSignSent(
-        next,
-        sent.envelopeId,
-        sent.message,
-        sent.mode,
-        sent.recipients,
-      );
-      await saveEngagement(next);
-    }
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Unable to record the review.",
     };
+  }
+
+  if (decision === "accept" && next.signingMethod === "docusign") {
+    try {
+      next = await sendDocuSignForEngagement(next);
+      await saveEngagement(next);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to send DocuSign envelope.";
+      // Keep Accepted; surface the send failure for Resend DocuSign.
+      next = {
+        ...next,
+        docusign: {
+          ...next.docusign,
+          lastMessage: `DocuSign send failed after Accept: ${message}`,
+        },
+        updatedAt: new Date().toISOString(),
+      };
+      await saveEngagement(next);
+    }
+  }
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/engagements/${engagementId}`);
+  revalidatePath(`/engagements/${engagementId}`);
+  redirect(`/admin/engagements/${engagementId}`);
+}
+
+async function sendDocuSignForEngagement(engagement: Engagement) {
+  const populated = await generatePopulatedAgreement(engagement);
+  const sent = await sendEnvelope({
+    engagementId: engagement.id,
+    reference: engagement.reference,
+    recipients: buildEnvelopeRecipients(engagement.intake),
+    document: {
+      name: populated.filename,
+      bytes: populated.bytes,
+      fileExtension: populated.fileExtension,
+    },
+  });
+  return applyDocuSignSent(
+    engagement,
+    sent.envelopeId,
+    sent.message,
+    sent.mode,
+    sent.recipients,
+  );
+}
+
+export async function resendDocuSign(
+  engagementId: string,
+  previousState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  void previousState;
+  void formData;
+  await requireAdmin();
+  const engagement = await getEngagement(engagementId);
+  if (!engagement) {
+    return { error: "Engagement not found." };
+  }
+  if (engagement.status !== "accepted") {
+    return { error: "DocuSign can be resent only while the engagement is Accepted." };
+  }
+  if (engagement.signingMethod !== "docusign") {
+    return { error: "This engagement is not on the DocuSign path." };
+  }
+  if (engagement.docusign.envelopeId) {
+    return { error: "An envelope was already sent. Use Refresh status instead." };
+  }
+
+  try {
+    const next = await sendDocuSignForEngagement(engagement);
+    await saveEngagement(next);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to resend DocuSign envelope.";
+    await saveEngagement({
+      ...engagement,
+      docusign: {
+        ...engagement.docusign,
+        lastMessage: `DocuSign resend failed: ${message}`,
+      },
+      updatedAt: new Date().toISOString(),
+    });
+    return { error: message };
   }
 
   revalidatePath("/admin");
