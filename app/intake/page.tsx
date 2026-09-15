@@ -24,7 +24,7 @@ export default function IntakePage() {
         <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
           Buyer intake
         </p>
-        <h1 className="type-h1 mt-3 text-forest">Start relocation intake.</h1>
+        <h1 className="type-h1 mt-3 text-forest">{brand.intakeCta}.</h1>
         <p className="mt-4 max-w-2xl text-[17px] leading-[27px] text-muted">
           Buyer notice block, reserved tortoise count, county of relocation, authorized agent,
           donor affiliation, and one Buyer witness. The Canaan Ranch LLP witness is seller-side

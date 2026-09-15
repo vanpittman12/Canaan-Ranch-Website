@@ -83,13 +83,15 @@ export default function Home() {
             </div>
 
             <div className="mt-16 overflow-hidden rounded-[16px] border border-line/30">
-              <dl className="grid gap-px bg-forest-deep/80 sm:grid-cols-4">
+              <dl className="grid grid-cols-2 gap-px bg-forest-deep/80 md:grid-cols-4">
                 {facts.map((fact) => (
-                  <div key={fact.label} className="bg-forest px-5 py-5">
+                  <div key={fact.label} className="min-w-0 bg-forest px-4 py-5 sm:px-5">
                     <dt className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
                       {fact.label}
                     </dt>
-                    <dd className="mt-2 font-medium text-cream">{fact.value}</dd>
+                    <dd className="mt-2 text-pretty break-words font-medium text-cream">
+                      {fact.value}
+                    </dd>
                   </div>
                 ))}
               </dl>

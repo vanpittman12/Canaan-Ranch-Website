@@ -111,6 +111,8 @@ describe("site builder visual lock", () => {
     expect(landing).not.toContain("Start relocation intake");
     expect(header).not.toContain("Start relocation intake");
     expect(footer).not.toContain("Start relocation intake");
+    expect(intakePage).toContain("{brand.intakeCta}");
+    expect(intakePage).not.toContain("Start relocation intake");
     expect(landing).not.toContain("is the contracting party. Intake produces");
     expect(landing).not.toContain("reservation letter");
     expect(landing).toContain("Word/DOCX");

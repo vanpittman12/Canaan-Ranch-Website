@@ -42,6 +42,11 @@ describe("FWC mitigation savings", () => {
     expect(landing.indexOf("facts.map")).toBeLessThan(landing.indexOf("<FwcSavingsModule"));
     expect(landing.indexOf("<FwcSavingsModule")).toBeLessThan(landing.indexOf('id="how-it-works"'));
     expect(savingsModule).toContain('id="fwc-savings"');
+    expect(landing).toContain("grid-cols-2");
+    expect(landing).toContain("md:grid-cols-4");
+    expect(landing).not.toContain("sm:grid-cols-4");
+    expect(landing).toContain("min-w-0");
+    expect(landing).toContain("break-words");
   });
 
   it("shows Van’s per-GT FWC schedule without public conservation", () => {
