@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { FwcSavingsMobileCards } from "@/components/fwc-savings-mobile-cards";
+import { FwcSavingsModule } from "@/components/fwc-savings";
 import { brand } from "./brand";
 import {
   CANAAN_FWC_LEVEL,
@@ -18,6 +22,10 @@ import {
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
 const savingsModule = readFileSync(
   path.join(process.cwd(), "components/fwc-savings.tsx"),
+  "utf8",
+);
+const mobileCards = readFileSync(
+  path.join(process.cwd(), "components/fwc-savings-mobile-cards.tsx"),
   "utf8",
 );
 
@@ -67,6 +75,7 @@ describe("FWC mitigation savings", () => {
     );
     expect(landing.toLowerCase()).not.toContain("public conservation");
     expect(savingsModule.toLowerCase()).not.toContain("public conservation");
+    expect(mobileCards.toLowerCase()).not.toContain("public conservation");
     expect(JSON.stringify(fwcSavingsRows).toLowerCase()).not.toContain("public conservation");
   });
 
@@ -95,32 +104,57 @@ describe("FWC mitigation savings", () => {
     expect(savingsModule).toContain("fwcSavingsColumnLabels.insteadOf");
     expect(savingsModule).toContain("fwcSavingsColumnLabels.fwcPerGt");
     expect(savingsModule).toContain("fwcSavingsColumnLabels.savedPerGt");
+    expect(mobileCards).toContain("fwcSavingsColumnLabels.insteadOf");
+    expect(mobileCards).toContain("fwcSavingsColumnLabels.fwcPerGt");
+    expect(mobileCards).toContain("fwcSavingsColumnLabels.savedPerGt");
     expect(savingsModule).toContain("fwcSavingsCopy.siteFeesSeparate");
     expect(savingsModule).toContain("{brand.fwcRecipientSitesUrl}");
     expect(landing).toContain("adult /");
     expect(landing).toContain("juvenile");
   });
 
-  it("stacks comparison cards below 768px and keeps the table from md up", () => {
+  it("SSRs one comparison table and mounts stacked cards only after hydration", () => {
     const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
     expect(FWC_SAVINGS_HERO_INSTEAD_OF).toBe("Unprotected");
     expect(fwcSavingsRows[0].insteadOf).toBe(FWC_SAVINGS_HERO_INSTEAD_OF);
     expect(fwcSavingsRows[0].savedPerGt).toBe(7126);
     expect(isFwcSavingsHeroRow(fwcSavingsRows[0])).toBe(true);
     expect(fwcSavingsRows.slice(1).every((row) => !isFwcSavingsHeroRow(row))).toBe(true);
-    expect(savingsModule).toContain("md:hidden");
+    expect(savingsModule).toContain("<FwcSavingsMobileCards");
     expect(savingsModule).toContain("hidden md:block");
-    expect(savingsModule).toContain("isFwcSavingsHeroRow");
-    expect(savingsModule).toContain("<SavingsCard");
-    expect(savingsModule).toContain("bg-forest");
-    expect(savingsModule.match(/fwcSavingsRows\.map/g)).toHaveLength(2);
+    expect(savingsModule).not.toContain("md:hidden");
+    expect(savingsModule).not.toContain("<SavingsCard");
+    expect(savingsModule).not.toContain("isFwcSavingsHeroRow");
+    expect(savingsModule.match(/fwcSavingsRows\.map/g)).toHaveLength(1);
+    expect(mobileCards).toContain('"use client"');
+    expect(mobileCards).toContain("useState");
+    expect(mobileCards).toContain("useEffect");
+    expect(mobileCards).toContain("max-width: 767px");
+    expect(mobileCards).toContain("<SavingsCard");
+    expect(mobileCards).toContain("isFwcSavingsHeroRow");
+    expect(mobileCards).toContain("bg-forest");
+    expect(mobileCards).not.toContain("<table");
+    expect(mobileCards).not.toContain("md:hidden");
+    expect(mobileCards).not.toContain("hidden md:block");
     expect(savingsModule).not.toContain("fwc-savings-table");
     expect(savingsModule).not.toContain("fwc-savings-row-hero");
+    expect(mobileCards).not.toContain("fwc-savings-table");
+    expect(mobileCards).not.toContain("fwc-savings-row-hero");
     expect(savingsModule).not.toContain("overflow-x-auto");
+    expect(mobileCards).not.toContain("overflow-x-auto");
     expect(savingsModule).not.toContain("min-w-[");
+    expect(mobileCards).not.toContain("min-w-[");
     expect(savingsModule).not.toContain("sticky");
+    expect(mobileCards).not.toContain("sticky");
     expect(css).not.toContain(".fwc-savings-table");
     expect(css).not.toContain(".fwc-savings-row-hero");
+
+    const html = renderToStaticMarkup(createElement(FwcSavingsModule));
+    expect(html).toContain("<table");
+    expect(html.match(/<table/g)).toHaveLength(1);
+    expect(html).not.toContain("<article");
+    expect(html).not.toContain("<ul");
+    expect(renderToStaticMarkup(createElement(FwcSavingsMobileCards))).toBe("");
   });
 
   it("does not use demo or go-live language on the savings surfaces", () => {
@@ -128,6 +162,8 @@ describe("FWC mitigation savings", () => {
     expect(landing.toLowerCase()).not.toContain("go-live");
     expect(savingsModule.toLowerCase()).not.toContain("this demo");
     expect(savingsModule.toLowerCase()).not.toContain("go-live");
+    expect(mobileCards.toLowerCase()).not.toContain("this demo");
+    expect(mobileCards.toLowerCase()).not.toContain("go-live");
     expect(fwcSavingsCopy.heading.toLowerCase()).not.toContain("demo");
     expect(fwcSavingsCopy.footnote.toLowerCase()).not.toContain("demo");
   });
