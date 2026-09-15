@@ -88,20 +88,20 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="mt-16 overflow-hidden rounded-[16px] border border-line/30">
-              <dl className="grid grid-cols-2 gap-px bg-forest-deep/80 md:grid-cols-4">
+            <div className="mt-16 min-w-0 overflow-hidden rounded-[16px] border border-line/30">
+              <dl className="grid w-full min-w-0 grid-cols-2 gap-px bg-forest-deep/80 md:grid-cols-4">
                 {facts.map((fact) => (
-                  <div key={fact.label} className="min-w-0 bg-forest px-4 py-5 sm:px-5">
-                    <dt className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+                  <div key={fact.label} className="min-w-0 overflow-hidden bg-forest px-3 py-4 sm:px-5 sm:py-5">
+                    <dt className="text-[11px] font-semibold uppercase tracking-[0.1em] text-brass sm:text-[12px] sm:tracking-[0.12em]">
                       {fact.label}
                     </dt>
-                    <dd className="mt-2 text-pretty break-words font-medium text-cream">
+                    <dd className="mt-2 text-pretty break-words text-[15px] leading-snug font-medium text-cream sm:text-base sm:leading-6">
                       {fact.value}
                     </dd>
                   </div>
                 ))}
               </dl>
-              <div className="border-t border-line bg-paper px-5 py-8 text-ink sm:px-8">
+              <div className="min-w-0 overflow-x-hidden border-t border-line bg-paper px-4 py-8 text-ink sm:px-8">
                 <FwcSavingsModule />
               </div>
             </div>

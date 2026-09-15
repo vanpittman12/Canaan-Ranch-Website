@@ -17,8 +17,8 @@ function SavingsCard({ row }: { row: FwcSavingsRow }) {
     <article
       className={
         featured
-          ? "rounded-[16px] border border-brass bg-forest px-4 py-5 text-cream"
-          : "rounded-[16px] border border-line bg-white px-4 py-4"
+          ? "min-w-0 overflow-hidden rounded-[16px] border border-brass bg-forest px-3 py-5 text-cream sm:px-4"
+          : "min-w-0 overflow-hidden rounded-[16px] border border-line bg-white px-3 py-4 sm:px-4"
       }
     >
       <p
@@ -41,7 +41,7 @@ function SavingsCard({ row }: { row: FwcSavingsRow }) {
       </h3>
       <dl className="mt-4 space-y-3">
         <div>
-          <dt className={featured ? "text-sm leading-6 text-cream/70" : "text-sm leading-6 text-muted"}>
+          <dt className={featured ? "text-pretty break-words text-sm leading-6 text-cream/70" : "text-pretty break-words text-sm leading-6 text-muted"}>
             {fwcSavingsColumnLabels.fwcPerGt}
           </dt>
           <dd className={featured ? "mt-0.5 tabular-nums text-cream" : "mt-0.5 tabular-nums text-ink"}>
@@ -49,14 +49,14 @@ function SavingsCard({ row }: { row: FwcSavingsRow }) {
           </dd>
         </div>
         <div>
-          <dt className={featured ? "text-sm leading-6 text-cream/70" : "text-sm leading-6 text-muted"}>
+          <dt className={featured ? "text-pretty break-words text-sm leading-6 text-cream/70" : "text-pretty break-words text-sm leading-6 text-muted"}>
             {fwcSavingsColumnLabels.savedPerGt}
           </dt>
           <dd
             className={
               featured
-                ? "mt-0.5 font-semibold tabular-nums text-2xl leading-7 text-brass"
-                : "mt-0.5 font-semibold tabular-nums text-forest"
+                ? "mt-0.5 break-words font-semibold tabular-nums text-xl leading-7 text-brass sm:text-2xl"
+                : "mt-0.5 break-words font-semibold tabular-nums text-forest"
             }
           >
             {formatSavedPerGt(row.savedPerGt)}
@@ -87,7 +87,7 @@ export function FwcSavingsMobileCards() {
   }
 
   return (
-    <ul className="mt-8 space-y-3">
+    <ul className="mt-8 w-full min-w-0 space-y-3 overflow-hidden">
       {fwcSavingsRows.map((row) => (
         <li key={row.insteadOf}>
           <SavingsCard row={row} />

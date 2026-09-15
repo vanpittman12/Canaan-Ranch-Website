@@ -1,6 +1,7 @@
 import {
   BASEMAP,
   MAP_FRAME,
+  MAP_LEGEND,
   MAP_OVERLAY,
   MAP_PLACES,
   SOUTHERN_LIMIT_LINE,
@@ -16,10 +17,10 @@ const CUTOFF_WEST = project(SOUTHERN_LIMIT_LINE.west[0], SOUTHERN_LIMIT_LINE.wes
 const CUTOFF_EAST = project(SOUTHERN_LIMIT_LINE.east[0], SOUTHERN_LIMIT_LINE.east[1]);
 const SCALE_NM = [0, 50, 100] as const;
 const SCALE_WIDTH = nauticalMilesToPixels(100);
-const LEGEND_X = 48;
-const LEGEND_Y = Math.round(MAP_FRAME.height * 0.58);
-const SCALE_X = 64;
-const SCALE_Y = LEGEND_Y + 108;
+const LEGEND_X = MAP_LEGEND.x;
+const LEGEND_Y = MAP_LEGEND.y;
+const SCALE_X = LEGEND_X + 16;
+const SCALE_Y = LEGEND_Y + MAP_LEGEND.height + 16;
 const SERVICE_PATH = serviceAreaOverlayPath();
 const SOUTH_PATH = southOfCutoffOverlayPath();
 
@@ -34,7 +35,7 @@ export function ServiceAreaMap() {
         </p>
         <h2 className="type-h2 mt-3 max-w-3xl text-forest">{serviceAreaCopy.title}</h2>
         <figure className="mt-10 overflow-hidden rounded-[16px] border border-line bg-[#d7e4ea]">
-          <div className="relative">
+          <div className="relative w-full" style={{ aspectRatio: `${width} / ${height}` }}>
             {/* Static public JPEG — skip image optimization on the Worker. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -42,14 +43,15 @@ export function ServiceAreaMap() {
               alt="OpenStreetMap geographic map of Florida"
               width={width}
               height={height}
-              className="h-auto w-full"
+              className="absolute inset-0 h-full w-full max-w-none object-fill"
               decoding="async"
             />
             <svg
               viewBox={`0 0 ${width} ${height}`}
+              preserveAspectRatio="none"
               role="img"
               aria-label={serviceAreaCopy.mapLabel}
-              className="absolute inset-0 h-full w-full"
+              className="pointer-events-none absolute inset-0 h-full w-full"
             >
               <path
                 d={SOUTH_PATH}
@@ -99,16 +101,19 @@ export function ServiceAreaMap() {
                 return (
                   <g key={place.name}>
                     {isSite ? (
-                      <rect
-                        x={point.x - 5}
-                        y={point.y - 5}
-                        width="10"
-                        height="10"
-                        fill="#24352a"
-                        stroke="#fffcf7"
-                        strokeWidth="1.25"
-                        transform={`rotate(45 ${point.x} ${point.y})`}
-                      />
+                      <>
+                        <circle cx={point.x} cy={point.y} r="12" fill="#fffcf7" />
+                        <rect
+                          x={point.x - 7}
+                          y={point.y - 7}
+                          width="14"
+                          height="14"
+                          fill="#24352a"
+                          stroke="#c4a15a"
+                          strokeWidth="2"
+                          transform={`rotate(45 ${point.x} ${point.y})`}
+                        />
+                      </>
                     ) : (
                       <circle
                         cx={point.x}
@@ -137,8 +142,8 @@ export function ServiceAreaMap() {
                 <rect
                   x={LEGEND_X}
                   y={LEGEND_Y}
-                  width="228"
-                  height="92"
+                  width={MAP_LEGEND.width}
+                  height={MAP_LEGEND.height}
                   rx="10"
                   fill="#f7f1e6"
                   fillOpacity="0.96"
@@ -164,12 +169,15 @@ export function ServiceAreaMap() {
                 >
                   {serviceAreaCopy.legendAnchor}
                 </text>
+                <circle cx={LEGEND_X + 25} cy={LEGEND_Y + 69} r="8" fill="#fffcf7" />
                 <rect
                   x={LEGEND_X + 20}
                   y={LEGEND_Y + 64}
                   width="10"
                   height="10"
                   fill="#24352a"
+                  stroke="#c4a15a"
+                  strokeWidth="1.5"
                   transform={`rotate(45 ${LEGEND_X + 25} ${LEGEND_Y + 69})`}
                 />
                 <text
@@ -225,7 +233,7 @@ export function ServiceAreaMap() {
                 </text>
               </g>
             </svg>
-            <p className="pointer-events-none absolute right-2 bottom-2 z-10 rounded bg-paper/95 px-2 py-1 text-[11px] leading-4 text-ink shadow-sm sm:right-3 sm:bottom-3">
+            <p className="pointer-events-none absolute right-2 bottom-2 z-20 rounded bg-paper/95 px-2 py-1 text-[11px] leading-4 text-ink shadow-sm sm:right-3 sm:bottom-3">
               {serviceAreaCopy.attribution}
             </p>
           </div>

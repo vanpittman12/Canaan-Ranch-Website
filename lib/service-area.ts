@@ -20,22 +20,28 @@ export const serviceAreaCopy = {
 
 /**
  * Real geographic basemap: static OpenStreetMap Mapnik mosaic of Florida
- * (z=8 tiles, no API key). Pixel bounds match MAP_FRAME exactly.
+ * (z=8 tiles 65–71 / 104–110, no API key). Pixel bounds match MAP_FRAME
+ * exactly — integer tile edges, no baked markers.
  */
 export const BASEMAP = {
   provider: "OpenStreetMap",
   src: "/maps/florida-basemap.jpg",
   attribution: serviceAreaCopy.attribution,
+  zoom: 8,
+  tileWest: 65,
+  tileEast: 72,
+  tileNorth: 104,
+  tileSouth: 111,
 } as const;
 
 /** Pixel-exact Web Mercator frame of `public/maps/florida-basemap.jpg`. */
 export const MAP_FRAME = {
-  west: -87.7203369140625,
-  east: -79.9200439453125,
-  north: 31.123496964067296,
-  south: 24.42214378185897,
-  width: 1420,
-  height: 1380,
+  west: -88.59375,
+  east: -78.75,
+  north: 31.952162238024954,
+  south: 23.241346102386128,
+  width: 1792,
+  height: 1792,
 } as const;
 
 /** West/east coast intersections of the 28.1°N cutoff with mainland Florida. */
@@ -46,14 +52,22 @@ export const SOUTHERN_LIMIT_LINE = {
 
 export const MAP_OVERLAY = {
   fill: "#3f5346",
-  fillOpacity: 0.58,
+  fillOpacity: 0.32,
   outside: "#d5cfc3",
-  outsideOpacity: 0.4,
+  outsideOpacity: 0.22,
   outline: "#24352a",
   cutoff: "#c4a15a",
   cutoffHalo: "#24352a",
   cutoffWidth: 4,
   cutoffHaloWidth: 8,
+} as const;
+
+/** Legend sits in the gulf west of north Florida — not at Tampa’s latitude. */
+export const MAP_LEGEND = {
+  x: 56,
+  y: Math.round(MAP_FRAME.height * 0.26),
+  width: 228,
+  height: 92,
 } as const;
 
 export type MapLabelSide = "left" | "right" | "top" | "bottom";
