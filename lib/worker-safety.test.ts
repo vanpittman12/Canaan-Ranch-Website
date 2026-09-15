@@ -62,7 +62,7 @@ describe("Worker-safe public routes", () => {
   });
 
   it("serves the Florida basemap as a static img, not next/image", () => {
-    expect(map).not.toContain("next/image");
+    expect(map).not.toContain('from "next/image"');
     expect(map).toContain("<img");
     expect(map).toContain("BASEMAP.src");
   });

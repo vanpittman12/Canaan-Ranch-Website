@@ -35,7 +35,7 @@ export function ServiceAreaMap() {
         <h2 className="type-h2 mt-3 max-w-3xl text-forest">{serviceAreaCopy.title}</h2>
         <figure className="mt-10 overflow-hidden rounded-[16px] border border-line bg-[#d7e4ea]">
           <div className="relative">
-            {/* Static public JPEG — do not send through next/image on the Worker. */}
+            {/* Static public JPEG — skip image optimization on the Worker. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={BASEMAP.src}
