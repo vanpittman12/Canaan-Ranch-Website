@@ -21,9 +21,7 @@ export default async function AdminLoginPage() {
         <BrandMark className="h-14 w-auto" decorative={false} />
         <h1 className="type-h2 mt-5 text-forest">Canaan Preserve team</h1>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Review queue access. Local default password is documented in the README
-          (<code className="text-ink">canaan-admin</code>) unless{" "}
-          <code className="text-ink">ADMIN_PASSWORD</code> is set.
+          Review queue access. Sign in with the team password.
         </p>
         <LoginForm />
       </div>

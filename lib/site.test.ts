@@ -11,6 +11,8 @@ const notFound = readFileSync(path.join(process.cwd(), "app/not-found.tsx"), "ut
 const intakeForm = readFileSync(path.join(process.cwd(), "components/intake-form.tsx"), "utf8");
 const intakePage = readFileSync(path.join(process.cwd(), "app/intake/page.tsx"), "utf8");
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+const adminLogin = readFileSync(path.join(process.cwd(), "app/admin/login/page.tsx"), "utf8");
+const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
 
 describe("public site SEO and copy hygiene", () => {
   it("canonicalizes www to the apex host", () => {
@@ -43,13 +45,27 @@ describe("public site SEO and copy hygiene", () => {
   it("uses buyer-facing 404 and intake copy", () => {
     expect(notFound).not.toContain("engagement");
     expect(notFound).toContain("address");
-    expect(intakeForm).toContain("before generating");
+    expect(notFound).toContain("This page is not on Canaan Preserve.");
+    expect(notFound).toContain("Page not found");
+    expect(notFound).not.toContain("That page is not on the preserve.");
+    expect(intakeForm).toContain("Confirm these details.");
+    expect(intakeForm).not.toContain("before the populated agreement is generated");
+    expect(intakeForm).not.toContain("before generating");
     expect(intakeForm).not.toContain("before generate.");
+    expect(intakePage).toContain("{brand.intakeCta}");
+    expect(intakePage).not.toContain("Start relocation intake");
     expect(intakePage).toContain("We use these details to populate your relocation agreement");
     expect(intakePage).toContain('href="/privacy"');
     expect(landing).toContain("Canaan Preserve accepts, then sign");
     expect(landing).not.toContain("Canaan Preserve Accepts, then sign");
     expect(brand.heroSlogan).toContain("Long Term");
     expect(brand.flowInvite).toContain("Canaan Preserve accepts");
+    expect(adminLogin).toContain("Sign in with the team password.");
+    expect(adminLogin).not.toContain("canaan-admin");
+    expect(adminLogin).not.toContain("ADMIN_PASSWORD");
+    expect(adminLogin).not.toContain("README");
+    expect(css).toContain(".pill-row");
+    expect(css).toContain("flex-wrap");
+    expect(css).not.toMatch(/\.pill-row\s*\{[^}]*overflow-x:\s*auto/);
   });
 });

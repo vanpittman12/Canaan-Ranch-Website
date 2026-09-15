@@ -40,7 +40,7 @@ describe("intake display joins", () => {
         buyerState: "FL",
         buyerPostalCode: "",
       }),
-    ).toBe("FL");
+    ).toBe("");
     expect(
       buyerNoticeAddress({
         buyerStreet: "",
@@ -67,6 +67,12 @@ describe("intake display joins", () => {
       buyerStreet: "",
       buyerCity: "",
       buyerState: "",
+      buyerPostalCode: "",
+    }))).toBe("—");
+    expect(displayValue(buyerNoticeAddress({
+      buyerStreet: "",
+      buyerCity: "",
+      buyerState: "FL",
       buyerPostalCode: "",
     }))).toBe("—");
   });

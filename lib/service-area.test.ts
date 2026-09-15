@@ -61,6 +61,9 @@ describe("service area map", () => {
     expect(SOUTHERN_LIMIT_LINE.west[1]).toBe(SOUTHERN_LIMIT_LAT);
     expect(SOUTHERN_LIMIT_LINE.east[1]).toBe(SOUTHERN_LIMIT_LAT);
     expect(mapModule).toContain("legendAnchor");
+    expect(mapModule).toContain("serviceAreaCopy.attribution");
+    expect(mapModule).toContain("absolute right-2 bottom-2 z-10");
+    expect(serviceAreaCopy.attribution).toBe("© OpenStreetMap contributors");
     expect(mapModule).toContain("SOUTHERN_LIMIT_LINE");
     expect(mapModule).toContain("MAP_PLACES");
     expect(mapModule).toContain("serviceAreaOverlayPath");
