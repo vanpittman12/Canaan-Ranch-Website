@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { brand } from "./brand";
@@ -29,6 +29,8 @@ describe("public site SEO and copy hygiene", () => {
     expect(layout).toContain("openGraph");
     expect(layout).toContain("twitter");
     expect(layout).toContain("summary_large_image");
+    expect(existsSync(path.join(process.cwd(), "app/opengraph-image.tsx"))).toBe(false);
+    expect(layout).not.toContain("next/og");
     expect(robots).toContain("Sitemap: https://canaanpreserve.com/sitemap.xml");
     expect(robots).toContain("Disallow: /admin");
     expect(sitemap).toContain("https://canaanpreserve.com/");
