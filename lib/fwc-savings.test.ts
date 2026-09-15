@@ -39,7 +39,7 @@ describe("FWC mitigation savings", () => {
     expect(landing).toContain("<h1");
     expect(landing.indexOf("{brand.heroSlogan}")).toBeLessThan(landing.indexOf("facts.map"));
     expect(landing).not.toContain("fwcValueProp");
-    expect(landing).not.toContain("lowest mitigation");
+    expect(landing).not.toContain("ecologically pristine");
     expect(landing).not.toContain("saving our clients money");
     expect(savingsModule).not.toContain("lowest mitigation");
     expect(savingsModule).not.toContain("saving our clients money");
@@ -96,8 +96,9 @@ describe("FWC mitigation savings", () => {
       "Illustrative from FWC conservation contribution schedule (additional tortoise after first five / >10 burrows); exact level depends on classification.",
     );
     expect(fwcSavingsCopy.example).toBe(
-      "50 GT vs unprotected ≈ ~$356k FWC mitigation savings (50 × $7,126).",
+      "50 GT vs unprotected ≈ $356k FWC mitigation savings (50 × $7,126).",
     );
+    expect(fwcSavingsCopy.example).not.toContain("≈ ~");
     expect(fwcSavingsExample.tortoiseCount * fwcSavingsExample.savedPerGt).toBe(356_300);
     expect(formatFwcPerGt(7545)).toBe("$7,545");
     expect(formatSavedPerGt(7126)).toBe("~$7,126");

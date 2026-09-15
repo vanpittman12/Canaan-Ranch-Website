@@ -9,8 +9,8 @@ export function SiteHeader({
 }) {
   return (
     <header className="overflow-visible border-b border-line bg-paper">
-      <div className="mx-auto flex w-full min-w-0 max-w-6xl items-center justify-between gap-3 overflow-visible px-4 py-3 sm:px-6 xl:px-8">
-        <Link href="/" prefetch={false} className="flex min-w-0 items-center gap-3">
+      <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-wrap items-center justify-between gap-3 overflow-visible px-4 py-3 sm:px-6 xl:px-8">
+        <Link href="/" prefetch={false} className="flex shrink-0 items-center gap-3">
           <BrandLockup variant={variant} />
         </Link>
         <nav className="flex min-w-0 shrink-0 items-center gap-2 overflow-visible text-sm text-ink sm:gap-3 xl:gap-5">

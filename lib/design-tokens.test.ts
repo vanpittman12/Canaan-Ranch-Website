@@ -82,16 +82,29 @@ describe("site builder visual lock", () => {
     expect(markAsset).toContain(BRAND_MARK_FILE);
     expect(header).toContain("BrandLockup");
     expect(lockup).toContain("h-12 w-auto");
+    expect(lockup).not.toContain("truncate");
+    expect(lockup).toContain("whitespace-nowrap");
+    expect(lockup).toContain("text-[17px]");
+    expect(header).toContain("flex-wrap");
+    expect(header).toContain('className="flex shrink-0 items-center gap-3"');
     expect(brand.lockupLine).toBe("Recipient site");
-    expect(brand.habitatLine).toBe("The most ecologically pristine recipient site in Florida");
+    expect(brand.habitatLine).toBe(
+      "FWC Tier 1 lowest mitigation contribution and permanently protected conservation-easement habitat",
+    );
+    expect(brand.habitatLine.toLowerCase()).not.toContain("ecologically pristine");
   });
 
-  it("uses Van’s Florida hero line without a county", () => {
+  it("uses a substantiated Tier 1 / conservation-easement hero line without a county", () => {
     for (const surface of marketingSurfaces) {
       expect(surface.toLowerCase()).not.toContain("pasco");
     }
-    expect(brand.habitatLine).toBe("The most ecologically pristine recipient site in Florida");
-    expect(brand.habitatLine).toContain("Florida");
+    expect(brand.habitatLine).toBe(
+      "FWC Tier 1 lowest mitigation contribution and permanently protected conservation-easement habitat",
+    );
+    expect(brand.habitatLine).toContain("FWC Tier 1");
+    expect(brand.habitatLine).toContain("lowest mitigation");
+    expect(brand.habitatLine).toContain("permanently protected conservation-easement habitat");
+    expect(brand.habitatLine.toLowerCase()).not.toContain("ecologically pristine");
     expect(brand.habitatLine.toLowerCase()).not.toMatch(/\bcounty\b/);
     expect(landing).toContain("{brand.habitatLine}");
     expect(landing).toContain("{brand.heroSlogan}");
@@ -151,7 +164,8 @@ describe("site builder visual lock", () => {
     expect(brand.flowInvite).toContain("complete intake");
     expect(brand.flowInvite).toContain("signature-ready");
     expect(brand.flowInvite).toContain("DocuSign is the usual signing path");
-    expect(landing).not.toContain("lowest mitigation");
+    expect(landing).toContain("{brand.habitatLine}");
+    expect(landing).not.toContain("ecologically pristine");
     expect(landing).not.toContain("saving our clients money");
     expect(landing).not.toContain("signature ready");
     expect(brand.fwcStatus).toContain("Long-Term");

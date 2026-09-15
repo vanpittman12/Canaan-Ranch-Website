@@ -2,7 +2,17 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { brand } from "./brand";
-import { CANONICAL_HOST, SITE_ORIGIN, WWW_HOST, canonicalPath, wwwToApexUrl } from "./site";
+import {
+  CANONICAL_HOST,
+  HOME_DESCRIPTION,
+  PRIVACY_DESCRIPTION,
+  SITE_ORIGIN,
+  TERMS_DESCRIPTION,
+  WWW_HOST,
+  canonicalPath,
+  pageShareMetadata,
+  wwwToApexUrl,
+} from "./site";
 
 const layout = readFileSync(path.join(process.cwd(), "app/layout.tsx"), "utf8");
 const robots = readFileSync(path.join(process.cwd(), "public/robots.txt"), "utf8");
@@ -16,6 +26,8 @@ const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
 const nextConfig = readFileSync(path.join(process.cwd(), "next.config.ts"), "utf8");
 const proxy = readFileSync(path.join(process.cwd(), "proxy.ts"), "utf8");
 const footer = readFileSync(path.join(process.cwd(), "components/site-footer.tsx"), "utf8");
+const privacy = readFileSync(path.join(process.cwd(), "app/privacy/page.tsx"), "utf8");
+const terms = readFileSync(path.join(process.cwd(), "app/terms/page.tsx"), "utf8");
 
 describe("public site SEO and copy hygiene", () => {
   it("canonicalizes www to the apex host", () => {
@@ -49,6 +61,27 @@ describe("public site SEO and copy hygiene", () => {
       "/privacy-policy /privacy 308",
     );
     expect(sitemap).not.toContain("www.canaanpreserve.com");
+    expect(layout).toContain("HOME_DESCRIPTION");
+    expect(privacy).toContain("pageShareMetadata");
+    expect(privacy).toContain("PRIVACY_DESCRIPTION");
+    expect(terms).toContain("pageShareMetadata");
+    expect(terms).toContain("TERMS_DESCRIPTION");
+    expect(PRIVACY_DESCRIPTION).not.toBe(HOME_DESCRIPTION);
+    expect(TERMS_DESCRIPTION).not.toBe(HOME_DESCRIPTION);
+    expect(pageShareMetadata("/privacy", "Privacy", PRIVACY_DESCRIPTION).twitter?.description).toBe(
+      PRIVACY_DESCRIPTION,
+    );
+    expect(pageShareMetadata("/privacy", "Privacy", PRIVACY_DESCRIPTION).openGraph?.description).toBe(
+      PRIVACY_DESCRIPTION,
+    );
+    expect(pageShareMetadata("/terms", "Terms", TERMS_DESCRIPTION).twitter?.description).toBe(
+      TERMS_DESCRIPTION,
+    );
+    expect(pageShareMetadata("/terms", "Terms", TERMS_DESCRIPTION).openGraph?.description).toBe(
+      TERMS_DESCRIPTION,
+    );
+    expect(privacy).not.toContain(HOME_DESCRIPTION);
+    expect(terms).not.toContain(HOME_DESCRIPTION);
   });
 
   it("uses buyer-facing 404 and intake copy", () => {
@@ -94,5 +127,11 @@ describe("public site SEO and copy hygiene", () => {
     expect(intakeForm).toContain("pill-row-end");
     expect(intakeForm).toContain("INTAKE_STEPS.slice(0, 3)");
     expect(intakeForm).toContain("INTAKE_STEPS.slice(3)");
+    expect(intakeForm).toContain("advanceGate");
+    expect(intakeForm).toContain("tryGoTo");
+    expect(intakeForm).toContain("tryGoTo(REVIEW_STEP_ID)");
+    expect(intakeForm).toContain(
+      "Required fields must be complete before Continue or Review.",
+    );
   });
 });

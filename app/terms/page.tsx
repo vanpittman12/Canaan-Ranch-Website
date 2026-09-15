@@ -2,16 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/legal-page";
 import { brand } from "@/lib/brand";
-import { canonicalPath } from "@/lib/site";
+import { TERMS_DESCRIPTION, pageShareMetadata } from "@/lib/site";
 
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "Terms",
-  description:
-    "Use of the Canaan Preserve site and relocation agreement is subject to the agreement you download.",
-  alternates: { canonical: canonicalPath("/terms") },
-  openGraph: { url: canonicalPath("/terms") },
+  ...pageShareMetadata("/terms", "Terms", TERMS_DESCRIPTION),
 };
 
 export default function TermsPage() {

@@ -7,6 +7,7 @@ import {
   INTAKE_STEPS,
   REVIEW_STEP_ID,
   canSubmitIntake,
+  advanceGate,
   firstStepForErrors,
   formatGopherTortoiseCount,
   intakeValuesFromDefaults,
@@ -194,11 +195,21 @@ export function IntakeForm({
     setStep(target);
   }
 
+  function tryGoTo(target: IntakeWizardStep) {
+    const gate = advanceGate(step, target, values);
+    if (!gate.ok) {
+      setStepErrors(gate.errors);
+      setStep(gate.step);
+      return;
+    }
+    goTo(target);
+  }
+
   function goNext() {
     if (step === REVIEW_STEP_ID) {
       return;
     }
-    goTo(nextStep(step));
+    tryGoTo(nextStep(step));
   }
 
   return (
@@ -244,7 +255,7 @@ export function IntakeForm({
                         ? "border border-sage bg-cream text-forest"
                         : "border border-line bg-white text-muted"
                   }`}
-                  onClick={() => goTo(item.id)}
+                  onClick={() => tryGoTo(item.id)}
                 >
                   {index + 1} {item.label}
                 </button>
@@ -270,7 +281,7 @@ export function IntakeForm({
                         ? "border border-sage bg-cream text-forest"
                         : "border border-line bg-white text-muted"
                   }`}
-                  onClick={() => goTo(item.id)}
+                  onClick={() => tryGoTo(item.id)}
                 >
                   {stepIndex + 1} {item.label}
                 </button>
@@ -285,7 +296,7 @@ export function IntakeForm({
                   ? "bg-forest text-cream"
                   : "border border-line bg-white text-muted"
               }`}
-              onClick={() => goTo(REVIEW_STEP_ID)}
+              onClick={() => tryGoTo(REVIEW_STEP_ID)}
             >
               Review
             </button>
@@ -655,7 +666,7 @@ export function IntakeForm({
         </div>
         <ReviewGroup
           title="Notice"
-          onEdit={() => setStep("notice")}
+          onEdit={() => goTo("notice")}
           rows={[
             ["Buyer legal name", values.buyerLegalName],
             ["Attention", values.buyerAttention],
@@ -666,7 +677,7 @@ export function IntakeForm({
         />
         <ReviewGroup
           title="Capacity"
-          onEdit={() => setStep("capacity")}
+          onEdit={() => goTo("capacity")}
           rows={[
             ["Reserved capacity", formatGopherTortoiseCount(values.tortoiseCount)],
             ["Adult rate", `${formatUsd(rate)} per adult`],
@@ -679,7 +690,7 @@ export function IntakeForm({
         />
         <ReviewGroup
           title="Project"
-          onEdit={() => setStep("project")}
+          onEdit={() => goTo("project")}
           rows={[
             ["County of relocation", values.relocationCounty],
             [
@@ -693,7 +704,7 @@ export function IntakeForm({
         />
         <ReviewGroup
           title="Witness"
-          onEdit={() => setStep("witness")}
+          onEdit={() => goTo("witness")}
           rows={[
             [
               "Buyer witness",
@@ -710,7 +721,7 @@ export function IntakeForm({
         <p className="text-sm text-muted">
           {step === REVIEW_STEP_ID
             ? "Submitting drafts the Canaan Preserve / Canaan Ranch LLP relocation agreement. You will download the populated Word agreement next."
-            : "Continue through Notice, Capacity, Project, and Witness, then review."}
+            : "Continue through Notice, Capacity, Project, and Witness, then review. Required fields must be complete before Continue or Review."}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           {step !== "notice" ? (

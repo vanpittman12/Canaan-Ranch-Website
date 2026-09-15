@@ -52,6 +52,10 @@ describe("Worker-safe public routes", () => {
     }
     expect(privacy).toContain('title: "Privacy"');
     expect(terms).toContain('title: "Terms"');
+    expect(privacy).toContain("pageShareMetadata");
+    expect(privacy).toContain("PRIVACY_DESCRIPTION");
+    expect(terms).toContain("pageShareMetadata");
+    expect(terms).toContain("TERMS_DESCRIPTION");
     expect(existsSync(path.join(root, "app/privacy/page.tsx"))).toBe(true);
     expect(existsSync(path.join(root, "app/terms/page.tsx"))).toBe(true);
     expect(privacy).not.toContain("cookies(");
