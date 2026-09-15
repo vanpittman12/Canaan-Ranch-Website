@@ -4,6 +4,8 @@ import { LegalPage } from "@/components/legal-page";
 import { brand } from "@/lib/brand";
 import { canonicalPath } from "@/lib/site";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   title: "Terms",
   description:
@@ -28,7 +30,7 @@ export default function TermsPage() {
           blank agreement
         </a>{" "}
         before intake, or{" "}
-        <Link href="/intake" className="text-forest underline underline-offset-2">
+        <Link href="/intake" prefetch={false} className="text-forest underline underline-offset-2">
           start intake
         </Link>{" "}
         to generate a populated copy.

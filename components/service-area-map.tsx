@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {
   BASEMAP,
   MAP_FRAME,
@@ -36,12 +35,15 @@ export function ServiceAreaMap() {
         <h2 className="type-h2 mt-3 max-w-3xl text-forest">{serviceAreaCopy.title}</h2>
         <figure className="mt-10 overflow-hidden rounded-[16px] border border-line bg-[#d7e4ea]">
           <div className="relative">
-            <Image
+            {/* Static public JPEG — do not send through next/image on the Worker. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={BASEMAP.src}
               alt="OpenStreetMap geographic map of Florida"
               width={width}
               height={height}
               className="h-auto w-full"
+              decoding="async"
             />
             <svg
               viewBox={`0 0 ${width} ${height}`}

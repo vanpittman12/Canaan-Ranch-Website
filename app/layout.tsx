@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Source_Sans_3 } from "next/font/google";
 import { brand } from "@/lib/brand";
+import { BRAND_MARK_SRC } from "@/lib/brand-mark-asset";
 import { SITE_ORIGIN } from "@/lib/site";
 import "./globals.css";
 
@@ -36,6 +37,10 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: brand.name,
     description,
+  },
+  icons: {
+    icon: [{ url: BRAND_MARK_SRC, type: "image/svg+xml" }],
+    apple: BRAND_MARK_SRC,
   },
 };
 
