@@ -180,7 +180,9 @@ type AuthorizedAgentFields = Pick<
   "authorizedAgentName" | "authorizedAgentCompany"
 >;
 
-export function buyerNoticeAddress(intake: NoticeAddressFields) {
+export function buyerNoticeAddress(
+  intake: NoticeAddressFields | Record<string, string>,
+) {
   const region = joinPresent([intake.buyerState, intake.buyerPostalCode], " ");
   return joinPresent([intake.buyerStreet, intake.buyerCity, region]);
 }
@@ -200,7 +202,9 @@ export function formatBuyerNotice(intake: IntakeFields) {
 }
 
 /** Buyer authorized agent as it appears in Parties, Notices, and responsibilities. */
-export function formatAuthorizedAgent(intake: AuthorizedAgentFields) {
+export function formatAuthorizedAgent(
+  intake: AuthorizedAgentFields | Record<string, string>,
+) {
   return joinPresent([intake.authorizedAgentName, intake.authorizedAgentCompany]);
 }
 
