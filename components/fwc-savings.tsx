@@ -16,17 +16,23 @@ function SavingsCard({ row }: { row: FwcSavingsRow }) {
     <article
       className={
         featured
-          ? "rounded-[16px] border border-brass bg-cream px-4 py-5 shadow-[inset_4px_0_0_0_var(--brass)]"
+          ? "rounded-[16px] border border-brass bg-forest px-4 py-5 text-cream"
           : "rounded-[16px] border border-line bg-white px-4 py-4"
       }
     >
-      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-muted">
+      <p
+        className={
+          featured
+            ? "text-[12px] font-semibold uppercase tracking-[0.12em] text-brass"
+            : "text-[12px] font-semibold uppercase tracking-[0.12em] text-muted"
+        }
+      >
         {fwcSavingsColumnLabels.insteadOf}
       </p>
       <h3
         className={
           featured
-            ? "mt-1 font-serif text-2xl font-medium text-forest"
+            ? "mt-1 font-serif text-2xl font-medium text-cream"
             : "mt-1 font-medium text-ink"
         }
       >
@@ -34,15 +40,21 @@ function SavingsCard({ row }: { row: FwcSavingsRow }) {
       </h3>
       <dl className="mt-4 space-y-3">
         <div>
-          <dt className="text-sm leading-6 text-muted">{fwcSavingsColumnLabels.fwcPerGt}</dt>
-          <dd className="mt-0.5 tabular-nums text-ink">{formatFwcPerGt(row.fwcPerGt)}</dd>
+          <dt className={featured ? "text-sm leading-6 text-cream/70" : "text-sm leading-6 text-muted"}>
+            {fwcSavingsColumnLabels.fwcPerGt}
+          </dt>
+          <dd className={featured ? "mt-0.5 tabular-nums text-cream" : "mt-0.5 tabular-nums text-ink"}>
+            {formatFwcPerGt(row.fwcPerGt)}
+          </dd>
         </div>
         <div>
-          <dt className="text-sm leading-6 text-muted">{fwcSavingsColumnLabels.savedPerGt}</dt>
+          <dt className={featured ? "text-sm leading-6 text-cream/70" : "text-sm leading-6 text-muted"}>
+            {fwcSavingsColumnLabels.savedPerGt}
+          </dt>
           <dd
             className={
               featured
-                ? "mt-0.5 font-semibold tabular-nums text-2xl leading-7 text-forest"
+                ? "mt-0.5 font-semibold tabular-nums text-2xl leading-7 text-brass"
                 : "mt-0.5 font-semibold tabular-nums text-forest"
             }
           >
