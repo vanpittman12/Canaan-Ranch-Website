@@ -75,6 +75,37 @@ describe("intake display joins", () => {
       buyerState: "FL",
       buyerPostalCode: "",
     }))).toBe("—");
+    expect(
+      formatBuyerNotice({
+        ...completeNotice,
+        buyerStreet: "",
+        buyerCity: "",
+        buyerState: "FL",
+        buyerPostalCode: "",
+      }),
+    ).not.toMatch(/,\s*,/);
+    expect(
+      formatBuyerNotice({
+        ...completeNotice,
+        buyerStreet: "",
+        buyerCity: "",
+        buyerState: "FL",
+        buyerPostalCode: "",
+      }),
+    ).not.toContain(", , FL");
+    expect(
+      formatBuyerNotice({
+        ...completeNotice,
+        buyerLegalName: "",
+        buyerAttention: "",
+        buyerEmail: "",
+        buyerStreet: "",
+        buyerCity: "",
+        buyerState: "FL",
+        buyerPostalCode: "",
+        buyerPhone: "",
+      }),
+    ).toBe("");
   });
 
   it("omits empty authorized-agent parts instead of a lone comma", () => {

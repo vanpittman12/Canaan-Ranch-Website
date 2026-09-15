@@ -10,6 +10,9 @@ export async function proxy(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+  if (pathname === "/privacy-policy" || pathname === "/privacy-policy/") {
+    return NextResponse.redirect(new URL("/privacy", request.url), 301);
+  }
   if (!pathname.startsWith("/admin")) {
     return NextResponse.next();
   }

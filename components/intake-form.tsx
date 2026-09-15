@@ -226,42 +226,72 @@ export function IntakeForm({
         </div>
       ) : null}
 
-      <ol className="pill-row" aria-label="Intake progress">
-        {INTAKE_STEPS.map((item, index) => {
-          const active = step === item.id;
-          const complete = INTAKE_STEPS.findIndex((entry) => entry.id === step) > index || step === REVIEW_STEP_ID;
-          return (
-            <li key={item.id}>
-              <button
-                type="button"
-                className={`status-pill min-h-11 ${
-                  active
-                    ? "bg-forest text-cream"
-                    : complete
-                      ? "border border-sage bg-cream text-forest"
-                      : "border border-line bg-white text-muted"
-                }`}
-                onClick={() => goTo(item.id)}
-              >
-                {index + 1} {item.label}
-              </button>
-            </li>
-          );
-        })}
-        <li>
-          <button
-            type="button"
-            className={`status-pill min-h-11 ${
-              step === REVIEW_STEP_ID
-                ? "bg-forest text-cream"
-                : "border border-line bg-white text-muted"
-            }`}
-            onClick={() => goTo(REVIEW_STEP_ID)}
-          >
-            Review
-          </button>
-        </li>
-      </ol>
+      <div className="pill-stack" role="navigation" aria-label="Intake progress">
+        <ol className="pill-row">
+          {INTAKE_STEPS.slice(0, 3).map((item, index) => {
+            const active = step === item.id;
+            const complete =
+              INTAKE_STEPS.findIndex((entry) => entry.id === step) > index ||
+              step === REVIEW_STEP_ID;
+            return (
+              <li key={item.id} className="min-w-0">
+                <button
+                  type="button"
+                  className={`status-pill min-h-11 ${
+                    active
+                      ? "bg-forest text-cream"
+                      : complete
+                        ? "border border-sage bg-cream text-forest"
+                        : "border border-line bg-white text-muted"
+                  }`}
+                  onClick={() => goTo(item.id)}
+                >
+                  {index + 1} {item.label}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+        <ol className="pill-row pill-row-end">
+          {INTAKE_STEPS.slice(3).map((item, index) => {
+            const stepIndex = index + 3;
+            const active = step === item.id;
+            const complete =
+              INTAKE_STEPS.findIndex((entry) => entry.id === step) > stepIndex ||
+              step === REVIEW_STEP_ID;
+            return (
+              <li key={item.id} className="min-w-0">
+                <button
+                  type="button"
+                  className={`status-pill min-h-11 ${
+                    active
+                      ? "bg-forest text-cream"
+                      : complete
+                        ? "border border-sage bg-cream text-forest"
+                        : "border border-line bg-white text-muted"
+                  }`}
+                  onClick={() => goTo(item.id)}
+                >
+                  {stepIndex + 1} {item.label}
+                </button>
+              </li>
+            );
+          })}
+          <li className="min-w-0">
+            <button
+              type="button"
+              className={`status-pill min-h-11 ${
+                step === REVIEW_STEP_ID
+                  ? "bg-forest text-cream"
+                  : "border border-line bg-white text-muted"
+              }`}
+              onClick={() => goTo(REVIEW_STEP_ID)}
+            >
+              Review
+            </button>
+          </li>
+        </ol>
+      </div>
 
       <section hidden={step !== "notice"} className="space-y-4">
         <div>

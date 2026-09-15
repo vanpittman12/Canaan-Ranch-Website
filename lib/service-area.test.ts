@@ -7,6 +7,7 @@ import {
   BASEMAP,
   CANAAN_SITE,
   MAP_FRAME,
+  MAP_LEGEND,
   MAP_OVERLAY,
   NAUTICAL_MILES_SOUTH,
   REFERENCE_CITIES,
@@ -28,7 +29,31 @@ import {
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
 const mapModule = readFileSync(path.join(process.cwd(), "components/service-area-map.tsx"), "utf8");
 const mapLib = readFileSync(path.join(process.cwd(), "lib/service-area.ts"), "utf8");
+const mosaicScript = readFileSync(
+  path.join(process.cwd(), "scripts/build-florida-basemap.py"),
+  "utf8",
+);
 const basemap = readFileSync(path.join(process.cwd(), "public/maps/florida-basemap.jpg"));
+
+function jpegSize(bytes: Buffer) {
+  let index = 2;
+  while (index < bytes.length - 8) {
+    if (bytes[index] !== 0xff) {
+      index += 1;
+      continue;
+    }
+    const marker = bytes[index + 1];
+    if (marker === 0xc0 || marker === 0xc1 || marker === 0xc2) {
+      return { height: bytes.readUInt16BE(index + 5), width: bytes.readUInt16BE(index + 7) };
+    }
+    if (marker === 0xd8 || marker === 0xd9) {
+      index += 2;
+      continue;
+    }
+    index += 2 + bytes.readUInt16BE(index + 2);
+  }
+  throw new Error("JPEG SOF not found");
+}
 
 describe("service area map", () => {
   it("uses Van’s Alachua anchor and ~100 NM southern cutoff", () => {
@@ -62,7 +87,7 @@ describe("service area map", () => {
     expect(SOUTHERN_LIMIT_LINE.east[1]).toBe(SOUTHERN_LIMIT_LAT);
     expect(mapModule).toContain("legendAnchor");
     expect(mapModule).toContain("serviceAreaCopy.attribution");
-    expect(mapModule).toContain("absolute right-2 bottom-2 z-10");
+    expect(mapModule).toContain("absolute right-2 bottom-2 z-20");
     expect(serviceAreaCopy.attribution).toBe("© OpenStreetMap contributors");
     expect(mapModule).toContain("SOUTHERN_LIMIT_LINE");
     expect(mapModule).toContain("MAP_PLACES");
@@ -90,12 +115,35 @@ describe("service area map", () => {
     expect(mapModule).toContain("BASEMAP.src");
     expect(mapModule).not.toContain('from "next/image"');
     expect(mapModule).toContain("<img");
+    expect(mapModule).toContain("aspectRatio");
+    expect(mapModule).toContain("object-fill");
     expect(BASEMAP.provider).toBe("OpenStreetMap");
     expect(BASEMAP.src).toBe("/maps/florida-basemap.jpg");
+    expect(BASEMAP.zoom).toBe(8);
+    expect(BASEMAP.tileWest).toBe(65);
+    expect(BASEMAP.tileEast).toBe(72);
+    expect(BASEMAP.tileNorth).toBe(104);
+    expect(BASEMAP.tileSouth).toBe(111);
     expect(basemap.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff]))).toBe(true);
     expect(basemap.byteLength).toBeGreaterThan(80_000);
+    expect(jpegSize(basemap)).toEqual({ width: MAP_FRAME.width, height: MAP_FRAME.height });
+    expect(MAP_FRAME).toEqual({
+      west: -88.59375,
+      east: -78.75,
+      north: 31.952162238024954,
+      south: 23.241346102386128,
+      width: 1280,
+      height: 1280,
+    });
+    expect(basemap.byteLength).toBeLessThan(200_000);
+    expect(MAP_OVERLAY.fillOpacity).toBeLessThanOrEqual(0.36);
+    expect(serviceAreaCopy.caption).not.toContain("100 nautical");
+    expect(serviceAreaCopy.caption).not.toContain(" NM ");
     expect(mapLib).toContain("/maps/florida-basemap.jpg");
     expect(mapLib).toContain("OpenStreetMap");
+    expect(mosaicScript).toContain("tile.openstreetmap.org");
+    expect(mosaicScript).toContain("X0, X1 = 65, 72");
+    expect(mosaicScript).toContain("Y0, Y1 = 104, 111");
     expect(mapLib).not.toContain("floridaOutlinePath");
     expect(mapModule).not.toContain("floridaOutlinePath");
     expect(mapModule).not.toContain("maplibre");
@@ -155,8 +203,14 @@ describe("service area map", () => {
     const cutoffY = project(ALACHUA.lon, SOUTHERN_LIMIT_LAT).y;
     const canaanY = project(CANAAN_SITE.lon, CANAAN_SITE.lat).y;
     const tampaY = project(-82.46, 27.95).y;
+    const gainesville = project(-82.32, 29.65);
     expect(cutoffY - canaanY).toBeGreaterThan(120);
     expect(tampaY).toBeGreaterThan(cutoffY);
+    expect(gainesville.y).toBeGreaterThan(canaanY);
+    expect(gainesville.y).toBeLessThan(cutoffY);
+    expect(MAP_LEGEND.y + MAP_LEGEND.height).toBeLessThan(tampaY);
+    expect(mapModule).toContain("MAP_LEGEND");
+    expect(mapModule).toContain('r="12"');
     expect(MAP_OVERLAY.cutoffWidth).toBeGreaterThanOrEqual(3.5);
     expect(MAP_OVERLAY.cutoffHalo).toBe("#24352a");
     expect(mapModule).toContain("cutoffHaloWidth");

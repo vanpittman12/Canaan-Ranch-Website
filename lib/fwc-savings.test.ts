@@ -55,6 +55,11 @@ describe("FWC mitigation savings", () => {
     expect(landing).not.toContain("sm:grid-cols-4");
     expect(landing).toContain("min-w-0");
     expect(landing).toContain("break-words");
+    expect(landing).toContain("overflow-hidden");
+    expect(landing).toContain("overflow-x-hidden");
+    expect(mobileCards).toContain("overflow-hidden");
+    expect(mobileCards).toContain("break-words");
+    expect(savingsModule).toContain("overflow-x-hidden");
   });
 
   it("shows Van’s per-GT FWC schedule without public conservation", () => {

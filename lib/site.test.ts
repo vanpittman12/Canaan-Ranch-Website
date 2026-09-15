@@ -13,6 +13,9 @@ const intakePage = readFileSync(path.join(process.cwd(), "app/intake/page.tsx"),
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
 const adminLogin = readFileSync(path.join(process.cwd(), "app/admin/login/page.tsx"), "utf8");
 const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
+const nextConfig = readFileSync(path.join(process.cwd(), "next.config.ts"), "utf8");
+const proxy = readFileSync(path.join(process.cwd(), "proxy.ts"), "utf8");
+const footer = readFileSync(path.join(process.cwd(), "components/site-footer.tsx"), "utf8");
 
 describe("public site SEO and copy hygiene", () => {
   it("canonicalizes www to the apex host", () => {
@@ -60,8 +63,18 @@ describe("public site SEO and copy hygiene", () => {
     expect(intakeForm).not.toContain("before generate.");
     expect(intakePage).toContain("{brand.intakeCta}");
     expect(intakePage).not.toContain("Start relocation intake");
+    expect(intakePage).toContain("After submission, download");
+    expect(intakePage).not.toContain("After submit you download");
     expect(intakePage).toContain("We use these details to populate your relocation agreement");
     expect(intakePage).toContain('href="/privacy"');
+    expect(existsSync(path.join(process.cwd(), "app/privacy/page.tsx"))).toBe(true);
+    expect(existsSync(path.join(process.cwd(), "app/terms/page.tsx"))).toBe(true);
+    expect(footer).toContain('href="/privacy"');
+    expect(footer).toContain('href="/terms"');
+    expect(nextConfig).toContain("/privacy-policy");
+    expect(nextConfig).toContain('destination: "/privacy"');
+    expect(proxy).toContain('"/privacy-policy"');
+    expect(proxy).toContain("301");
     expect(landing).toContain("Canaan Preserve accepts, then sign");
     expect(landing).not.toContain("Canaan Preserve Accepts, then sign");
     expect(brand.heroSlogan).toContain("Long Term");
@@ -70,8 +83,16 @@ describe("public site SEO and copy hygiene", () => {
     expect(adminLogin).not.toContain("canaan-admin");
     expect(adminLogin).not.toContain("ADMIN_PASSWORD");
     expect(adminLogin).not.toContain("README");
+    expect(css).toContain(".pill-stack");
     expect(css).toContain(".pill-row");
+    expect(css).toContain(".pill-row-end");
+    expect(css).toContain("repeat(3, minmax(0, 1fr))");
+    expect(css).toContain("repeat(2, minmax(0, 1fr))");
     expect(css).toContain("flex-wrap");
     expect(css).not.toMatch(/\.pill-row\s*\{[^}]*overflow-x:\s*auto/);
+    expect(intakeForm).toContain('className="pill-stack"');
+    expect(intakeForm).toContain("pill-row-end");
+    expect(intakeForm).toContain("INTAKE_STEPS.slice(0, 3)");
+    expect(intakeForm).toContain("INTAKE_STEPS.slice(3)");
   });
 });

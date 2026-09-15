@@ -32,7 +32,7 @@ export default function IntakePage() {
           donor affiliation, and one Buyer witness. The Canaan Ranch LLP witness is seller-side
           and is not collected here. The Effective Date is the date the Buyer signs — not a field
           on this form. The Expiration Date is one year after the Buyer Date Signed / Effective
-          Date. After submit you download the populated Word agreement to review.
+          Date. After submission, download the populated Word agreement to review.
         </p>
         <div className="mt-4">
           <FwcBadge />

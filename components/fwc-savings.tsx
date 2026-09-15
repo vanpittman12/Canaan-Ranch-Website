@@ -10,7 +10,7 @@ import {
 
 export function FwcSavingsModule() {
   return (
-    <div id="fwc-savings">
+    <div id="fwc-savings" className="min-w-0 overflow-x-hidden">
       <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
         FWC mitigation contribution
       </p>
