@@ -238,8 +238,7 @@ export function ServiceAreaMap() {
             </p>
           </div>
           <figcaption className="border-t border-line bg-paper px-4 py-3 text-sm leading-6 text-muted sm:px-5">
-            <span className="block">{serviceAreaCopy.caption}</span>
-            <span className="mt-1 block text-xs">{serviceAreaCopy.attribution}</span>
+            {serviceAreaCopy.caption}
           </figcaption>
         </figure>
       </div>

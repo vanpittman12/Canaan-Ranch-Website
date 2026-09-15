@@ -162,7 +162,8 @@ export function joinPresent(
 ): string {
   return parts
     .map((part) => (part ?? "").replace(/\s+/g, " ").trim())
-    .filter(Boolean)
+    .map((part) => part.replace(/^(?:,\s*)+|(?:\s*,)+$/g, "").trim())
+    .filter((part) => Boolean(part.replace(/,/g, "").trim()))
     .join(separator);
 }
 
@@ -190,7 +191,11 @@ export function buyerNoticeAddress(
     return "";
   }
   const region = joinPresent([intake.buyerState, intake.buyerPostalCode], " ");
-  return joinPresent([street, city, region]);
+  if (city) {
+    return joinPresent([street, city, region]);
+  }
+  // No city: never leave a comma hanging before state/ZIP.
+  return joinPresent([street, region], " ");
 }
 
 /** Exact Buyer notice block used in Parties and Notices. */

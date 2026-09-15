@@ -106,6 +106,56 @@ describe("intake display joins", () => {
         buyerPhone: "",
       }),
     ).toBe("");
+    expect(
+      buyerNoticeAddress({
+        buyerStreet: "100 Main Street",
+        buyerCity: "",
+        buyerState: "FL",
+        buyerPostalCode: "32601",
+      }),
+    ).toBe("100 Main Street FL 32601");
+    expect(
+      buyerNoticeAddress({
+        buyerStreet: "100 Main Street",
+        buyerCity: "",
+        buyerState: "FL",
+        buyerPostalCode: "32601",
+      }),
+    ).not.toMatch(/,\s*FL\b/);
+    expect(
+      buyerNoticeAddress({
+        buyerStreet: "100 Main Street",
+        buyerCity: "",
+        buyerState: "FL",
+        buyerPostalCode: "",
+      }),
+    ).toBe("100 Main Street FL");
+    expect(
+      buyerNoticeAddress({
+        buyerStreet: "",
+        buyerCity: "Alachua",
+        buyerState: "FL",
+        buyerPostalCode: "32601",
+      }),
+    ).toBe("Alachua, FL 32601");
+    expect(
+      buyerNoticeAddress({
+        buyerStreet: "100 Main Street",
+        buyerCity: "Alachua",
+        buyerState: "FL",
+        buyerPostalCode: "",
+      }),
+    ).toBe("100 Main Street, Alachua, FL");
+    expect(
+      displayValue(
+        buyerNoticeAddress({
+          buyerStreet: "",
+          buyerCity: "",
+          buyerState: "FL",
+          buyerPostalCode: "",
+        }),
+      ),
+    ).toBe("—");
   });
 
   it("omits empty authorized-agent parts instead of a lone comma", () => {
@@ -141,12 +191,34 @@ describe("intake display joins", () => {
       "Riley Chen · riley@suncoast.example",
     );
     expect(formatBuyerWitness("", "")).toBe("");
+    expect(
+      formatBuyerNotice({
+        ...completeNotice,
+        buyerStreet: "100 Main Street",
+        buyerCity: "",
+        buyerPostalCode: "32601",
+      }),
+    ).toContain("100 Main Street FL 32601");
+    expect(
+      formatBuyerNotice({
+        ...completeNotice,
+        buyerStreet: "100 Main Street",
+        buyerCity: "",
+        buyerPostalCode: "32601",
+      }),
+    ).not.toMatch(/Street,\s*FL/);
   });
 
   it("never emits dangling commas from joinPresent", () => {
     expect(joinPresent(["", "", "FL"])).toBe("FL");
-    expect(joinPresent([",", "  ", ""])).toBe(",");
+    expect(joinPresent([",", "  ", ""])).toBe("");
     expect(joinPresent(["Tampa", "", "FL"])).toBe("Tampa, FL");
+    expect(joinPresent(["100 Main Street", "", "FL 32601"])).toBe(
+      "100 Main Street, FL 32601",
+    );
+    expect(joinPresent(["100 Main Street,", "", ", FL 32601"])).toBe(
+      "100 Main Street, FL 32601",
+    );
     expect(joinPresent(["", ""])).toBe("");
   });
 });

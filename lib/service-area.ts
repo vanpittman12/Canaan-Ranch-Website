@@ -8,7 +8,8 @@ export const SOUTHERN_LIMIT_LAT = 28.1;
 
 export const serviceAreaCopy = {
   heading: "Service area",
-  title: "North of about 100 nautical miles south of Alachua, including the panhandle.",
+  title:
+    "Florida north of a line about 100 nautical miles south of Alachua, including the Panhandle.",
   caption: "Shaded land is inside the service area. The dashed line marks the southern limit.",
   mapLabel: "Map of Florida showing the Canaan Preserve service area north of Alachua.",
   legendService: "Service area",
