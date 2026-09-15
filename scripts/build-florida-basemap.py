@@ -73,7 +73,9 @@ def main() -> int:
 
     out = Path(__file__).resolve().parents[1] / "public" / "maps" / "florida-basemap.jpg"
     out.parent.mkdir(parents=True, exist_ok=True)
-    mosaic.save(out, "JPEG", quality=86, optimize=True, progressive=True)
+    # Same Web Mercator window, downsampled so the Worker homepage stays light.
+    display = mosaic.resize((1280, 1280), Image.Resampling.LANCZOS)
+    display.save(out, "JPEG", quality=74, optimize=True, progressive=True)
 
     west = tile2lon(X0, Z)
     east = tile2lon(X1, Z)
@@ -85,8 +87,8 @@ def main() -> int:
     print(f"  east: {east},")
     print(f"  north: {north},")
     print(f"  south: {south},")
-    print(f"  width: {mosaic.size[0]},")
-    print(f"  height: {mosaic.size[1]},")
+    print(f"  width: {display.size[0]},")
+    print(f"  height: {display.size[1]},")
     print("}")
     return 0
 

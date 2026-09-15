@@ -20,8 +20,8 @@ export const serviceAreaCopy = {
 
 /**
  * Real geographic basemap: static OpenStreetMap Mapnik mosaic of Florida
- * (z=8 tiles 65–71 / 104–110, no API key). Pixel bounds match MAP_FRAME
- * exactly — integer tile edges, no baked markers.
+ * (z=8 tiles 65–71 / 104–110, no API key). Geographic bounds are those
+ * integer tile edges; the committed JPEG is 1280×1280 for a lighter Worker.
  */
 export const BASEMAP = {
   provider: "OpenStreetMap",
@@ -40,8 +40,8 @@ export const MAP_FRAME = {
   east: -78.75,
   north: 31.952162238024954,
   south: 23.241346102386128,
-  width: 1792,
-  height: 1792,
+  width: 1280,
+  height: 1280,
 } as const;
 
 /** West/east coast intersections of the 28.1°N cutoff with mainland Florida. */

@@ -237,11 +237,19 @@ body {
 }
 
 .pill-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   overflow: visible;
   padding-bottom: 4px;
+}
+
+.pill-row .status-pill {
+  width: 100%;
+  justify-content: center;
+  padding: 4px 6px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
 }
 
 .status-pill {
@@ -270,6 +278,18 @@ body {
 }
 
 @media (min-width: 768px) {
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .pill-row .status-pill {
+    width: auto;
+    padding: 4px 12px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+
   .status-pill {
     padding: 4px 12px;
     font-size: 12px;

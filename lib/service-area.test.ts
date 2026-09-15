@@ -132,10 +132,13 @@ describe("service area map", () => {
       east: -78.75,
       north: 31.952162238024954,
       south: 23.241346102386128,
-      width: 1792,
-      height: 1792,
+      width: 1280,
+      height: 1280,
     });
+    expect(basemap.byteLength).toBeLessThan(200_000);
     expect(MAP_OVERLAY.fillOpacity).toBeLessThanOrEqual(0.36);
+    expect(serviceAreaCopy.caption).not.toContain("100 nautical");
+    expect(serviceAreaCopy.caption).not.toContain(" NM ");
     expect(mapLib).toContain("/maps/florida-basemap.jpg");
     expect(mapLib).toContain("OpenStreetMap");
     expect(mosaicScript).toContain("tile.openstreetmap.org");
