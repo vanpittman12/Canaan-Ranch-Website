@@ -101,26 +101,26 @@ describe("FWC mitigation savings", () => {
     expect(landing).toContain("juvenile");
   });
 
-  it("renders one comparison table and restyles it as stacked cards below 768px", () => {
+  it("stacks comparison cards below 768px and keeps the table from md up", () => {
     const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
     expect(FWC_SAVINGS_HERO_INSTEAD_OF).toBe("Unprotected");
     expect(fwcSavingsRows[0].insteadOf).toBe(FWC_SAVINGS_HERO_INSTEAD_OF);
     expect(fwcSavingsRows[0].savedPerGt).toBe(7126);
     expect(isFwcSavingsHeroRow(fwcSavingsRows[0])).toBe(true);
     expect(fwcSavingsRows.slice(1).every((row) => !isFwcSavingsHeroRow(row))).toBe(true);
-    expect(savingsModule.match(/fwcSavingsRows\.map/g)).toHaveLength(1);
-    expect(savingsModule).toContain("fwc-savings-table");
-    expect(savingsModule).toContain("fwc-savings-row-hero");
+    expect(savingsModule).toContain("md:hidden");
+    expect(savingsModule).toContain("hidden md:block");
     expect(savingsModule).toContain("isFwcSavingsHeroRow");
-    expect(savingsModule).not.toContain("<SavingsCard");
-    expect(savingsModule).not.toContain("md:hidden");
-    expect(savingsModule).not.toContain("hidden md:block");
+    expect(savingsModule).toContain("<SavingsCard");
+    expect(savingsModule).toContain("bg-forest");
+    expect(savingsModule.match(/fwcSavingsRows\.map/g)).toHaveLength(2);
+    expect(savingsModule).not.toContain("fwc-savings-table");
+    expect(savingsModule).not.toContain("fwc-savings-row-hero");
     expect(savingsModule).not.toContain("overflow-x-auto");
     expect(savingsModule).not.toContain("min-w-[");
     expect(savingsModule).not.toContain("sticky");
-    expect(css).toContain(".fwc-savings-table");
-    expect(css).toContain(".fwc-savings-row-hero");
-    expect(css).toContain("@media (max-width: 767px)");
+    expect(css).not.toContain(".fwc-savings-table");
+    expect(css).not.toContain(".fwc-savings-row-hero");
   });
 
   it("does not use demo or go-live language on the savings surfaces", () => {
