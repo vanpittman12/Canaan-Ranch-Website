@@ -183,8 +183,14 @@ type AuthorizedAgentFields = Pick<
 export function buyerNoticeAddress(
   intake: NoticeAddressFields | Record<string, string>,
 ) {
+  const street = (intake.buyerStreet ?? "").trim();
+  const city = (intake.buyerCity ?? "").trim();
+  const zip = (intake.buyerPostalCode ?? "").trim();
+  if (!street && !city && !zip) {
+    return "";
+  }
   const region = joinPresent([intake.buyerState, intake.buyerPostalCode], " ");
-  return joinPresent([intake.buyerStreet, intake.buyerCity, region]);
+  return joinPresent([street, city, region]);
 }
 
 /** Exact Buyer notice block used in Parties and Notices. */

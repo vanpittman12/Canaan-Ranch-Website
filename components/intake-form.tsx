@@ -619,8 +619,8 @@ export function IntakeForm({
         <div>
           <h2 className="type-h2 text-forest">Review answers</h2>
           <p className="mt-2 text-sm text-muted">
-            Confirm these details before the populated agreement is generated. You can edit any section
-            and return here. Submit is available only from this review.
+            Confirm these details. You can edit any section and return here. Submit is available
+            only from this review.
           </p>
         </div>
         <ReviewGroup
@@ -680,7 +680,7 @@ export function IntakeForm({
         <p className="text-sm text-muted">
           {step === REVIEW_STEP_ID
             ? "Submitting drafts the Canaan Preserve / Canaan Ranch LLP relocation agreement. You will download the populated Word agreement next."
-            : "Continue through Notice, Capacity, Project, and Witness, then review before generating."}
+            : "Continue through Notice, Capacity, Project, and Witness, then review."}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           {step !== "notice" ? (

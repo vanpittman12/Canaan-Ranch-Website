@@ -238,15 +238,10 @@ body {
 
 .pill-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
+  overflow: visible;
   padding-bottom: 4px;
-  white-space: nowrap;
-  scrollbar-width: none;
-}
-
-.pill-row::-webkit-scrollbar {
-  display: none;
 }
 
 .status-pill {
@@ -254,10 +249,10 @@ body {
   align-items: center;
   min-height: 32px;
   border-radius: 999px;
-  padding: 4px 12px;
-  font-size: 12px;
+  padding: 4px 10px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   line-height: 16px;
   text-transform: uppercase;
   white-space: nowrap;
@@ -275,6 +270,12 @@ body {
 }
 
 @media (min-width: 768px) {
+  .status-pill {
+    padding: 4px 12px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+
   .intake-sticky {
     position: static;
     margin: 0;
