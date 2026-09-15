@@ -106,6 +106,10 @@ describe("site builder visual lock", () => {
     expect(landing).not.toContain("Start relocation intake for a clear recipient-site agreement.");
     expect(landing).toContain("{brand.intakeCta}");
     expect(header).toContain("{brand.intakeCta}");
+    expect(header).toContain("shrink-0 overflow-visible whitespace-nowrap");
+    expect(header).toContain("px-3.5");
+    expect(header).not.toContain("!px-3");
+    expect(header).toContain("xl:inline-flex");
     expect(footer).toContain("{brand.intakeCta}");
     expect(brand.intakeCta).toBe("Start intake");
     expect(landing).not.toContain("Start relocation intake");

@@ -8,12 +8,12 @@ export function SiteHeader({
   variant?: "public" | "admin";
 }) {
   return (
-    <header className="border-b border-line bg-paper">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-8">
+    <header className="overflow-visible border-b border-line bg-paper">
+      <div className="mx-auto flex w-full min-w-0 max-w-6xl items-center justify-between gap-3 overflow-visible px-4 py-3 sm:px-6 xl:px-8">
         <Link href="/" prefetch={false} className="flex min-w-0 items-center gap-3">
           <BrandLockup variant={variant} />
         </Link>
-        <nav className="flex shrink-0 items-center gap-3 text-sm text-ink sm:gap-5">
+        <nav className="flex min-w-0 shrink-0 items-center gap-2 overflow-visible text-sm text-ink sm:gap-3 xl:gap-5">
           {variant === "admin" ? (
             <Link href="/admin" className="inline-flex min-h-11 items-center hover:text-forest">
               Queue
@@ -29,7 +29,7 @@ export function SiteHeader({
               </Link>
               <a
                 href={brand.fwcRecipientSitesUrl}
-                className="hidden min-h-11 items-center hover:text-forest lg:inline-flex"
+                className="hidden min-h-11 items-center hover:text-forest xl:inline-flex"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -41,7 +41,11 @@ export function SiteHeader({
               >
                 Blank agreement
               </a>
-              <Link href="/intake" prefetch={false} className="btn-primary !px-3 text-sm sm:!px-4">
+              <Link
+                href="/intake"
+                prefetch={false}
+                className="btn-primary shrink-0 overflow-visible whitespace-nowrap px-3.5 text-sm sm:px-4"
+              >
                 {brand.intakeCta}
               </Link>
             </>

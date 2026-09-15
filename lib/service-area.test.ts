@@ -63,7 +63,7 @@ describe("service area map", () => {
     expect(latitudeToNmSouthOfAlachua(SOUTHERN_LIMIT_LAT)).toBeCloseTo(101.4, 0);
     expect(ALACHUA.lat - NAUTICAL_MILES_SOUTH / 60).toBeCloseTo(28.12, 1);
     expect(serviceAreaCopy.title).toBe(
-      "North of about 100 nautical miles south of Alachua, including the panhandle.",
+      "Florida north of a line about 100 nautical miles south of Alachua, including the Panhandle.",
     );
     expect(serviceAreaCopy.caption).toBe(
       "Shaded land is inside the service area. The dashed line marks the southern limit.",
@@ -87,7 +87,9 @@ describe("service area map", () => {
     expect(SOUTHERN_LIMIT_LINE.east[1]).toBe(SOUTHERN_LIMIT_LAT);
     expect(mapModule).toContain("legendAnchor");
     expect(mapModule).toContain("serviceAreaCopy.attribution");
+    expect(mapModule.match(/serviceAreaCopy\.attribution/g)).toHaveLength(1);
     expect(mapModule).toContain("absolute right-2 bottom-2 z-20");
+    expect(mapModule).not.toContain("mt-1 block text-xs");
     expect(serviceAreaCopy.attribution).toBe("© OpenStreetMap contributors");
     expect(mapModule).toContain("SOUTHERN_LIMIT_LINE");
     expect(mapModule).toContain("MAP_PLACES");
