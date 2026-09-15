@@ -12,7 +12,13 @@ import { describeDocuSignSeam } from "@/lib/docusign";
 import { formatGopherTortoiseCount } from "@/lib/intake-steps";
 import { addOneYear, dealEconomics, formatLongDate, formatUsd } from "@/lib/money";
 import { getEngagement } from "@/lib/store";
-import { buyerNoticeAddress, dealTitle } from "@/lib/types";
+import {
+  buyerNoticeAddress,
+  dealTitle,
+  displayValue,
+  formatAuthorizedAgent,
+  formatBuyerWitness,
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -77,7 +83,10 @@ export default async function AdminEngagementPage({
                 <Row label="Attention" value={engagement.intake.buyerAttention} />
                 <Row label="Email" value={engagement.intake.buyerEmail} />
                 <Row label="Phone" value={engagement.intake.buyerPhone} />
-                <Row label="Notice" value={buyerNoticeAddress(engagement.intake)} />
+                <Row
+                  label="Notice"
+                  value={displayValue(buyerNoticeAddress(engagement.intake))}
+                />
                 <Row
                   label="Reserved capacity"
                   value={formatGopherTortoiseCount(engagement.intake.tortoiseCount)}
@@ -87,7 +96,7 @@ export default async function AdminEngagementPage({
                 <Row label="County of relocation" value={engagement.intake.relocationCounty} />
                 <Row
                   label="Buyer’s authorized agent"
-                  value={`${engagement.intake.authorizedAgentName}, ${engagement.intake.authorizedAgentCompany}`}
+                  value={displayValue(formatAuthorizedAgent(engagement.intake))}
                 />
                 <Row
                   label="Donor company affiliation"
@@ -103,7 +112,12 @@ export default async function AdminEngagementPage({
                 />
                 <Row
                   label="Buyer witness"
-                  value={`${engagement.intake.buyerWitnessName} · ${engagement.intake.buyerWitnessEmail}`}
+                  value={displayValue(
+                    formatBuyerWitness(
+                      engagement.intake.buyerWitnessName,
+                      engagement.intake.buyerWitnessEmail,
+                    ),
+                  )}
                 />
                 <Row
                   label="Canaan witness (fixed)"

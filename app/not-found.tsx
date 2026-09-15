@@ -10,7 +10,7 @@ export default function NotFound() {
       <main className="mx-auto w-full max-w-3xl px-5 py-24 sm:px-8">
         <EmptyState
           title="That page is not on the preserve."
-          body="The engagement may have been mistyped, or the page does not exist."
+          body="That address may have been mistyped, or this page does not exist."
           action={
             <Link href="/" className="btn-primary">
               Return home

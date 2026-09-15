@@ -33,7 +33,7 @@ export function ServiceAreaMap() {
         <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
           {serviceAreaCopy.heading}
         </p>
-        <h2 className="type-h2 mt-3 max-w-3xl text-forest">{serviceAreaCopy.caption}</h2>
+        <h2 className="type-h2 mt-3 max-w-3xl text-forest">{serviceAreaCopy.title}</h2>
         <figure className="mt-10 overflow-hidden rounded-[16px] border border-line bg-[#d7e4ea]">
           <div className="relative">
             <Image
@@ -46,7 +46,7 @@ export function ServiceAreaMap() {
             <svg
               viewBox={`0 0 ${width} ${height}`}
               role="img"
-              aria-label={serviceAreaCopy.caption}
+              aria-label={serviceAreaCopy.mapLabel}
               className="absolute inset-0 h-full w-full"
             >
               <path

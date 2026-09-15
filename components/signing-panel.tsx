@@ -23,7 +23,7 @@ export function SigningPanel({
       <div>
         <h2 className="type-h2 text-forest">Choose how you will sign</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Download the populated Word agreement first. After Canaan Preserve Accepts, DocuSign
+          Download the populated Word agreement first. After Canaan Preserve accepts, DocuSign
           is the usual signing path. The fallback is to download the Word agreement and upload
           a signed copy. The Canaan Ranch LLP witness is already routed from brand config.
           Nothing is executed until the team Accepts and a signed artifact is on file.

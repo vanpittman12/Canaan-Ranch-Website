@@ -37,9 +37,26 @@ describe("service area map", () => {
     expect(SOUTHERN_LIMIT_LAT).toBe(28.1);
     expect(latitudeToNmSouthOfAlachua(SOUTHERN_LIMIT_LAT)).toBeCloseTo(101.4, 0);
     expect(ALACHUA.lat - NAUTICAL_MILES_SOUTH / 60).toBeCloseTo(28.12, 1);
-    expect(serviceAreaCopy.caption).toBe(
-      "Service area: north of ~100 NM south of Alachua (incl. panhandle).",
+    expect(serviceAreaCopy.title).toBe(
+      "North of about 100 nautical miles south of Alachua, including the panhandle.",
     );
+    expect(serviceAreaCopy.caption).toBe(
+      "Shaded land is inside the service area. The dashed line marks the southern limit.",
+    );
+    expect(serviceAreaCopy.mapLabel).toBe(
+      "Map of Florida showing the Canaan Preserve service area north of Alachua.",
+    );
+    expect(new Set([
+      serviceAreaCopy.heading,
+      serviceAreaCopy.title,
+      serviceAreaCopy.caption,
+      serviceAreaCopy.mapLabel,
+    ]).size).toBe(4);
+    expect(serviceAreaCopy.title).toContain("nautical miles");
+    expect(serviceAreaCopy.title).not.toContain(" NM ");
+    expect(mapModule).toContain("serviceAreaCopy.title");
+    expect(mapModule).toContain("serviceAreaCopy.mapLabel");
+    expect(mapModule).toContain("aria-label={serviceAreaCopy.mapLabel}");
     expect(SERVICE_AREA_FEATURE.properties.southernLimitLat).toBe(28.1);
     expect(SOUTHERN_LIMIT_LINE.west[1]).toBe(SOUTHERN_LIMIT_LAT);
     expect(SOUTHERN_LIMIT_LINE.east[1]).toBe(SOUTHERN_LIMIT_LAT);

@@ -16,7 +16,13 @@ import {
   validateThrough,
 } from "@/lib/intake-steps";
 import { estimatedPayment, formatUsd } from "@/lib/money";
-import type { IntakeFields } from "@/lib/types";
+import {
+  buyerNoticeAddress,
+  displayValue,
+  formatAuthorizedAgent,
+  formatBuyerWitness,
+  type IntakeFields,
+} from "@/lib/types";
 
 const initialState: ActionState = {};
 
@@ -625,10 +631,7 @@ export function IntakeForm({
             ["Attention", values.buyerAttention],
             ["Email", values.buyerEmail],
             ["Phone", values.buyerPhone],
-            [
-              "Notice address",
-              `${values.buyerStreet}, ${values.buyerCity}, ${values.buyerState} ${values.buyerPostalCode}`,
-            ],
+            ["Notice address", displayValue(buyerNoticeAddress(values))],
           ]}
         />
         <ReviewGroup
@@ -651,18 +654,23 @@ export function IntakeForm({
             ["County of relocation", values.relocationCounty],
             [
               "Authorized agent",
-              `${values.authorizedAgentName}, ${values.authorizedAgentCompany}`,
+              displayValue(formatAuthorizedAgent(values)),
             ],
-            ["Donor company affiliation", values.donorCompanyAffiliation],
-            ["Project name", values.donorSiteName || "—"],
-            ["Project description", values.donorSiteDescription || "—"],
+            ["Donor company affiliation", displayValue(values.donorCompanyAffiliation)],
+            ["Project name", displayValue(values.donorSiteName)],
+            ["Project description", displayValue(values.donorSiteDescription)],
           ]}
         />
         <ReviewGroup
           title="Witness"
           onEdit={() => setStep("witness")}
           rows={[
-            ["Buyer witness", `${values.buyerWitnessName} · ${values.buyerWitnessEmail}`],
+            [
+              "Buyer witness",
+              displayValue(
+                formatBuyerWitness(values.buyerWitnessName, values.buyerWitnessEmail),
+              ),
+            ],
             ["Canaan Ranch LLP witness", "Seller-side, already on file"],
           ]}
         />
@@ -672,7 +680,7 @@ export function IntakeForm({
         <p className="text-sm text-muted">
           {step === REVIEW_STEP_ID
             ? "Submitting drafts the Canaan Preserve / Canaan Ranch LLP relocation agreement. You will download the populated Word agreement next."
-            : "Continue through Notice, Capacity, Project, and Witness, then review before generate."}
+            : "Continue through Notice, Capacity, Project, and Witness, then review before generating."}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           {step !== "notice" ? (
@@ -724,7 +732,7 @@ function ReviewGroup({
         {rows.map(([label, value]) => (
           <div key={label} className="grid gap-1 sm:grid-cols-[10rem_1fr]">
             <dt className="type-label">{label}</dt>
-            <dd className="text-ink">{value}</dd>
+            <dd className="text-ink">{displayValue(value)}</dd>
           </div>
         ))}
       </dl>

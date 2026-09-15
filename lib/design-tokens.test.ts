@@ -104,6 +104,13 @@ describe("site builder visual lock", () => {
     expect(landing).toContain("ProgramOffer");
     expect(landing).toContain("ServiceAreaMap");
     expect(landing).not.toContain("Start relocation intake for a clear recipient-site agreement.");
+    expect(landing).toContain("{brand.intakeCta}");
+    expect(header).toContain("{brand.intakeCta}");
+    expect(footer).toContain("{brand.intakeCta}");
+    expect(brand.intakeCta).toBe("Start intake");
+    expect(landing).not.toContain("Start relocation intake");
+    expect(header).not.toContain("Start relocation intake");
+    expect(footer).not.toContain("Start relocation intake");
     expect(landing).not.toContain("is the contracting party. Intake produces");
     expect(landing).not.toContain("reservation letter");
     expect(landing).toContain("Word/DOCX");
@@ -154,6 +161,10 @@ describe("site builder visual lock", () => {
     expect(intakeForm).toContain("Buyer Date Signed / Effective Date.");
     expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
     expect(footer).toContain("{brand.footerLine}");
+    expect(footer).toContain("brandMailtoHref");
+    expect(footer).toContain("brandTelHref");
+    expect(footer).toContain('href="/privacy"');
+    expect(footer).toContain('href="/terms"');
     expect(footer).not.toContain("A Canaan Ranch LLP recipient site");
     expect(footer).not.toContain("Gopher tortoise relocation recipient site.");
     expect(footer).not.toContain("{brand.tagline}");

@@ -155,16 +155,55 @@ export function dealTitle(intake: IntakeFields) {
   return `Gopher tortoise relocation — ${intake.buyerLegalName}`;
 }
 
-export function buyerNoticeAddress(intake: IntakeFields) {
-  return `${intake.buyerStreet}, ${intake.buyerCity}, ${intake.buyerState} ${intake.buyerPostalCode}`;
+/** Join non-empty trimmed parts. Never emits dangling or doubled separators. */
+export function joinPresent(
+  parts: Array<string | null | undefined>,
+  separator = ", ",
+): string {
+  return parts
+    .map((part) => (part ?? "").replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .join(separator);
+}
+
+export function displayValue(value: string) {
+  return value.trim() || "—";
+}
+
+type NoticeAddressFields = Pick<
+  IntakeFields,
+  "buyerStreet" | "buyerCity" | "buyerState" | "buyerPostalCode"
+>;
+
+type AuthorizedAgentFields = Pick<
+  IntakeFields,
+  "authorizedAgentName" | "authorizedAgentCompany"
+>;
+
+export function buyerNoticeAddress(intake: NoticeAddressFields) {
+  const region = joinPresent([intake.buyerState, intake.buyerPostalCode], " ");
+  return joinPresent([intake.buyerStreet, intake.buyerCity, region]);
 }
 
 /** Exact Buyer notice block used in Parties and Notices. */
 export function formatBuyerNotice(intake: IntakeFields) {
-  return `${intake.buyerLegalName}, Attention: ${intake.buyerAttention}, ${buyerNoticeAddress(intake)}, Phone ${intake.buyerPhone}, Email ${intake.buyerEmail}`;
+  const attention = intake.buyerAttention.trim();
+  const phone = intake.buyerPhone.trim();
+  const email = intake.buyerEmail.trim();
+  return joinPresent([
+    intake.buyerLegalName,
+    attention ? `Attention: ${attention}` : "",
+    buyerNoticeAddress(intake),
+    phone ? `Phone ${phone}` : "",
+    email ? `Email ${email}` : "",
+  ]);
 }
 
 /** Buyer authorized agent as it appears in Parties, Notices, and responsibilities. */
-export function formatAuthorizedAgent(intake: IntakeFields) {
-  return `${intake.authorizedAgentName}, ${intake.authorizedAgentCompany}`;
+export function formatAuthorizedAgent(intake: AuthorizedAgentFields) {
+  return joinPresent([intake.authorizedAgentName, intake.authorizedAgentCompany]);
+}
+
+export function formatBuyerWitness(name: string, email: string) {
+  return joinPresent([name, email], " · ");
 }

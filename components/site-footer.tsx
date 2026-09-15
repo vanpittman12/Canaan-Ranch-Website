@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { brand, formatBrandAddress } from "@/lib/brand";
+import { brand, brandMailtoHref, brandTelHref, formatBrandAddress } from "@/lib/brand";
 import { BrandLockup } from "./brand-lockup";
 
 export function SiteFooter() {
@@ -11,12 +11,18 @@ export function SiteFooter() {
           <p className="mt-4 max-w-sm text-sm text-cream/80">{brand.footerLine}</p>
           <p className="mt-4 text-sm text-cream/70">{formatBrandAddress()}</p>
           <p className="text-sm text-cream/70">
-            {brand.email} · {brand.phone}
+            <a className="hover:text-cream" href={brandMailtoHref()}>
+              {brand.email}
+            </a>
+            {" · "}
+            <a className="hover:text-cream" href={brandTelHref()}>
+              {brand.phone}
+            </a>
           </p>
         </div>
         <div className="flex flex-col items-start gap-2 text-sm text-cream/70 sm:items-end">
           <Link href="/intake" className="inline-flex min-h-11 items-center hover:text-cream">
-            Start relocation intake
+            {brand.intakeCta}
           </Link>
           <a
             href={brand.fwcRecipientSitesUrl}
@@ -26,6 +32,12 @@ export function SiteFooter() {
           >
             {brand.fwcMitigationLinkLabel}
           </a>
+          <Link href="/privacy" className="inline-flex min-h-11 items-center hover:text-cream">
+            Privacy
+          </Link>
+          <Link href="/terms" className="inline-flex min-h-11 items-center hover:text-cream">
+            Terms
+          </Link>
           <Link href="/admin/login" className="inline-flex min-h-11 items-center hover:text-cream">
             Team sign in
           </Link>

@@ -10,7 +10,13 @@
  * (ports 25 / 465 / 587). The app already uses fetch for DocuSign.
  */
 import { brand } from "./brand";
-import type { Engagement, IntakeFields } from "./types";
+import {
+  buyerNoticeAddress,
+  displayValue,
+  formatAuthorizedAgent,
+  type Engagement,
+  type IntakeFields,
+} from "./types";
 
 export const NEW_ENGAGEMENT_NOTIFY_TO = "vpittman@beachparkcap.com";
 export const DEFAULT_GMAIL_USER = "vpittman@beachparkcap.com";
@@ -195,8 +201,8 @@ export function toNewEngagementNotice(engagement: EngagementLike): NewEngagement
 export function buildNewEngagementEmail(notice: NewEngagementNotice): NewEngagementEmail {
   const reviewUrl = adminReviewUrl(notice.id);
   const subject = `New Canaan Preserve intake — ${notice.reference}`;
-  const noticeAddress = `${notice.buyerStreet}, ${notice.buyerCity}, ${notice.buyerState} ${notice.buyerPostalCode}`;
-  const agent = `${notice.authorizedAgentName}, ${notice.authorizedAgentCompany}`;
+  const noticeAddress = displayValue(buyerNoticeAddress(notice));
+  const agent = displayValue(formatAuthorizedAgent(notice));
   const text = [
     "A public intake engagement was created.",
     "",
