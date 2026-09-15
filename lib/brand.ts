@@ -12,8 +12,10 @@ export const brand = {
   /** Full sentence under the locked slogan. Uses site-wide Long-Term casing. */
   heroLead:
     "Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get human review before anything closes.",
+  /** Primary buyer-facing intake CTA. Keep nav, hero, footer, and bottom CTA in sync. */
+  intakeCta: "Start intake",
   flowInvite:
-    "Review the template, complete intake, and download your signature-ready relocation agreement. After Canaan Preserve Accepts, DocuSign is the usual signing path.",
+    "Review the template, complete intake, and download your signature-ready relocation agreement. After Canaan Preserve accepts, DocuSign is the usual signing path.",
   footerLine:
     "Canaan Ranch LLP operates this FWC Approved Tier 1 Long-Term recipient site.",
   fwcBadge: "FWC Approved Tier 1",
@@ -51,6 +53,15 @@ export const TEMPLATE_AGREEMENT_PATH = "/api/agreement-template";
 export function formatBrandAddress() {
   const { street, city, state, postalCode } = brand.address;
   return `${street}, ${city}, ${state} ${postalCode}`;
+}
+
+export function brandMailtoHref() {
+  return `mailto:${brand.email}`;
+}
+
+export function brandTelHref() {
+  const digits = brand.phone.replace(/\D/g, "");
+  return digits.length === 10 ? `tel:+1${digits}` : `tel:${digits}`;
 }
 
 export function formatSellerNotice() {

@@ -41,7 +41,7 @@ export function SiteHeader({
                 Blank agreement
               </a>
               <Link href="/intake" className="btn-primary !px-3 text-sm sm:!px-4">
-                Start intake
+                {brand.intakeCta}
               </Link>
             </>
           )}

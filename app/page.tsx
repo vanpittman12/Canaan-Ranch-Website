@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { FwcBadge } from "@/components/fwc-badge";
 import { FwcSavingsModule } from "@/components/fwc-savings";
@@ -9,6 +10,12 @@ import { SiteHeader } from "@/components/site-header";
 import { TemplateDownloadButton } from "@/components/template-download";
 import { brand } from "@/lib/brand";
 import { formatUsd } from "@/lib/money";
+import { canonicalPath } from "@/lib/site";
+
+export const metadata: Metadata = {
+  alternates: { canonical: canonicalPath("/") },
+  openGraph: { url: canonicalPath("/") },
+};
 
 const steps = [
   {
@@ -28,7 +35,7 @@ const steps = [
   },
   {
     n: "04",
-    title: "Canaan Preserve Accepts, then sign",
+    title: "Canaan Preserve accepts, then sign",
     body: "Review happens first. After Accept, DocuSign is the usual signing path. The fallback is to download the Word agreement and upload a signed copy. Nothing is executed until Accept and a signed copy are on file.",
   },
 ];
@@ -66,7 +73,7 @@ export default function Home() {
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">
-                  Start relocation intake
+                  {brand.intakeCta}
                 </Link>
                 <TemplateDownloadButton variant="dark" />
                 <a href="#how-it-works" className="btn-secondary border-cream/35 bg-transparent text-cream">
@@ -146,7 +153,7 @@ export default function Home() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">
-                Start relocation intake
+                {brand.intakeCta}
               </Link>
               <TemplateDownloadButton variant="dark" />
             </div>

@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { ADMIN_COOKIE, verifyAdminSession } from "@/lib/auth";
+import { wwwToApexUrl } from "@/lib/site";
 
 export async function proxy(request: NextRequest) {
+  const apex = wwwToApexUrl(request.nextUrl);
+  if (apex) {
+    return NextResponse.redirect(apex, 308);
+  }
+
   const { pathname } = request.nextUrl;
   if (!pathname.startsWith("/admin")) {
     return NextResponse.next();
@@ -22,5 +28,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)",
+  ],
 };

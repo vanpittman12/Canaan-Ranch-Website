@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FwcBadge } from "@/components/fwc-badge";
 import { IntakeForm } from "@/components/intake-form";
 import { SiteFooter } from "@/components/site-footer";
@@ -7,9 +8,12 @@ import { TemplateDownloadButton } from "@/components/template-download";
 import { brand } from "@/lib/brand";
 import { INTAKE_MINUTES, PREPARE_ITEMS } from "@/lib/intake-steps";
 import { formatUsd } from "@/lib/money";
+import { canonicalPath } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Reserve capacity",
+  alternates: { canonical: canonicalPath("/intake") },
+  openGraph: { url: canonicalPath("/intake") },
 };
 
 export default function IntakePage() {
@@ -58,7 +62,15 @@ export default function IntakePage() {
           </ol>
         </aside>
 
-        <div className="surface-card mt-8 sm:p-8">
+        <p className="mt-8 text-sm text-muted">
+          We use these details to populate your relocation agreement and to contact you
+          about this reservation.{" "}
+          <Link href="/privacy" className="text-forest underline underline-offset-2">
+            Privacy
+          </Link>
+        </p>
+
+        <div className="surface-card mt-4 sm:p-8">
           <IntakeForm />
         </div>
       </main>
