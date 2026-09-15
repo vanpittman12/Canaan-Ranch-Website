@@ -39,6 +39,12 @@ describe("public site SEO and copy hygiene", () => {
     expect(sitemap).toContain("https://canaanpreserve.com/intake");
     expect(sitemap).toContain("https://canaanpreserve.com/privacy");
     expect(sitemap).toContain("https://canaanpreserve.com/terms");
+    expect(readFileSync(path.join(process.cwd(), "next.config.ts"), "utf8")).toContain(
+      'source: "/privacy-policy"',
+    );
+    expect(readFileSync(path.join(process.cwd(), "public/_redirects"), "utf8")).toContain(
+      "/privacy-policy /privacy 308",
+    );
     expect(sitemap).not.toContain("www.canaanpreserve.com");
   });
 

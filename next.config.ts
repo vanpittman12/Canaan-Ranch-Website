@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/privacy-policy",
+        destination: "/privacy",
+        permanent: true,
+      },
+      {
         source: "/",
         has: [{ type: "host", value: "www.canaanpreserve.com" }],
         destination: "https://canaanpreserve.com/",

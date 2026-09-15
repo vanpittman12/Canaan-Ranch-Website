@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -7,6 +8,10 @@ const read = (file: string) => readFileSync(path.join(root, file), "utf8");
 
 const proxy = read("proxy.ts");
 const nextConfig = read("next.config.ts");
+const openNextConfig = read("open-next.config.ts");
+const wrangler = read("wrangler.jsonc");
+const redirects = read("public/_redirects");
+const ensureLegal = read("scripts/ensure-legal-routes.mjs");
 const layout = read("app/layout.tsx");
 const landing = read("app/page.tsx");
 const intake = read("app/intake/page.tsx");
@@ -49,6 +54,39 @@ describe("Worker-safe public routes", () => {
     expect(terms).toContain('title: "Terms"');
     expect(existsSync(path.join(root, "app/privacy/page.tsx"))).toBe(true);
     expect(existsSync(path.join(root, "app/terms/page.tsx"))).toBe(true);
+    expect(privacy).not.toContain("cookies(");
+    expect(privacy).not.toContain("headers(");
+    expect(terms).not.toContain("cookies(");
+    expect(terms).not.toContain("headers(");
+    expect(read("components/legal-page.tsx")).not.toContain("cookies(");
+    expect(read("components/legal-page.tsx")).not.toContain("headers(");
+  });
+
+  it("ships privacy/terms through OpenNext assets instead of the dummy cache", () => {
+    expect(openNextConfig).toContain("static-assets-incremental-cache");
+    expect(openNextConfig).toContain("incrementalCache: staticAssetsIncrementalCache");
+    expect(wrangler).toContain('"html_handling": "auto-trailing-slash"');
+    expect(ensureLegal).toContain('LEGAL_ROUTES = ["privacy", "terms"]');
+    expect(ensureLegal).toContain("copyFileSync(htmlSrc, path.join(assetsDir, `${route}.html`))");
+    expect(nextConfig).toContain('source: "/privacy-policy"');
+    expect(nextConfig).toContain('destination: "/privacy"');
+    expect(redirects).toContain("/privacy-policy /privacy 308");
+  });
+
+  it("asserts privacy/terms HTML is in the OpenNext Worker assets after cf:build", () => {
+    if (!existsSync(path.join(root, ".open-next/assets"))) {
+      return;
+    }
+    execFileSync(process.execPath, [path.join(root, "scripts/ensure-legal-routes.mjs")], {
+      cwd: root,
+    });
+    const privacyHtml = read(".open-next/assets/privacy.html");
+    const termsHtml = read(".open-next/assets/terms.html");
+    expect(privacyHtml).toContain("<title>Privacy · Canaan Preserve</title>");
+    expect(privacyHtml).toContain("This page is a short summary, not a complete privacy policy.");
+    expect(termsHtml).toContain("<title>Terms · Canaan Preserve</title>");
+    expect(termsHtml).toContain("This page is a short summary, not a complete terms of use.");
+    expect(existsSync(path.join(root, ".open-next/assets/cdn-cgi/_next_cache"))).toBe(true);
   });
 
   it("disables Link prefetch on public chrome so ?_rsc= does not SSR companion routes", () => {

@@ -6,7 +6,9 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // privacy.html / terms.html → `/privacy` and `/terms` without a Worker hit.
+    "html_handling": "auto-trailing-slash"
   },
   "observability": {
     "enabled": true
