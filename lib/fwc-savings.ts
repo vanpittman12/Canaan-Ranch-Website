@@ -5,6 +5,14 @@ import { formatUsd } from "./money";
 export const CANAAN_FWC_LEVEL = "Long-Term Level 1";
 export const CANAAN_FWC_PER_ADDITIONAL_GT = 419;
 
+export const FWC_SAVINGS_HERO_INSTEAD_OF = "Unprotected";
+
+export const fwcSavingsColumnLabels = {
+  insteadOf: "Instead of",
+  fwcPerGt: "FWC per GT",
+  savedPerGt: "Saved per GT with Canaan",
+} as const;
+
 export const fwcSavingsRows = [
   { insteadOf: "Unprotected", fwcPerGt: 7545, savedPerGt: 7126 },
   { insteadOf: "Short-term Level 3", fwcPerGt: 4193, savedPerGt: 3774 },
@@ -12,6 +20,12 @@ export const fwcSavingsRows = [
   { insteadOf: "Short-term Level 1", fwcPerGt: 1257, savedPerGt: 838 },
   { insteadOf: "Long-Term Level 2", fwcPerGt: 838, savedPerGt: 419 },
 ] as const;
+
+export type FwcSavingsRow = (typeof fwcSavingsRows)[number];
+
+export function isFwcSavingsHeroRow(row: FwcSavingsRow) {
+  return row.insteadOf === FWC_SAVINGS_HERO_INSTEAD_OF;
+}
 
 export const fwcSavingsExample = {
   tortoiseCount: 50,

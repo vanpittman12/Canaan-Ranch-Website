@@ -5,11 +5,14 @@ import { brand } from "./brand";
 import {
   CANAAN_FWC_LEVEL,
   CANAAN_FWC_PER_ADDITIONAL_GT,
+  FWC_SAVINGS_HERO_INSTEAD_OF,
   formatFwcPerGt,
   formatSavedPerGt,
+  fwcSavingsColumnLabels,
   fwcSavingsCopy,
   fwcSavingsExample,
   fwcSavingsRows,
+  isFwcSavingsHeroRow,
 } from "./fwc-savings";
 
 const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
@@ -79,13 +82,33 @@ describe("FWC mitigation savings", () => {
     expect(fwcSavingsExample.tortoiseCount * fwcSavingsExample.savedPerGt).toBe(356_300);
     expect(formatFwcPerGt(7545)).toBe("$7,545");
     expect(formatSavedPerGt(7126)).toBe("~$7,126");
-    expect(savingsModule).toContain("Instead of");
-    expect(savingsModule).toContain("FWC per GT");
-    expect(savingsModule).toContain("Saved per GT with Canaan");
+    expect(fwcSavingsColumnLabels).toEqual({
+      insteadOf: "Instead of",
+      fwcPerGt: "FWC per GT",
+      savedPerGt: "Saved per GT with Canaan",
+    });
+    expect(savingsModule).toContain("fwcSavingsColumnLabels.insteadOf");
+    expect(savingsModule).toContain("fwcSavingsColumnLabels.fwcPerGt");
+    expect(savingsModule).toContain("fwcSavingsColumnLabels.savedPerGt");
     expect(savingsModule).toContain("fwcSavingsCopy.siteFeesSeparate");
     expect(savingsModule).toContain("{brand.fwcRecipientSitesUrl}");
     expect(landing).toContain("adult /");
     expect(landing).toContain("juvenile");
+  });
+
+  it("stacks comparison cards below 768px and keeps the table from md up", () => {
+    expect(FWC_SAVINGS_HERO_INSTEAD_OF).toBe("Unprotected");
+    expect(fwcSavingsRows[0].insteadOf).toBe(FWC_SAVINGS_HERO_INSTEAD_OF);
+    expect(fwcSavingsRows[0].savedPerGt).toBe(7126);
+    expect(isFwcSavingsHeroRow(fwcSavingsRows[0])).toBe(true);
+    expect(fwcSavingsRows.slice(1).every((row) => !isFwcSavingsHeroRow(row))).toBe(true);
+    expect(savingsModule).toContain("md:hidden");
+    expect(savingsModule).toContain("hidden md:block");
+    expect(savingsModule).toContain("isFwcSavingsHeroRow");
+    expect(savingsModule).toContain("<SavingsCard");
+    expect(savingsModule).not.toContain("overflow-x-auto");
+    expect(savingsModule).not.toContain("min-w-[");
+    expect(savingsModule).not.toContain("sticky");
   });
 
   it("does not use demo or go-live language on the savings surfaces", () => {
