@@ -45,7 +45,7 @@ export const fwcSavingsCopy = {
   footnote:
     "Illustrative from FWC conservation contribution schedule (additional tortoise after first five / >10 burrows); exact level depends on classification.",
   example:
-    "50 GT vs unprotected ≈ ~$356k FWC mitigation savings (50 × $7,126).",
+    "50 GT vs unprotected ≈ $356k FWC mitigation savings (50 × $7,126).",
 } as const;
 
 export function formatFwcPerGt(amount: number) {

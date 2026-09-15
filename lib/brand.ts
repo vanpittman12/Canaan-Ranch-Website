@@ -3,7 +3,8 @@ export const brand = {
   legalName: "Canaan Ranch LLP",
   tagline: "Canaan Ranch LLP operates this FWC Approved Tier 1 Long-Term recipient site.",
   lockupLine: "Recipient site",
-  habitatLine: "The most ecologically pristine recipient site in Florida",
+  habitatLine:
+    "FWC Tier 1 lowest mitigation contribution and permanently protected conservation-easement habitat",
   shortTagline: "Reserve recipient-site capacity with a clear agreement.",
   fwcStatus: "Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site.",
   /** Van’s exact hero slogan — do not polish. */

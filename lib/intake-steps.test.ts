@@ -5,6 +5,7 @@ import {
   PREPARE_ITEMS,
   REVIEW_STEP_ID,
   canSubmitIntake,
+  advanceGate,
   firstStepForErrors,
   formatGopherTortoiseCount,
   nextStep,
@@ -13,6 +14,18 @@ import {
   validateThrough,
 } from "./intake-steps";
 import { intakeSchema } from "./validation";
+
+const completeNotice = {
+  buyerLegalName: "Cypress Ridge Holdings LLC",
+  buyerAttention: "Avery Cole",
+  buyerEmail: "avery@cypressridge.example",
+  buyerStreet: "200 Bay Street",
+  buyerCity: "Tampa",
+  buyerState: "FL",
+  buyerPostalCode: "33602",
+  buyerPhone: "813-555-0144",
+  tortoiseCount: "1",
+};
 
 describe("intake wizard", () => {
   it("uses the four locked steps and requires review before submit", () => {
@@ -70,5 +83,38 @@ describe("intake wizard", () => {
     expect(validateThrough("review", { tortoiseCount: "2" }).donorSiteName).toBe(
       "This field is required.",
     );
+    expect(validateStepFields("notice", { ...completeNotice, buyerCity: "" }).buyerCity).toBe(
+      "City is required.",
+    );
+  });
+
+  it("gates Continue and Review on required fields, including City", () => {
+    const emptyCity = { ...completeNotice, buyerCity: "" };
+    const blockedContinue = advanceGate("notice", "capacity", emptyCity);
+    expect(blockedContinue.ok).toBe(false);
+    if (!blockedContinue.ok) {
+      expect(blockedContinue.errors.buyerCity).toBe("City is required.");
+      expect(blockedContinue.step).toBe("notice");
+    }
+
+    const blockedReview = advanceGate("notice", "review", emptyCity);
+    expect(blockedReview.ok).toBe(false);
+    if (!blockedReview.ok) {
+      expect(blockedReview.errors.buyerCity).toBe("City is required.");
+      expect(blockedReview.step).toBe("notice");
+    }
+
+    expect(advanceGate("notice", "capacity", completeNotice).ok).toBe(true);
+    expect(advanceGate("capacity", "notice", emptyCity).ok).toBe(true);
+
+    const skippedProject = advanceGate("notice", "review", {
+      ...completeNotice,
+      tortoiseCount: "2",
+    });
+    expect(skippedProject.ok).toBe(false);
+    if (!skippedProject.ok) {
+      expect(skippedProject.step).toBe("project");
+      expect(skippedProject.errors.donorSiteName).toBe("This field is required.");
+    }
   });
 });

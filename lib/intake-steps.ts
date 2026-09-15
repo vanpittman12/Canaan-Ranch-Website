@@ -131,6 +131,30 @@ export function validateThrough(
   return errors;
 }
 
+/**
+ * Gated wizard: Continue and step pills share one rule.
+ * Backward/same-step moves are free. Forward moves (including Review)
+ * must pass required fields through the last skipped step — City included.
+ */
+export function advanceGate(
+  from: IntakeWizardStep,
+  to: IntakeWizardStep,
+  values: Record<string, string>,
+):
+  | { ok: true }
+  | { ok: false; errors: Record<string, string>; step: IntakeWizardStep } {
+  if (stepIndex(to) <= stepIndex(from)) {
+    return { ok: true };
+  }
+  const through: IntakeWizardStep =
+    to === REVIEW_STEP_ID ? REVIEW_STEP_ID : previousStep(to);
+  const errors = validateThrough(through, values);
+  if (Object.keys(errors).length === 0) {
+    return { ok: true };
+  }
+  return { ok: false, errors, step: firstStepForErrors(errors) };
+}
+
 export function validateStepFields(
   stepId: IntakeStepId,
   values: Record<string, string>,
@@ -151,7 +175,7 @@ export function validateStepFields(
       continue;
     }
     if (!value) {
-      errors[field] = "This field is required.";
+      errors[field] = field === "buyerCity" ? "City is required." : "This field is required.";
       continue;
     }
     if (EMAIL_FIELDS.has(field) && !isEmailValue(value)) {

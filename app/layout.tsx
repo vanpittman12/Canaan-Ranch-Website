@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Source_Sans_3 } from "next/font/google";
 import { brand } from "@/lib/brand";
 import { BRAND_MARK_SRC } from "@/lib/brand-mark-asset";
-import { SITE_ORIGIN } from "@/lib/site";
+import { HOME_DESCRIPTION, SITE_ORIGIN } from "@/lib/site";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -16,8 +16,7 @@ const sourceSans = Source_Sans_3({
   subsets: ["latin"],
 });
 
-const description =
-  "Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site. Gopher tortoise intake, downloadable relocation agreement, signature, and internal review.";
+const description = HOME_DESCRIPTION;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),

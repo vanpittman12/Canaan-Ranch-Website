@@ -2,16 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/legal-page";
 import { brand } from "@/lib/brand";
-import { canonicalPath } from "@/lib/site";
+import { PRIVACY_DESCRIPTION, pageShareMetadata } from "@/lib/site";
 
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "Privacy",
-  description:
-    "How Canaan Preserve uses intake details to prepare a relocation agreement and contact you about that reservation.",
-  alternates: { canonical: canonicalPath("/privacy") },
-  openGraph: { url: canonicalPath("/privacy") },
+  ...pageShareMetadata("/privacy", "Privacy", PRIVACY_DESCRIPTION),
 };
 
 export default function PrivacyPage() {
