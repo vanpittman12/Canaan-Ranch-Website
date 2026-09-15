@@ -31,9 +31,8 @@ const markAsset = readFileSync(path.join(process.cwd(), "lib/brand-mark-asset.ts
 const lockup = readFileSync(path.join(process.cwd(), "components/brand-lockup.tsx"), "utf8");
 const header = readFileSync(path.join(process.cwd(), "components/site-header.tsx"), "utf8");
 const habitat = readFileSync(path.join(process.cwd(), "components/sandhill-habitat.tsx"), "utf8");
-const icon = readFileSync(path.join(process.cwd(), "app/icon.tsx"), "utf8");
-const appleIcon = readFileSync(path.join(process.cwd(), "app/apple-icon.tsx"), "utf8");
-const marketingSurfaces = [landing, habitat, mark, header, icon, brand.habitatLine];
+const layout = readFileSync(path.join(process.cwd(), "app/layout.tsx"), "utf8");
+const marketingSurfaces = [landing, habitat, mark, header, layout, brand.habitatLine];
 
 describe("site builder visual lock", () => {
   it("retunes CSS tokens to the locked palette", () => {
@@ -76,9 +75,10 @@ describe("site builder visual lock", () => {
     expect(mark).not.toContain("PINE_TRUNK_PATH");
     expect(mark).not.toContain("gopher-tortoise");
     expect(mark).not.toContain("TORTOISE_");
-    expect(icon).toContain("BRAND_MARK_DATA_URI");
-    expect(icon).not.toContain("TORTOISE");
-    expect(appleIcon).toContain("BRAND_MARK_DATA_URI");
+    expect(layout).toContain("BRAND_MARK_SRC");
+    expect(layout).toContain("image/svg+xml");
+    expect(layout).not.toContain("next/og");
+    expect(markAsset).not.toContain("BRAND_MARK_DATA_URI");
     expect(markAsset).toContain(BRAND_MARK_FILE);
     expect(header).toContain("BrandLockup");
     expect(lockup).toContain("h-12 w-auto");

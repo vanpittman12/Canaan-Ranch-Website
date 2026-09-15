@@ -21,7 +21,11 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="flex flex-col items-start gap-2 text-sm text-cream/70 sm:items-end">
-          <Link href="/intake" className="inline-flex min-h-11 items-center hover:text-cream">
+          <Link
+            href="/intake"
+            prefetch={false}
+            className="inline-flex min-h-11 items-center hover:text-cream"
+          >
             {brand.intakeCta}
           </Link>
           <a
@@ -32,13 +36,25 @@ export function SiteFooter() {
           >
             {brand.fwcMitigationLinkLabel}
           </a>
-          <Link href="/privacy" className="inline-flex min-h-11 items-center hover:text-cream">
+          <Link
+            href="/privacy"
+            prefetch={false}
+            className="inline-flex min-h-11 items-center hover:text-cream"
+          >
             Privacy
           </Link>
-          <Link href="/terms" className="inline-flex min-h-11 items-center hover:text-cream">
+          <Link
+            href="/terms"
+            prefetch={false}
+            className="inline-flex min-h-11 items-center hover:text-cream"
+          >
             Terms
           </Link>
-          <Link href="/admin/login" className="inline-flex min-h-11 items-center hover:text-cream">
+          <Link
+            href="/admin/login"
+            prefetch={false}
+            className="inline-flex min-h-11 items-center hover:text-cream"
+          >
             Team sign in
           </Link>
           <p className="pt-2 text-xs text-cream/50">

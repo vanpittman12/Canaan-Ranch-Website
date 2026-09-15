@@ -10,6 +10,8 @@ import { INTAKE_MINUTES, PREPARE_ITEMS } from "@/lib/intake-steps";
 import { formatUsd } from "@/lib/money";
 import { canonicalPath } from "@/lib/site";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   title: "Reserve capacity",
   alternates: { canonical: canonicalPath("/intake") },
@@ -65,7 +67,7 @@ export default function IntakePage() {
         <p className="mt-8 text-sm text-muted">
           We use these details to populate your relocation agreement and to contact you
           about this reservation.{" "}
-          <Link href="/privacy" className="text-forest underline underline-offset-2">
+          <Link href="/privacy" prefetch={false} className="text-forest underline underline-offset-2">
             Privacy
           </Link>
         </p>

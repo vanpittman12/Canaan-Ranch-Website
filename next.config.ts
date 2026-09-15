@@ -7,6 +7,23 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "12mb",
     },
   },
+  // Host-conditioned so apex `/` and `/intake` stay off the Worker proxy.
+  async redirects() {
+    return [
+      {
+        source: "/",
+        has: [{ type: "host", value: "www.canaanpreserve.com" }],
+        destination: "https://canaanpreserve.com/",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.canaanpreserve.com" }],
+        destination: "https://canaanpreserve.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

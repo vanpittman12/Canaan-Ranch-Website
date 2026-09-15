@@ -17,7 +17,7 @@ export default function NotFound() {
           title="This page is not on Canaan Preserve."
           body="That address is not a page on this site. Check the link, or return home to reserve capacity."
           action={
-            <Link href="/" className="btn-primary">
+            <Link href="/" prefetch={false} className="btn-primary">
               Return home
             </Link>
           }

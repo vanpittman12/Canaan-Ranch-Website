@@ -10,7 +10,7 @@ export function SiteHeader({
   return (
     <header className="border-b border-line bg-paper">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-8">
-        <Link href="/" className="flex min-w-0 items-center gap-3">
+        <Link href="/" prefetch={false} className="flex min-w-0 items-center gap-3">
           <BrandLockup variant={variant} />
         </Link>
         <nav className="flex shrink-0 items-center gap-3 text-sm text-ink sm:gap-5">
@@ -22,6 +22,7 @@ export function SiteHeader({
             <>
               <Link
                 href="/#how-it-works"
+                prefetch={false}
                 className="hidden min-h-11 items-center hover:text-forest md:inline-flex"
               >
                 How it works
@@ -40,7 +41,7 @@ export function SiteHeader({
               >
                 Blank agreement
               </a>
-              <Link href="/intake" className="btn-primary !px-3 text-sm sm:!px-4">
+              <Link href="/intake" prefetch={false} className="btn-primary !px-3 text-sm sm:!px-4">
                 {brand.intakeCta}
               </Link>
             </>

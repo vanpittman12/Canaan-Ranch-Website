@@ -88,7 +88,8 @@ describe("service area map", () => {
     expect(landing.indexOf("<ServiceAreaMap")).toBeLessThan(landing.indexOf('id="how-it-works"'));
     expect(mapModule).toContain('id="service-area"');
     expect(mapModule).toContain("BASEMAP.src");
-    expect(mapModule).toContain("next/image");
+    expect(mapModule).not.toContain('from "next/image"');
+    expect(mapModule).toContain("<img");
     expect(BASEMAP.provider).toBe("OpenStreetMap");
     expect(BASEMAP.src).toBe("/maps/florida-basemap.jpg");
     expect(basemap.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff]))).toBe(true);

@@ -12,6 +12,8 @@ import { brand } from "@/lib/brand";
 import { formatUsd } from "@/lib/money";
 import { canonicalPath } from "@/lib/site";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   alternates: { canonical: canonicalPath("/") },
   openGraph: { url: canonicalPath("/") },
@@ -72,7 +74,11 @@ export default function Home() {
                 {brand.heroLead}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">
+                <Link
+                  href="/intake"
+                  prefetch={false}
+                  className="btn-primary bg-cream text-forest hover:bg-white"
+                >
                   {brand.intakeCta}
                 </Link>
                 <TemplateDownloadButton variant="dark" />
@@ -154,7 +160,11 @@ export default function Home() {
               juvenile
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/intake" className="btn-primary bg-cream text-forest hover:bg-white">
+              <Link
+                href="/intake"
+                prefetch={false}
+                className="btn-primary bg-cream text-forest hover:bg-white"
+              >
                 {brand.intakeCta}
               </Link>
               <TemplateDownloadButton variant="dark" />

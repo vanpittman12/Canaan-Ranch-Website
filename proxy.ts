@@ -27,8 +27,11 @@ export async function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
+/**
+ * Keep this matcher admin-only. A site-wide matcher forces `/` and `/intake`
+ * through the Worker on every request (including `?_rsc=` prefetches) and
+ * was part of the post-PR#27 exceededCpu hang pattern.
+ */
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)",
-  ],
+  matcher: ["/admin", "/admin/:path*"],
 };
