@@ -77,9 +77,16 @@ describe("public site SEO and copy hygiene", () => {
     expect(adminLogin).not.toContain("canaan-admin");
     expect(adminLogin).not.toContain("ADMIN_PASSWORD");
     expect(adminLogin).not.toContain("README");
+    expect(css).toContain(".pill-stack");
     expect(css).toContain(".pill-row");
+    expect(css).toContain(".pill-row-end");
     expect(css).toContain("repeat(3, minmax(0, 1fr))");
+    expect(css).toContain("repeat(2, minmax(0, 1fr))");
     expect(css).toContain("flex-wrap");
     expect(css).not.toMatch(/\.pill-row\s*\{[^}]*overflow-x:\s*auto/);
+    expect(intakeForm).toContain('className="pill-stack"');
+    expect(intakeForm).toContain("pill-row-end");
+    expect(intakeForm).toContain("INTAKE_STEPS.slice(0, 3)");
+    expect(intakeForm).toContain("INTAKE_STEPS.slice(3)");
   });
 });

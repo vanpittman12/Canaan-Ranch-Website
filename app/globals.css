@@ -236,20 +236,33 @@ body {
   padding: 24px;
 }
 
+.pill-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
 .pill-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  min-width: 0;
   overflow: visible;
-  padding-bottom: 4px;
+}
+
+.pill-row-end {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .pill-row .status-pill {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   justify-content: center;
   padding: 4px 6px;
   font-size: 10px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 .status-pill {
