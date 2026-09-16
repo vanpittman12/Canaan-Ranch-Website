@@ -4,9 +4,12 @@ import { BrandMark } from "./brand-mark";
 export function BrandLockup({
   variant = "public",
   light = false,
+  compact = false,
 }: {
   variant?: "public" | "admin";
   light?: boolean;
+  /** Header lockup: keep 17px wordmark and hide the subtitle until 2xl. */
+  compact?: boolean;
 }) {
   const subtitle = variant === "admin" ? "Internal review" : brand.lockupLine;
 
@@ -15,12 +18,12 @@ export function BrandLockup({
       <BrandMark className="h-12 w-auto shrink-0" plate={light} />
       <span className="leading-tight">
         <span
-          className={`block whitespace-nowrap font-serif text-[17px] tracking-tight sm:text-xl ${light ? "text-cream" : "text-forest"}`}
+          className={`block whitespace-nowrap font-serif text-[17px] tracking-tight ${compact ? "2xl:text-xl" : "sm:text-xl"} ${light ? "text-cream" : "text-forest"}`}
         >
           {brand.name}
         </span>
         <span
-          className={`block whitespace-nowrap text-[12px] font-semibold uppercase tracking-[0.12em] ${light ? "text-cream/70" : "text-muted"}`}
+          className={`${compact ? "hidden 2xl:block" : "block"} whitespace-nowrap text-[12px] font-semibold uppercase tracking-[0.12em] ${light ? "text-cream/70" : "text-muted"}`}
         >
           {subtitle}
         </span>

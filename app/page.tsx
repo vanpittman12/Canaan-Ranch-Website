@@ -139,7 +139,7 @@ export default function Home() {
               <FwcBadge />
             </div>
             <a
-              className="btn-secondary shrink-0"
+              className="btn-secondary max-w-full whitespace-normal text-center xl:whitespace-nowrap"
               href={brand.fwcRecipientSitesUrl}
               target="_blank"
               rel="noreferrer"
