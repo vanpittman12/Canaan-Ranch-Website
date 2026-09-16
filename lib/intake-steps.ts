@@ -136,6 +136,8 @@ export function validateThrough(
  * Browse is free: Continue and step pills share one rule — always allow.
  * Submit on Review still uses validateThrough (plus server zod) and jumps
  * to the first step with errors. HTML required attributes stay for submit.
+ * Continue must stay type="button"; swapping it for type="submit" under the
+ * same click lets Witness Continue finish as a Review submit.
  */
 export function advanceGate(
   _from: IntakeWizardStep,
@@ -145,6 +147,33 @@ export function advanceGate(
   | { ok: true }
   | { ok: false; errors: Record<string, string>; step: IntakeWizardStep } {
   return { ok: true };
+}
+
+export function continueControlLabel(step: IntakeWizardStep) {
+  return nextStep(step) === REVIEW_STEP_ID ? "Review" : "Continue";
+}
+
+export type IntakeFormSubmitIntent =
+  | { kind: "advance"; next: IntakeWizardStep }
+  | { kind: "reject"; errors: Record<string, string>; step: IntakeWizardStep }
+  | { kind: "submit" };
+
+/**
+ * Continue / Enter on a step only advances. Required-field checks run when
+ * Review actually submits, not when landing on Review.
+ */
+export function intakeFormSubmitIntent(
+  step: IntakeWizardStep,
+  values: Record<string, string>,
+): IntakeFormSubmitIntent {
+  if (!canSubmitIntake(step)) {
+    return { kind: "advance", next: nextStep(step) };
+  }
+  const errors = validateThrough(REVIEW_STEP_ID, values);
+  if (Object.keys(errors).length > 0) {
+    return { kind: "reject", errors, step: firstStepForErrors(errors) };
+  }
+  return { kind: "submit" };
 }
 
 export function validateStepFields(

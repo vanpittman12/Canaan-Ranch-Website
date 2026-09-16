@@ -6,8 +6,11 @@ import {
   REVIEW_STEP_ID,
   canSubmitIntake,
   advanceGate,
+  continueControlLabel,
   firstStepForErrors,
   formatGopherTortoiseCount,
+  intakeFormSubmitIntent,
+  intakeValuesFromDefaults,
   nextStep,
   previousStep,
   validateStepFields,
@@ -115,5 +118,24 @@ describe("intake wizard", () => {
     expect(submitErrors.buyerCity).toBe("City is required.");
     expect(submitErrors.donorSiteName).toBe("This field is required.");
     expect(firstStepForErrors(submitErrors)).toBe("notice");
+  });
+
+  it("reaches Review from empty Witness without field errors; Review submit still jumps to Notice", () => {
+    const empty = intakeValuesFromDefaults();
+    expect(continueControlLabel("project")).toBe("Continue");
+    expect(continueControlLabel("witness")).toBe("Review");
+    expect(nextStep("witness")).toBe(REVIEW_STEP_ID);
+    expect(advanceGate("witness", nextStep("witness"), empty)).toEqual({ ok: true });
+
+    const fromWitness = intakeFormSubmitIntent("witness", empty);
+    expect(fromWitness).toEqual({ kind: "advance", next: REVIEW_STEP_ID });
+    expect("errors" in fromWitness).toBe(false);
+
+    const fromReview = intakeFormSubmitIntent("review", empty);
+    expect(fromReview.kind).toBe("reject");
+    if (fromReview.kind === "reject") {
+      expect(fromReview.errors.buyerLegalName).toBe("This field is required.");
+      expect(fromReview.step).toBe("notice");
+    }
   });
 });

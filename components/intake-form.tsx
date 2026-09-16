@@ -1,20 +1,20 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { createEngagement, updateIntake, type ActionState } from "@/app/actions/engagements";
 import { brand } from "@/lib/brand";
 import {
   INTAKE_STEPS,
   REVIEW_STEP_ID,
-  canSubmitIntake,
   advanceGate,
+  continueControlLabel,
   firstStepForErrors,
   formatGopherTortoiseCount,
+  intakeFormSubmitIntent,
   intakeValuesFromDefaults,
   nextStep,
   previousStep,
   type IntakeWizardStep,
-  validateThrough,
 } from "@/lib/intake-steps";
 import { estimatedPayment, formatUsd } from "@/lib/money";
 import {
@@ -165,6 +165,7 @@ export function IntakeForm({
   const [step, setStep] = useState<IntakeWizardStep>(defaults ? REVIEW_STEP_ID : "notice");
   const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
   const [appliedErrorKey, setAppliedErrorKey] = useState("");
+  const [submitArmed, setSubmitArmed] = useState(() => Boolean(defaults));
   const errors = { ...stepErrors, ...(state.fieldErrors ?? {}) };
   const errorKey = state.fieldErrors ? JSON.stringify(state.fieldErrors) : "";
   if (errorKey && errorKey !== appliedErrorKey) {
@@ -212,21 +213,35 @@ export function IntakeForm({
     tryGoTo(nextStep(step));
   }
 
+  useEffect(() => {
+    if (step !== REVIEW_STEP_ID) {
+      setSubmitArmed(false);
+      return;
+    }
+    const frame = requestAnimationFrame(() => setSubmitArmed(true));
+    return () => cancelAnimationFrame(frame);
+  }, [step]);
+  const submitReady = step === REVIEW_STEP_ID && submitArmed;
+
   return (
     <form
-      action={formAction}
+      action={submitReady ? formAction : undefined}
       noValidate
       onSubmit={(event) => {
-        if (!canSubmitIntake(step)) {
+        const intent = intakeFormSubmitIntent(step, values);
+        if (intent.kind === "advance") {
           event.preventDefault();
           goNext();
           return;
         }
-        const gate = validateThrough(REVIEW_STEP_ID, values);
-        if (Object.keys(gate).length > 0) {
+        if (!submitReady) {
           event.preventDefault();
-          setStepErrors(gate);
-          setStep(firstStepForErrors(gate));
+          return;
+        }
+        if (intent.kind === "reject") {
+          event.preventDefault();
+          setStepErrors(intent.errors);
+          setStep(intent.step);
         }
       }}
       className="space-y-8"
@@ -752,19 +767,32 @@ export function IntakeForm({
               Back
             </button>
           ) : null}
-          {step === REVIEW_STEP_ID ? (
-            <button className="btn-primary" type="submit" disabled={pending}>
-              {pending
-                ? "Saving…"
-                : engagementId
-                  ? "Update agreement details"
-                  : "Generate populated agreement"}
-            </button>
-          ) : (
-            <button className="btn-primary" type="button" onClick={goNext}>
-              Continue
-            </button>
-          )}
+          {/* Continue stays type="button". Submit mounts hidden/disabled until the
+              next frame on Review so the Witness click cannot finish as submit. */}
+          <button
+            key="intake-continue"
+            className={`btn-primary ${submitReady ? "!hidden" : ""}`}
+            type="button"
+            data-intake-continue="true"
+            tabIndex={submitReady ? -1 : undefined}
+            onClick={goNext}
+          >
+            {continueControlLabel(step)}
+          </button>
+          <button
+            key="intake-submit"
+            className={`btn-primary ${submitReady ? "" : "!hidden"}`}
+            type="submit"
+            data-intake-submit="true"
+            tabIndex={submitReady ? undefined : -1}
+            disabled={!submitReady || pending}
+          >
+            {pending
+              ? "Saving…"
+              : engagementId
+                ? "Update agreement details"
+                : "Generate populated agreement"}
+          </button>
         </div>
       </div>
     </form>
