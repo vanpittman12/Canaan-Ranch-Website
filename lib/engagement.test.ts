@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   applyDocuSignCompleted,
   applyDocuSignSent,
@@ -93,6 +93,15 @@ function artifact() {
 }
 
 describe("engagement status machine", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-01T18:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("keeps drafts editable and submittable", () => {
     expect(canSubmitForReview("draft")).toBe(true);
     expect(canSubmitForReview("pending_review")).toBe(false);
@@ -103,6 +112,7 @@ describe("engagement status machine", () => {
     expect(next.status).toBe("pending_review");
     expect(next.signingMethod).toBe("manual");
     expect(next.submittedAt).toBeTruthy();
+    expect(next.effectiveDate).toBe("2026-04-01");
     expect(next.acceptedAt).toBeNull();
     expect(canReview(next.status)).toBe(true);
   });
@@ -112,6 +122,7 @@ describe("engagement status machine", () => {
     expect(next.status).toBe("accepted");
     expect(next.signingMethod).toBe("docusign");
     expect(next.submittedAt).toBeTruthy();
+    expect(next.effectiveDate).toBe("2026-04-01");
     expect(next.acceptedAt).toBeTruthy();
     expect(next.executedAt).toBeNull();
     expect(canReview(next.status)).toBe(false);
@@ -124,7 +135,7 @@ describe("engagement status machine", () => {
     const accepted = applyReview(pendingReview("docusign"), "accept", "");
     expect(accepted.status).toBe("accepted");
     expect(accepted.executedAt).toBeNull();
-    expect(accepted.effectiveDate).toBeNull();
+    expect(accepted.effectiveDate).toBe("2026-04-01");
     expect(nextStatusAfterAccept(false)).toBe("accepted");
     expect(STATUS_LABELS.accepted).toBe("Awaiting seller signature");
     expect(STATUS_PILL_LABELS.accepted).toBe("Awaiting seller");
@@ -145,7 +156,7 @@ describe("engagement status machine", () => {
     const pending = applySubmit(draft(), "manual");
     const withSignature = applySignedArtifact(pending, artifact());
     expect(withSignature.status).toBe("pending_review");
-    expect(withSignature.effectiveDate).toBe(withSignature.signedArtifact?.uploadedAt.slice(0, 10));
+    expect(withSignature.effectiveDate).toBe("2026-04-01");
     const executed = applyReview(withSignature, "accept", "Looks complete.");
     expect(executed.status).toBe("executed");
     expect(executed.executedAt).toBeTruthy();
@@ -163,21 +174,22 @@ describe("engagement status machine", () => {
     const accepted = applyReview(pending, "accept", "");
     const executed = applySignedArtifact(accepted, artifact());
     expect(executed.status).toBe("executed");
-    expect(executed.effectiveDate).toBe(executed.signedArtifact?.uploadedAt.slice(0, 10));
+    expect(executed.effectiveDate).toBe("2026-04-01");
   });
 
-  it("does not overwrite an Effective Date already captured at signing", () => {
+  it("does not overwrite an Effective Date already captured at intake submit", () => {
     const pending = applySubmit(draft(), "manual");
+    expect(pending.effectiveDate).toBe("2026-04-01");
     const signed = applySignedArtifact(pending, {
       ...artifact(),
       uploadedAt: "2026-04-15T18:22:00.000Z",
     });
-    expect(signed.effectiveDate).toBe("2026-04-15");
+    expect(signed.effectiveDate).toBe("2026-04-01");
     const later = applySignedArtifact(signed, {
       ...artifact(),
       uploadedAt: "2026-05-01T12:00:00.000Z",
     });
-    expect(later.effectiveDate).toBe("2026-04-15");
+    expect(later.effectiveDate).toBe("2026-04-01");
   });
 
   it("returns to customer edit after request changes", () => {
@@ -209,7 +221,7 @@ describe("engagement status machine", () => {
     const executed = applyDocuSignCompleted(submitted, completedArtifact);
     expect(executed.status).toBe("executed");
     expect(executed.docusign.status).toBe("completed");
-    expect(executed.effectiveDate).toBe("2026-06-02");
+    expect(executed.effectiveDate).toBe("2026-04-01");
     expect(executed.docusign.lastMessage).toMatch(/stub/i);
   });
 
@@ -242,20 +254,30 @@ describe("engagement status machine", () => {
       uploadedAt: "2026-06-02T09:00:00.000Z",
     });
     expect(executed.docusign.lastMessage).toMatch(/DocuSign: envelope completed/i);
-    expect(executed.effectiveDate).toBe("2026-06-02");
+    expect(executed.effectiveDate).toBe("2026-04-01");
   });
 
-  it("prefers the Buyer Date Signed over the artifact upload time for Effective Date", () => {
+  it("does not stamp Effective Date from Buyer Date Signed or artifact upload time", () => {
+    vi.setSystemTime(new Date("2026-09-17T03:30:00.000Z"));
     const submitted = applySubmit(draft(), "docusign");
-    const executed = applyDocuSignCompleted(
-      submitted,
-      {
-        ...artifact(),
-        uploadedAt: "2026-06-03T16:00:00.000Z",
-      },
-      undefined,
-      "2026-06-02T09:15:00.000Z",
-    );
-    expect(executed.effectiveDate).toBe("2026-06-02");
+    expect(submitted.effectiveDate).toBe("2026-09-16");
+    const executed = applyDocuSignCompleted(submitted, {
+      ...artifact(),
+      uploadedAt: "2026-06-03T16:00:00.000Z",
+    });
+    expect(executed.effectiveDate).toBe("2026-09-16");
+  });
+
+  it("recovers Effective Date from submittedAt when the stored field is missing", () => {
+    const submitted = {
+      ...applySubmit(draft(), "docusign"),
+      effectiveDate: null,
+      submittedAt: "2026-09-17T03:30:00.000Z",
+    };
+    const executed = applyDocuSignCompleted(submitted, {
+      ...artifact(),
+      uploadedAt: "2026-09-18T09:00:00.000Z",
+    });
+    expect(executed.effectiveDate).toBe("2026-09-16");
   });
 });

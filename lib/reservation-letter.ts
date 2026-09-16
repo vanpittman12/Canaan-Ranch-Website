@@ -76,7 +76,7 @@ export function buildReservationLetterFields(
     : null;
   const reservationPeriod = engagement.effectiveDate
     ? `twelve (12) months from the Effective Date of ${formatLongDate(engagement.effectiveDate)} (date of permit issuance), expiring ${formatLongDate(expirationDate!)}`
-    : "twelve (12) months from the Effective Date (date of permit issuance / Effective Date + 1 year), to be stamped when the Seller signs";
+    : "twelve (12) months from the Effective Date (date of permit issuance), to be stamped when intake is submitted";
   const consultantName = intake.authorizedAgentName.trim();
   const consultantCompany = intake.authorizedAgentCompany.trim();
 

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { addOneYear, dateOnly, dealEconomics, numberToWords, usdInWords } from "./money";
+import {
+  addOneYear,
+  businessDateOnly,
+  dateOnly,
+  dealEconomics,
+  numberToWords,
+  usdInWords,
+} from "./money";
 import type { IntakeFields } from "./types";
 
 const intake: IntakeFields = {
@@ -37,6 +44,24 @@ describe("deal economics", () => {
   it("sets expiration to one year after the effective date", () => {
     expect(addOneYear("2026-04-15")).toBe("2027-04-15");
     expect(dateOnly("2026-04-15T18:22:00.000Z")).toBe("2026-04-15");
+  });
+
+  it("uses the America/New_York calendar date so midnight UTC does not roll the Florida day", () => {
+    // 2026-09-17 03:30 UTC is still 2026-09-16 23:30 EDT.
+    expect(businessDateOnly("2026-09-17T03:30:00.000Z")).toBe("2026-09-16");
+    expect(dateOnly("2026-09-17T03:30:00.000Z")).toBe("2026-09-17");
+    // 2026-09-17 04:00 UTC is 2026-09-17 00:00 EDT.
+    expect(businessDateOnly("2026-09-17T04:00:00.000Z")).toBe("2026-09-17");
+    // EST (UTC-5): 2026-01-16 04:30 UTC is still 2026-01-15 23:30.
+    expect(businessDateOnly("2026-01-16T04:30:00.000Z")).toBe("2026-01-15");
+  });
+
+  it("adds one calendar year with the existing Date setFullYear overflow policy", () => {
+    expect(addOneYear("2024-02-29")).toBe("2025-03-01");
+    expect(addOneYear("2028-02-29")).toBe("2029-03-01");
+    expect(addOneYear("2024-02-28")).toBe("2025-02-28");
+    expect(addOneYear("2026-12-31")).toBe("2027-12-31");
+    expect(addOneYear("2026-01-01")).toBe("2027-01-01");
   });
 
   it("writes integer counts in words for paragraph 2", () => {

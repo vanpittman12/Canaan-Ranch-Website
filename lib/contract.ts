@@ -7,8 +7,6 @@ import {
   formatLongDate,
   formatUsd,
   numberToWords,
-  PENDING_EFFECTIVE_DATE_PHRASE,
-  PENDING_EXPIRATION_DATE_PHRASE,
   usdInWords,
 } from "./money";
 import {
@@ -48,9 +46,9 @@ function sellerWitnessLine(intake: IntakeFields) {
 function agreementDates(engagement: Engagement) {
   if (!engagement.effectiveDate) {
     return {
-      effectiveDate: PENDING_EFFECTIVE_DATE_PHRASE,
-      effectiveFormal: PENDING_EFFECTIVE_DATE_PHRASE,
-      expirationDate: PENDING_EXPIRATION_DATE_PHRASE,
+      effectiveDate: "—",
+      effectiveFormal: "the Effective Date",
+      expirationDate: "—",
     };
   }
 
@@ -150,8 +148,8 @@ export function buildContract(engagement: Engagement): ContractDocument {
         heading: "3. Term and expiration",
         paragraphs: [
           engagement.effectiveDate
-            ? `This Agreement begins on the Effective Date and expires on ${expirationDate} (the “Expiration Date”), which is one (1) year after the Effective Date, unless earlier terminated or extended in a writing signed by both parties.`
-            : `This Agreement begins on the Effective Date and expires one (1) year after the Effective Date (the “Expiration Date”), unless earlier terminated or extended in a writing signed by both parties.`,
+            ? `This Agreement begins on the Effective Date and expires on ${expirationDate} (the “Expiration Date”), unless earlier terminated or extended in a writing signed by both parties.`
+            : `This Agreement begins on the Effective Date and expires on the Expiration Date, unless earlier terminated or extended in a writing signed by both parties.`,
           "Unused Reserved Capacity expires on the Expiration Date and does not roll forward unless the parties execute a written amendment.",
         ],
       },

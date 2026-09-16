@@ -68,7 +68,7 @@ export default async function AdminEngagementPage({
                   value={
                     engagement.effectiveDate
                       ? formatLongDate(engagement.effectiveDate)
-                      : "Set when the Buyer signs"
+                      : "Set on intake submission"
                   }
                 />
                 <Row
@@ -76,7 +76,7 @@ export default async function AdminEngagementPage({
                   value={
                     engagement.effectiveDate
                       ? formatLongDate(addOneYear(engagement.effectiveDate))
-                      : "Effective Date + 1 year"
+                      : "Set on intake submission"
                   }
                 />
                 <Row label="Buyer" value={engagement.intake.buyerLegalName} />

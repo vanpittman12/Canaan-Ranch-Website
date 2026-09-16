@@ -21,8 +21,6 @@ import {
   formatFormalDate,
   formatLongDate,
   numberToWords,
-  PENDING_EFFECTIVE_DATE_PHRASE,
-  PENDING_EXPIRATION_DATE_PHRASE,
 } from "./money";
 import type { Engagement } from "./types";
 
@@ -68,8 +66,8 @@ const HIDDEN_ANCHOR_RPR =
   '<w:rPr><w:color w:val="FFFFFF"/><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr>';
 
 export const AGREEMENT_UNMAPPED_GAPS = [
-  "Effective Date leftover (“this  day of, 2024”) — not an intake field; typed into the outgoing Word as “the date Buyer signs this Agreement”, then the calendar stamp after the Buyer signs (complete / manual upload)",
-  "Expiration leftover (leading underlined tab + “, 202 ,”) — typed into the outgoing Word as “one (1) year after the Effective Date,”; calendar addOneYear after complete. DocuSign has no Date Signed + 1 year formula and no template field #3",
+  "Effective Date leftover (“this  day of, 2024”) — not a form field; stamped from the intake-submission Florida/Eastern calendar date once the buyer submits",
+  "Expiration leftover (leading underlined tab + “, 202 ,”) — stamped as addOneYear(Effective Date) into the outgoing Word/DocuSign at submit. Signature-block Date Signed tabs stay audit dates only",
   "Buyer email — Van’s notice block has name / address / phone only",
   "Buyer title (“Its:”) — not collected on intake",
   "Relocation county — no matching blank in the Word file",
@@ -120,22 +118,9 @@ export function formatExpirationDateStamp(isoDate: string) {
   return `${formatLongDate(addOneYear(isoDate))},`;
 }
 
-/** Outgoing envelope / unsigned download — same copy as the HTML contract preview. */
-export function formatEffectiveDatePendingStamp() {
-  return PENDING_EFFECTIVE_DATE_PHRASE;
-}
-
-/** Trailing comma matches Van’s “, 202 ,” leftover so the sentence still reads. */
-export function formatExpirationDatePendingStamp() {
-  return `${PENDING_EXPIRATION_DATE_PHRASE},`;
-}
-
 export function buildAgreementDateStamps(engagement: Engagement): Array<[string, string]> {
   if (!engagement.effectiveDate) {
-    return [
-      [EFFECTIVE_DATE_LEFTOVER, formatEffectiveDatePendingStamp()],
-      [EXPIRATION_DATE_LEFTOVER, formatExpirationDatePendingStamp()],
-    ];
+    return [];
   }
   return [
     [EFFECTIVE_DATE_LEFTOVER, formatEffectiveDateStamp(engagement.effectiveDate)],

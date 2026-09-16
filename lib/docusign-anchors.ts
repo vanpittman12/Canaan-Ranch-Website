@@ -4,8 +4,8 @@
  *
  * Signature-block `date` strings are Date Signed tabs (auto-fill on sign),
  * not text tabs the recipient types. Body Effective / Expiration leftovers are
- * typed into the DOCX (Times New Roman 12pt) at populate — never AutoPlace.
- * DocuSign has no “Date Signed + 1 year” formula for Van’s “, 202 ,” leftover.
+ * typed as explicit calendar dates (Times New Roman 12pt) at populate-after-
+ * submit — never AutoPlace and never a body Date Signed overlay.
  */
 export const DOCUSIGN_ANCHORS = {
   buyer_signer: { sign: "/sn_buyer/", date: "/date_buyer/" },

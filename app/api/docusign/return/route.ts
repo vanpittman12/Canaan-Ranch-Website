@@ -16,12 +16,7 @@ export async function GET(request: Request) {
     if (engagement?.docusign.envelopeId && engagement.docusign.mode === "live") {
       try {
         const snapshot = await getLiveEnvelopeStatus(engagement.docusign.envelopeId);
-        await syncLiveEnvelope(
-          engagement,
-          snapshot.status,
-          undefined,
-          snapshot.buyerSignedDateTime ?? snapshot.completedDateTime,
-        );
+        await syncLiveEnvelope(engagement, snapshot.status);
       } catch {
         // Still return the buyer to the engagement page if polling fails.
       }

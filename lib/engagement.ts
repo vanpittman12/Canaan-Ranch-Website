@@ -1,4 +1,4 @@
-import { dateOnly } from "./money";
+import { businessDateOnly } from "./money";
 import type {
   ArtifactSource,
   DocuSignEnvelopeStatus,
@@ -10,8 +10,18 @@ import type {
   SigningMethod,
 } from "./types";
 
-function stampEffectiveDate(engagement: Engagement, when: string) {
-  return engagement.effectiveDate ?? dateOnly(when);
+/**
+ * Effective Date is the intake-submission calendar day (America/New_York).
+ * Never derive it from Buyer signedDateTime or artifact upload time.
+ */
+export function intakeEffectiveDate(engagement: Pick<Engagement, "effectiveDate" | "submittedAt">) {
+  if (engagement.effectiveDate) {
+    return engagement.effectiveDate;
+  }
+  if (engagement.submittedAt) {
+    return businessDateOnly(engagement.submittedAt);
+  }
+  return null;
 }
 
 export class EngagementError extends Error {
@@ -79,6 +89,7 @@ export function applySubmit(
     // gated on admin Accept. Manual still waits in the review queue.
     status: docusignPath ? "accepted" : "pending_review",
     submittedAt: now,
+    effectiveDate: businessDateOnly(now),
     acceptedAt: docusignPath ? now : engagement.acceptedAt,
     updatedAt: now,
     changeRequestNote:
@@ -138,9 +149,7 @@ export function applyReview(
     status,
     acceptedAt: now,
     executedAt: status === "executed" ? now : null,
-    effectiveDate: engagement.signedArtifact
-      ? stampEffectiveDate(engagement, engagement.signedArtifact.uploadedAt)
-      : engagement.effectiveDate,
+    effectiveDate: intakeEffectiveDate(engagement),
     updatedAt: now,
     changeRequestNote: null,
   };
@@ -158,7 +167,7 @@ export function applySignedArtifact(
   const next: Engagement = {
     ...engagement,
     signedArtifact: artifact,
-    effectiveDate: stampEffectiveDate(engagement, artifact.uploadedAt),
+    effectiveDate: intakeEffectiveDate(engagement),
     updatedAt: now,
   };
 
@@ -221,7 +230,6 @@ export function applyDocuSignCompleted(
   engagement: Engagement,
   artifact: SignedArtifact,
   message?: string,
-  signedAt?: string,
 ): Engagement {
   if (engagement.status !== "accepted" && engagement.status !== "executed") {
     throw new EngagementError(
@@ -235,7 +243,7 @@ export function applyDocuSignCompleted(
     signedArtifact: artifact,
     status: "executed",
     executedAt: engagement.executedAt ?? now,
-    effectiveDate: stampEffectiveDate(engagement, signedAt ?? artifact.uploadedAt ?? now),
+    effectiveDate: intakeEffectiveDate(engagement),
     updatedAt: now,
     docusign: {
       ...engagement.docusign,

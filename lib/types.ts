@@ -91,7 +91,7 @@ export interface Engagement {
   id: string;
   reference: string;
   status: EngagementStatus;
-  /** YYYY-MM-DD, set when the Buyer signs. Null until signature completion. */
+  /** YYYY-MM-DD, Florida/Eastern calendar date of intake submission. Null until submit. */
   effectiveDate: string | null;
   intake: IntakeFields;
   signingMethod: SigningMethod | null;

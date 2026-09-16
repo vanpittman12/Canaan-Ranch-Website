@@ -82,8 +82,8 @@ npm run cf:provision     # Create D1 + R2 and write the database id into wrangle
 | Optional donor site / description | Reserved-capacity paragraph |
 | Buyer witness name + email | Buyer signature block (1 witness) + DocuSign routing |
 | Canaan Ranch LLP witness (brand/config, not intake) | Seller signature block (1 witness) + DocuSign routing |
-| Effective Date (not on the form) | Date the Buyer signs (DocuSign completion or manual signed-copy upload) |
-| Effective Date + 1 year | Expiration Date (filled once signed) |
+| Effective Date (not on the form) | Florida/Eastern calendar date of intake submission (`America/New_York`) |
+| Effective Date + 1 calendar year | Expiration Date (typed at submit into Word and DocuSign) |
 
 Seller-side constants (not buyer intake): Canaan Ranch LLP; Attention Van Pittman; 1700 S. MacDill Ave., Suite 340, Tampa, FL 33629; Phone 813-390-1044; signatory Andrew V. Pittman, Jr., Manager; agent Applied Bionomics, LLC / Andrew Fuddy; Canaan witness (env-overridable); $6,000 per adult; $3,000 per juvenile all-in (not added to the adult rate) at delivery/acceptance; no deposits; venue Pasco County, Florida.
 
@@ -93,7 +93,7 @@ Adult vs juvenile is not collected at intake. The $3,000 juvenile price stays in
 
 1. Buyer may download the blank agreement template from the landing page or intake.
 2. Buyer completes intake (legal name, notice / signatory, reserved capacity, project/ops fields, Buyer witness only).
-3. Submit fills Van’s Word agreement (`public/agreements/Canaan-Preserve-Relocation-Agreement-template.docx`) with intake fields. The buyer downloads that populated DOCX to review — not a separately authored PDF from `lib/contract.ts`. A successful public create also calls `notifyNewEngagement` so Van is emailed (intake still succeeds if that send fails).
+3. Submit fills Van’s Word agreement (`public/agreements/Canaan-Preserve-Relocation-Agreement-template.docx`) with intake fields **and** explicit Effective / Expiration calendar dates (intake-submission Florida/Eastern date, plus exactly one calendar year). The buyer downloads that populated DOCX to review — not a separately authored PDF from `lib/contract.ts`. A successful public create also calls `notifyNewEngagement` so Van is emailed (intake still succeeds if that send fails).
 4. Usual path is **submit, then DocuSign**. Submitting with DocuSign selected creates and sends the envelope immediately (live API when `DOCUSIGN_ENABLED=true`, otherwise the local stub). Admin **Accept is not required** to start buyer signing. Routing is Buyer signer, Buyer witness, Canaan Ranch LLP signer, then the fixed Canaan witness. The envelope document is the populated DOCX. Manual signed upload remains a fallback and still waits in the review queue until Accept. Contract and signed files require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
 5. Team reviews at `/admin`:
    - **DocuSign submit** — status becomes **Awaiting seller signature**. Accept is a no-op when an envelope is already on file. A reservation-letter draft is generated when the seller signs (and still on Accept for the manual path) and is **not** emailed automatically.
@@ -101,7 +101,7 @@ Adult vs juvenile is not collected at intake. The $3,000 juvenile price stays in
    - **Resend DocuSign** — retries send for Accepted engagements that have no envelope (intake or Accept send failures).
    - **Request changes** — buyer can edit and resubmit (manual / pending-review path).
    - **Decline** — closed without execution.
-6. Status becomes **Executed** only when the Seller has signed: DocuSign envelope complete (Connect / polling / stub “Simulate DocuSign signed”), or a complete manual signed copy after Accept. The Effective Date is stamped from that signature completion. The reservation letter is refreshed if the Effective Date or intake fields changed.
+6. Status becomes **Executed** only when the Seller has signed: DocuSign envelope complete (Connect / polling / stub “Simulate DocuSign signed”), or a complete manual signed copy after Accept. Seller may choose not to countersign. The Effective Date stays the intake-submission calendar date; completion does not overwrite it with Buyer `signedDateTime`. The reservation letter is refreshed if the Effective Date or intake fields changed.
 7. **Send reservation letter** is an admin checkbox. Checking it emails the letter PDF to Van (`vpittman@beachparkcap.com`) and the buyer notice email via the existing Gmail notify path. Generation never sends mail.
 
 ## New-engagement email
@@ -180,19 +180,19 @@ The populated Word agreement is the envelope document. Hidden anchor strings (`/
 
 | When | Effective Date | Expiration Date |
 | --- | --- | --- |
-| Accept / envelope send | Typed into the Word body as **“the date Buyer signs this Agreement”** (Times New Roman 12pt). No `/date_effective/` Date Signed overlay. | Typed into the Word body as **“one (1) year after the Effective Date,”** (consumes the leading underlined tab + `, 202 ,`). No AutoPlace / template field #3. |
-| DocuSign completed (Connect / poll / return) | `engagement.effectiveDate` = Buyer `signedDateTime` when the API reports it, else envelope `completedDateTime`. Regenerated Word stamps “this 15th day of April, 2026” as Times New Roman 12pt body runs. | `addOneYear(effectiveDate)` stamped as “April 15, 2027,” in the same body face. Stored as `{id}-executed-agreement.docx`; contract download regenerates the same stamps. |
-| Manual signed upload | `engagement.effectiveDate` = upload time (already in `applySignedArtifact`). | Same +1 year stamp into the stored executed Word. |
+| Intake submit / envelope send | `engagement.effectiveDate` = Florida/Eastern calendar date of `submittedAt` (`America/New_York`, not UTC slice). Typed into Van’s leftover as **“this 16th day of September, 2026”** (Times New Roman 12pt). No `/date_effective/` Date Signed overlay. | `addOneYear(effectiveDate)` typed over the leading underlined tab + `, 202 ,` as **“September 16, 2027,”**. No AutoPlace / template field #3. |
+| DocuSign completed (Connect / poll / return) | **Unchanged.** Completion must not overwrite intake-submission Effective Date with Buyer `signedDateTime` or envelope `completedDateTime`. Regenerated Word uses the same calendar stamps. | Same +1 year stamp. Stored as `{id}-executed-agreement.docx`; contract download regenerates the same stamps. |
+| Manual signed upload / download | Same intake-submission Effective Date (already on the engagement after submit). | Same +1 year stamp into the stored/regenerated Word. |
 
-Signature-block `/date_*` strings remain Date Signed tabs (auto-fill when that recipient signs), styled Times New Roman 12pt. Body dates are never DocuSign tabs — Formula tabs are numeric-only, and a sent envelope cannot replace the Word file after the Buyer signs.
+Do **not** type “the date Buyer signs this Agreement” or “one (1) year after the Effective Date” as substitutes. Signature-block `/date_*` strings remain Date Signed tabs (auto-fill when that recipient signs), styled Times New Roman 12pt — those are signature audit dates, not body Effective / Expiration.
 
-The DocuSign combined PDF is the signed artifact (signatures + signature-block Date Signed tabs). Body Effective / Expiration in that PDF are the typed phrases from populate-at-send. Calendar dates land in the stored/regenerated Word after complete. Accept never writes a guessed calendar day into the body.
+The DocuSign combined PDF is the signed artifact (signatures + signature-block Date Signed tabs). Body Effective / Expiration in that PDF are the explicit calendar dates from populate-at-submit.
 
 **How to verify without live DocuSign credentials**
 
-1. `npx vitest run lib/agreement-populate.test.ts lib/docusign.test.ts` — send-time populate contains the pending phrases and **not** `, 202 ,` / `/date_effective/`; date runs use `AGREEMENT_FILL_RPR`; envelope Date Signed tabs are signature-block only (`TimesNewRoman` / `Size12`).
-2. Populate with `effectiveDate: "2026-04-15"` (complete/upload → `persistExecutedAgreement`): `this 15th day of April, 2026` and `April 15, 2027,`.
-3. Wiring: `lib/docusign-complete.ts`, admin Simulate DocuSign signed, and manual signed upload all call `persistExecutedAgreement`.
+1. `npx vitest run lib/money.test.ts lib/engagement.test.ts lib/agreement-populate.test.ts lib/docusign.test.ts` — submit near midnight UTC still uses the prior America/New_York day; send-time populate contains `this 16th day of September, 2026` / `September 16, 2027,` and **not** `, 202 ,` / `/date_effective/` / the old phrase substitutes; date runs use `AGREEMENT_FILL_RPR`; envelope Date Signed tabs are signature-block only (`TimesNewRoman` / `Size12`).
+2. Populate with `effectiveDate: "2026-04-15"` (submit / complete / upload → `persistExecutedAgreement`): `this 15th day of April, 2026` and `April 15, 2027,`.
+3. Wiring: `applySubmit` stamps Effective Date; `lib/docusign-complete.ts`, admin Simulate DocuSign signed, and manual signed upload all call `persistExecutedAgreement` without overwriting it.
 
 ### Environment variables
 

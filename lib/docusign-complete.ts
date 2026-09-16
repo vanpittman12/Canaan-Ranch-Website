@@ -6,10 +6,8 @@ import {
 import {
   buildLiveSignedFilename,
   downloadLiveCombinedDocument,
-  getLiveEnvelopeStatus,
   isCompleteEnvelopeStatus,
   normalizeEnvelopeStatus,
-  resolveSignedAt,
   type DocuSignHttp,
 } from "./docusign";
 import { persistExecutedAgreement } from "./executed-agreement";
@@ -21,7 +19,6 @@ export async function syncLiveEnvelope(
   engagement: Engagement,
   status: string | null | undefined,
   http?: DocuSignHttp,
-  signedAt?: string | null,
 ): Promise<Engagement> {
   if (!engagement.docusign.envelopeId) {
     return engagement;
@@ -37,7 +34,6 @@ export async function syncLiveEnvelope(
     const bytes = await downloadLiveCombinedDocument(engagement.docusign.envelopeId, http);
     const storedName = `${engagement.id}-signed.pdf`;
     await putUpload(storedName, bytes);
-    const fromEnvelope = signedAt ?? (await buyerSignedAtFromEnvelope(engagement.docusign.envelopeId, http));
     const next = applyDocuSignCompleted(
       engagement,
       artifactFromUpload({
@@ -47,8 +43,6 @@ export async function syncLiveEnvelope(
         mimeType: "application/pdf",
         sizeBytes: bytes.length,
       }),
-      undefined,
-      fromEnvelope,
     );
     await persistExecutedAgreement(next);
     const withLetter = await persistReservationLetter(next, "seller_sign");
@@ -63,13 +57,4 @@ export async function syncLiveEnvelope(
   }
 
   return engagement;
-}
-
-async function buyerSignedAtFromEnvelope(envelopeId: string, http?: DocuSignHttp) {
-  try {
-    const snapshot = await getLiveEnvelopeStatus(envelopeId, http);
-    return resolveSignedAt(snapshot.buyerSignedDateTime, snapshot.completedDateTime);
-  } catch {
-    return undefined;
-  }
 }
