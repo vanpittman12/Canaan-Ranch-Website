@@ -349,25 +349,43 @@ export function IntakeForm({
           </Field>
           <Field
             split
-            name="buyerEmail"
-            label="Buyer signatory email"
-            hint="Notice email and DocuSign Buyer signer."
-            error={errors.buyerEmail}
+            name="buyerTitle"
+            label="Title"
+            hint="Corporate signatory title. Appears as Its: on the buyer signature block."
+            error={errors.buyerTitle}
           >
             <input
               {...controlProps(
-                "buyerEmail",
-                errors.buyerEmail,
-                "Notice email and DocuSign Buyer signer.",
+                "buyerTitle",
+                errors.buyerTitle,
+                "Corporate signatory title. Appears as Its: on the buyer signature block.",
               )}
-              type="email"
-              value={values.buyerEmail}
-              onChange={(event) => update("buyerEmail", event.target.value)}
+              value={values.buyerTitle}
+              onChange={(event) => update("buyerTitle", event.target.value)}
               required
-              autoComplete="email"
+              autoComplete="organization-title"
             />
           </Field>
         </FieldRow>
+        <Field
+          name="buyerEmail"
+          label="Buyer signatory email"
+          hint="Notice email and DocuSign Buyer signer."
+          error={errors.buyerEmail}
+        >
+          <input
+            {...controlProps(
+              "buyerEmail",
+              errors.buyerEmail,
+              "Notice email and DocuSign Buyer signer.",
+            )}
+            type="email"
+            value={values.buyerEmail}
+            onChange={(event) => update("buyerEmail", event.target.value)}
+            required
+            autoComplete="email"
+          />
+        </Field>
         <Field
           name="buyerStreet"
           label="Street address"
@@ -670,6 +688,7 @@ export function IntakeForm({
           rows={[
             ["Buyer legal name", values.buyerLegalName],
             ["Attention", values.buyerAttention],
+            ["Title", values.buyerTitle],
             ["Email", values.buyerEmail],
             ["Phone", values.buyerPhone],
             ["Notice address", displayValue(buyerNoticeAddress(values))],

@@ -81,6 +81,7 @@ export default async function AdminEngagementPage({
                 />
                 <Row label="Buyer" value={engagement.intake.buyerLegalName} />
                 <Row label="Attention" value={engagement.intake.buyerAttention} />
+                <Row label="Title" value={displayValue(engagement.intake.buyerTitle)} />
                 <Row label="Email" value={engagement.intake.buyerEmail} />
                 <Row label="Phone" value={engagement.intake.buyerPhone} />
                 <Row

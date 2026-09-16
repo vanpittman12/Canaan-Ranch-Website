@@ -112,7 +112,7 @@ export function buildContract(engagement: Engagement): ContractDocument {
     `${intake.buyerLegalName} (“Buyer”)`,
     "Authorized signature: ______________________________",
     `Name: ${intake.buyerAttention}`,
-    "Title: _____________________________________________",
+    `Title: ${intake.buyerTitle.trim() || "_____________________________________________"}`,
     "Date: _____________________________________________",
     `Witness: ${intake.buyerWitnessName}`,
     "Witness signature: ________________________________",
@@ -218,6 +218,7 @@ export function buildTemplateEngagement(): Engagement {
   const blanks: IntakeFields = {
     buyerLegalName: "[Buyer legal name]",
     buyerAttention: "[Buyer signatory / attention]",
+    buyerTitle: "[Buyer signatory title]",
     buyerEmail: "[Buyer signatory email]",
     buyerStreet: "[Street address]",
     buyerCity: "[City]",

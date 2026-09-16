@@ -12,6 +12,7 @@ describe("engagement normalize", () => {
     expect(intake.sellerWitnessName).toBe(brand.sellerWitnessName);
     expect(intake.sellerWitnessEmail).toBe(brand.sellerWitnessEmail);
     expect(intake.buyerLegalName).toBe("Cypress Ridge Holdings LLC");
+    expect(intake.buyerTitle).toBe("");
   });
 
   it("maps a legacy intake.effectiveDate onto the engagement", () => {

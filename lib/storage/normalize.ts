@@ -25,6 +25,7 @@ export function normalizeIntake(intake: StoredIntake): IntakeFields {
   return {
     buyerLegalName: intake.buyerLegalName ?? "",
     buyerAttention: intake.buyerAttention ?? "",
+    buyerTitle: intake.buyerTitle ?? "",
     buyerEmail: intake.buyerEmail ?? "",
     buyerStreet: intake.buyerStreet ?? "",
     buyerCity: intake.buyerCity ?? "",

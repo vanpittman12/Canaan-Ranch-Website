@@ -72,7 +72,8 @@ npm run cf:provision     # Create D1 + R2 and write the database id into wrangle
 | Intake / record | Agreement |
 | --- | --- |
 | Buyer legal name | Buyer party |
-| Buyer notice (attention / signatory, street, city/state/zip, phone, email) | Parties + Notices (“Buyer’s notice address”) and Buyer signature name |
+| Buyer notice (attention / signatory, title, street, city/state/zip, phone, email) | Parties + Notices (“Buyer’s notice address”) and Buyer signature name |
+| Buyer signatory title | Buyer signature block “Its:” |
 | Reserved capacity (tortoise count) | Paragraph 2 “up to N” reserved capacity |
 | Adult rate (locked to $6,000 on public intake; admin override only) | Payment paragraph: $6,000 per adult (words + numbers) |
 | Tortoise count × adult rate | Total Estimated Payment at the adult rate (words + numbers) |
@@ -92,7 +93,7 @@ Adult vs juvenile is not collected at intake. The $3,000 juvenile price stays in
 ## Product flow
 
 1. Buyer may download the blank agreement template from the landing page or intake.
-2. Buyer completes intake (legal name, notice / signatory, reserved capacity, project/ops fields, Buyer witness only).
+2. Buyer completes intake (legal name, notice / signatory and title, reserved capacity, project/ops fields, Buyer witness only).
 3. Submit fills Van’s Word agreement (`public/agreements/Canaan-Preserve-Relocation-Agreement-template.docx`) with intake fields **and** explicit Effective / Expiration calendar dates (intake-submission Florida/Eastern date, plus exactly one calendar year). The buyer downloads that populated DOCX to review — not a separately authored PDF from `lib/contract.ts`. A successful public create also calls `notifyNewEngagement` so Van is emailed (intake still succeeds if that send fails).
 4. Usual path is **submit, then DocuSign**. Submitting with DocuSign selected creates and sends the envelope immediately (live API when `DOCUSIGN_ENABLED=true`, otherwise the local stub). Admin **Accept is not required** to start buyer signing. Routing is Buyer signer, Buyer witness, Canaan Ranch LLP signer, then the fixed Canaan witness. The envelope document is the populated DOCX. Manual signed upload remains a fallback and still waits in the review queue until Accept. Contract and signed files require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
 5. Team reviews at `/admin`:
@@ -113,7 +114,7 @@ After a **public intake create** succeeds, [`lib/notify.ts`](lib/notify.ts) `not
 | From | `GMAIL_USER` if set, otherwise `vpittman@beachparkcap.com` (shown as `Canaan Preserve <…>`). Must be the Google account that issued the refresh token. |
 | Primary To | `vpittman@beachparkcap.com` |
 | Also To | `brand.email` when it differs from the primary To. During testing `brand.email` is also `vpittman@beachparkcap.com`, so notify sends a single To (no duplicate). `engagements@canaanpreserve.com` is not a live inbox. |
-| Body | Reference, project name, buyer contact (name / attention / email / phone / address), county, tortoise count, authorized agent, donor affiliation, project description, buyer witness, admin review link. Operational fields stay in this email and admin — they are not stuffed into Van’s Word file. |
+| Body | Reference, project name, buyer contact (name / attention / title / email / phone / address), county, tortoise count, authorized agent, donor affiliation, project description, buyer witness, admin review link. Operational fields stay in this email and admin — they are not stuffed into Van’s Word file. |
 
 ### Reservation letter email (admin send hold)
 

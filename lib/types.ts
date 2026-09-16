@@ -21,6 +21,7 @@ export type ReservationLetterSource = "accept" | "seller_sign" | "manual";
 export interface IntakeFields {
   buyerLegalName: string;
   buyerAttention: string;
+  buyerTitle: string;
   buyerEmail: string;
   buyerStreet: string;
   buyerCity: string;
