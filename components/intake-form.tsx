@@ -740,7 +740,7 @@ export function IntakeForm({
         <p className="text-sm text-muted">
           {step === REVIEW_STEP_ID
             ? "Submitting drafts the Canaan Preserve / Canaan Ranch LLP relocation agreement. You will download the populated Word agreement next."
-            : "Continue through Notice, Capacity, Project, and Witness, then review. Required fields must be complete before Continue or Review."}
+            : "Continue or click any step to browse. Required fields are checked when you submit on Review."}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           {step !== "notice" ? (

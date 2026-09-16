@@ -131,6 +131,9 @@ describe("public site SEO and copy hygiene", () => {
     expect(intakeForm).toContain("tryGoTo");
     expect(intakeForm).toContain("tryGoTo(REVIEW_STEP_ID)");
     expect(intakeForm).toContain(
+      "Continue or click any step to browse. Required fields are checked when you submit on Review.",
+    );
+    expect(intakeForm).not.toContain(
       "Required fields must be complete before Continue or Review.",
     );
   });

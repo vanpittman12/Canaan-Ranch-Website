@@ -133,27 +133,18 @@ export function validateThrough(
 }
 
 /**
- * Gated wizard: Continue and step pills share one rule.
- * Backward/same-step moves are free. Forward moves (including Review)
- * must pass required fields through the last skipped step — City included.
+ * Browse is free: Continue and step pills share one rule — always allow.
+ * Submit on Review still uses validateThrough (plus server zod) and jumps
+ * to the first step with errors. HTML required attributes stay for submit.
  */
 export function advanceGate(
-  from: IntakeWizardStep,
-  to: IntakeWizardStep,
-  values: Record<string, string>,
+  _from: IntakeWizardStep,
+  _to: IntakeWizardStep,
+  _values: Record<string, string>,
 ):
   | { ok: true }
   | { ok: false; errors: Record<string, string>; step: IntakeWizardStep } {
-  if (stepIndex(to) <= stepIndex(from)) {
-    return { ok: true };
-  }
-  const through: IntakeWizardStep =
-    to === REVIEW_STEP_ID ? REVIEW_STEP_ID : previousStep(to);
-  const errors = validateThrough(through, values);
-  if (Object.keys(errors).length === 0) {
-    return { ok: true };
-  }
-  return { ok: false, errors, step: firstStepForErrors(errors) };
+  return { ok: true };
 }
 
 export function validateStepFields(
