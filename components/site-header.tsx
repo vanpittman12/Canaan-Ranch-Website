@@ -11,9 +11,9 @@ export function SiteHeader({
     <header className="overflow-visible border-b border-line bg-paper">
       <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-wrap items-center justify-between gap-2 overflow-visible px-4 py-3 sm:gap-3 sm:px-6">
         <Link href="/" prefetch={false} className="flex shrink-0 items-center gap-3">
-          <BrandLockup variant={variant} />
+          <BrandLockup variant={variant} compact />
         </Link>
-        <nav className="flex min-w-0 shrink-0 items-center gap-2 overflow-visible text-sm text-ink sm:gap-3">
+        <nav className="flex shrink-0 items-center gap-2 overflow-visible text-sm text-ink sm:gap-3">
           {variant === "admin" ? (
             <Link href="/admin" className="inline-flex min-h-11 items-center hover:text-forest">
               Queue
@@ -37,14 +37,14 @@ export function SiteHeader({
               </a>
               <a
                 href="/api/agreement-template"
-                className="hidden min-h-11 items-center hover:text-forest sm:inline-flex"
+                className="hidden min-h-11 items-center whitespace-nowrap hover:text-forest 2xl:inline-flex"
               >
                 Blank agreement
               </a>
               <Link
                 href="/intake"
                 prefetch={false}
-                className="btn-primary shrink-0 overflow-visible whitespace-nowrap px-3.5 text-sm sm:px-4"
+                className="btn-primary min-w-max shrink-0 overflow-visible whitespace-nowrap px-3.5 text-sm sm:px-4"
               >
                 {brand.intakeCta}
               </Link>

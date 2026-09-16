@@ -81,10 +81,13 @@ describe("site builder visual lock", () => {
     expect(markAsset).not.toContain("BRAND_MARK_DATA_URI");
     expect(markAsset).toContain(BRAND_MARK_FILE);
     expect(header).toContain("BrandLockup");
+    expect(header).toContain("<BrandLockup variant={variant} compact />");
     expect(lockup).toContain("h-12 w-auto");
     expect(lockup).not.toContain("truncate");
     expect(lockup).toContain("whitespace-nowrap");
     expect(lockup).toContain("text-[17px]");
+    expect(lockup).toContain("2xl:text-xl");
+    expect(lockup).toContain("hidden 2xl:block");
     expect(header).toContain("flex-wrap");
     expect(header).toContain('className="flex shrink-0 items-center gap-3"');
     expect(brand.lockupLine).toBe("Recipient site");
@@ -120,12 +123,17 @@ describe("site builder visual lock", () => {
     expect(landing).toContain("{brand.intakeCta}");
     expect(header).toContain("{brand.intakeCta}");
     expect(header).toContain("shrink-0 overflow-visible whitespace-nowrap");
+    expect(header).toContain("min-w-max");
     expect(header).toContain("px-3.5");
     expect(header).not.toContain("!px-3");
     expect(header).toContain("hover:text-forest 2xl:inline-flex");
     expect(header).not.toContain("hover:text-forest xl:inline-flex");
+    expect(header).not.toContain("hover:text-forest sm:inline-flex");
+    expect(header).not.toContain("min-w-0 shrink-0 items-center");
     expect(header).not.toContain("xl:gap-5");
     expect(header).not.toContain("xl:px-8");
+    expect(header).toContain("md:inline-flex");
+    expect(header).toContain("whitespace-nowrap hover:text-forest 2xl:inline-flex");
     expect(footer).toContain("{brand.intakeCta}");
     expect(brand.intakeCta).toBe("Start intake");
     expect(landing).not.toContain("Start relocation intake");
@@ -240,5 +248,6 @@ describe("site builder visual lock", () => {
     expect(landing).not.toContain("recipient-sites/");
     expect(header).not.toContain("FWC sites");
     expect(footer).not.toContain("FWC recipient-site guidance");
+    expect(landing).toContain("whitespace-normal text-center xl:whitespace-nowrap");
   });
 });
