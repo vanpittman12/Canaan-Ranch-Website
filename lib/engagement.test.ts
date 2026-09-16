@@ -3,6 +3,7 @@ import {
   applyDocuSignCompleted,
   applyDocuSignSent,
   applyHideFromLedger,
+  applyMarkDeclined,
   applyReview,
   applySignedArtifact,
   applySubmit,
@@ -312,6 +313,36 @@ describe("engagement status machine", () => {
     expect(reviewed.archivedAt).toBe("2026-04-01T18:00:00.000Z");
     expect(reviewLedgerItems([reviewed])).toEqual([]);
     expect(reviewLedgerItems([reviewed], { includeHidden: true })).toEqual([reviewed]);
+  });
+
+  it("marks any non-declined status as declined without dropping stored data", () => {
+    const statuses = [
+      "draft",
+      "pending_review",
+      "changes_requested",
+      "accepted",
+      "executed",
+    ] as const;
+    for (const status of statuses) {
+      const source = {
+        ...draft(),
+        status,
+        docusign: {
+          ...draft().docusign,
+          envelopeId: "env-keep-2",
+          status: "sent" as const,
+        },
+        signedArtifact: artifact(),
+      };
+      const declined = applyMarkDeclined(source);
+      expect(declined.status).toBe("declined");
+      expect(declined.archivedAt).toBeNull();
+      expect(declined.docusign.envelopeId).toBe("env-keep-2");
+      expect(declined.signedArtifact?.storedName).toBe("eng-1-signed.pdf");
+      expect(declined.reviews.at(-1)?.decision).toBe("decline");
+      expect(reviewLedgerItems([declined])).toEqual([declined]);
+      expect(() => applyMarkDeclined(declined)).toThrow(/already declined/i);
+    }
   });
 
   it("omits hidden rows from the default ledger and lists them when asked", () => {

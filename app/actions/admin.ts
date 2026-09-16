@@ -24,6 +24,7 @@ import {
 import {
   applyDocuSignCompleted,
   applyHideFromLedger,
+  applyMarkDeclined,
   applyReview,
   artifactFromUpload,
   EngagementError,
@@ -351,4 +352,36 @@ export async function hideEngagementFromLedger(
   revalidatePath("/admin");
   revalidatePath(`/admin/engagements/${engagementId}`);
   redirect("/admin");
+}
+
+export async function markEngagementDeclined(
+  engagementId: string,
+  _prev: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  await requireAdmin();
+  if (formData.get("confirmDecline") !== "on") {
+    return { error: "Confirm decline to move this engagement off the active review queue." };
+  }
+
+  const engagement = await getEngagement(engagementId);
+  if (!engagement) {
+    return { error: "Engagement not found." };
+  }
+
+  try {
+    // Status-only move. Keep the D1 payload, R2 artifacts, and DocuSign envelope.
+    await saveEngagement(applyMarkDeclined(engagement));
+  } catch (error) {
+    return {
+      error:
+        error instanceof EngagementError
+          ? error.message
+          : "Unable to mark this engagement declined.",
+    };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/engagements/${engagementId}`);
+  redirect(`/admin/engagements/${engagementId}`);
 }

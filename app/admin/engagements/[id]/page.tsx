@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/app/actions/admin";
 import { DocumentDesk } from "@/components/document-desk";
 import { HideFromLedgerForm } from "@/components/hide-from-ledger-form";
+import { MarkDeclinedForm } from "@/components/mark-declined-form";
 import { RateOverrideForm } from "@/components/rate-override-form";
 import { ReservationLetterForm } from "@/components/reservation-letter-form";
 import { ReviewForm } from "@/components/review-form";
@@ -199,6 +200,11 @@ export default async function AdminEngagementPage({
             <ReservationLetterForm engagement={engagement} />
 
             <ReviewForm engagement={engagement} />
+
+            <MarkDeclinedForm
+              engagementId={engagement.id}
+              status={engagement.status}
+            />
 
             <HideFromLedgerForm
               engagementId={engagement.id}
