@@ -1,3 +1,4 @@
+import { intakeCityServiceAreaError } from "./service-area-cities";
 import type { IntakeFields } from "./types";
 
 export const INTAKE_STEP_IDS = ["notice", "capacity", "project", "witness"] as const;
@@ -134,7 +135,8 @@ export function validateThrough(
 /**
  * Gated wizard: Continue and step pills share one rule.
  * Backward/same-step moves are free. Forward moves (including Review)
- * must pass required fields through the last skipped step — City included.
+ * must pass required fields through the last skipped step — City included,
+ * and City must be inside the Florida service area when the name is known.
  */
 export function advanceGate(
   from: IntakeWizardStep,
@@ -176,6 +178,13 @@ export function validateStepFields(
     }
     if (!value) {
       errors[field] = field === "buyerCity" ? "City is required." : "This field is required.";
+      continue;
+    }
+    if (field === "buyerCity") {
+      const areaError = intakeCityServiceAreaError(value);
+      if (areaError) {
+        errors[field] = areaError;
+      }
       continue;
     }
     if (EMAIL_FIELDS.has(field) && !isEmailValue(value)) {

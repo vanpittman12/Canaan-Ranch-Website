@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { brand, getSellerWitness } from "./brand";
+import { SERVICE_AREA_CITY_ERROR } from "./service-area-cities";
 import { intakeSchema, publicIntakeFields } from "./validation";
 
 const posted = {
@@ -7,9 +8,9 @@ const posted = {
   buyerAttention: "Avery Cole",
   buyerEmail: "avery@cypressridge.example",
   buyerStreet: "200 Bay Street",
-  buyerCity: "Tampa",
+  buyerCity: "Alachua",
   buyerState: "FL",
-  buyerPostalCode: "33602",
+  buyerPostalCode: "32615",
   buyerPhone: "813-555-0144",
   tortoiseCount: "8",
   perGtRate: "1",
@@ -80,5 +81,18 @@ describe("public intake rate lock and seller witness", () => {
     const fields = publicIntakeFields(parsed.data);
     expect(fields.sellerWitnessName).toBe("Jordan Blake");
     expect(fields.sellerWitnessEmail).toBe("jordan.blake@canaanpreserve.example");
+  });
+
+  it("rejects Tampa and accepts Alachua and Gainesville on the City gate", () => {
+    const tampa = intakeSchema.safeParse({ ...posted, buyerCity: "Tampa" });
+    expect(tampa.success).toBe(false);
+    if (!tampa.success) {
+      expect(tampa.error.issues.some((issue) => issue.message === SERVICE_AREA_CITY_ERROR)).toBe(
+        true,
+      );
+    }
+
+    expect(intakeSchema.safeParse({ ...posted, buyerCity: "Alachua" }).success).toBe(true);
+    expect(intakeSchema.safeParse({ ...posted, buyerCity: "Gainesville" }).success).toBe(true);
   });
 });

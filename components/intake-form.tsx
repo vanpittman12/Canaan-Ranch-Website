@@ -387,9 +387,19 @@ export function IntakeForm({
           />
         </Field>
         <FieldRow columns={3}>
-          <Field split name="buyerCity" label="City" error={errors.buyerCity}>
+          <Field
+            split
+            name="buyerCity"
+            label="City"
+            hint="Must be inside the Florida service area."
+            error={errors.buyerCity}
+          >
             <input
-              {...controlProps("buyerCity", errors.buyerCity)}
+              {...controlProps(
+                "buyerCity",
+                errors.buyerCity,
+                "Must be inside the Florida service area.",
+              )}
               value={values.buyerCity}
               onChange={(event) => update("buyerCity", event.target.value)}
               required

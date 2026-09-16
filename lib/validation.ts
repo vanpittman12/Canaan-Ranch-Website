@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { brand, getSellerWitness } from "./brand";
+import { intakeCityServiceAreaError, SERVICE_AREA_CITY_ERROR } from "./service-area-cities";
 import type { IntakeFields } from "./types";
 
 export const intakeSchema = z.object({
@@ -7,7 +8,11 @@ export const intakeSchema = z.object({
   buyerAttention: z.string().trim().min(2, "Attention name is required."),
   buyerEmail: z.string().trim().email("Enter a valid email address."),
   buyerStreet: z.string().trim().min(3, "Street address is required."),
-  buyerCity: z.string().trim().min(2, "City is required."),
+  buyerCity: z
+    .string()
+    .trim()
+    .min(2, "City is required.")
+    .refine((city) => !intakeCityServiceAreaError(city), SERVICE_AREA_CITY_ERROR),
   buyerState: z.string().trim().min(2, "State is required."),
   buyerPostalCode: z.string().trim().min(3, "Postal code is required."),
   buyerPhone: z.string().trim().min(7, "Phone number is required."),

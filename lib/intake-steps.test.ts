@@ -13,6 +13,7 @@ import {
   validateStepFields,
   validateThrough,
 } from "./intake-steps";
+import { SERVICE_AREA_CITY_ERROR } from "./service-area-cities";
 import { intakeSchema } from "./validation";
 
 const completeNotice = {
@@ -20,9 +21,9 @@ const completeNotice = {
   buyerAttention: "Avery Cole",
   buyerEmail: "avery@cypressridge.example",
   buyerStreet: "200 Bay Street",
-  buyerCity: "Tampa",
+  buyerCity: "Alachua",
   buyerState: "FL",
-  buyerPostalCode: "33602",
+  buyerPostalCode: "32615",
   buyerPhone: "813-555-0144",
   tortoiseCount: "1",
 };
@@ -69,9 +70,9 @@ describe("intake wizard", () => {
       buyerAttention: "Avery Cole",
       buyerEmail: "not-an-email",
       buyerStreet: "200 Bay Street",
-      buyerCity: "Tampa",
+      buyerCity: "Alachua",
       buyerState: "FL",
-      buyerPostalCode: "33602",
+      buyerPostalCode: "32615",
       buyerPhone: "",
     });
     expect(errors.buyerEmail).toBe("Enter a valid email address.");
@@ -115,6 +116,28 @@ describe("intake wizard", () => {
     if (!skippedProject.ok) {
       expect(skippedProject.step).toBe("project");
       expect(skippedProject.errors.donorSiteName).toBe("This field is required.");
+    }
+  });
+
+  it("hard-blocks out-of-area cities and still accepts Alachua and Gainesville", () => {
+    for (const city of ["Tampa", "tampa", "TAMPA", "South Tampa", "Miami"]) {
+      const errors = validateStepFields("notice", { ...completeNotice, buyerCity: city });
+      expect(errors.buyerCity).toBe(SERVICE_AREA_CITY_ERROR);
+      const blocked = advanceGate("notice", "capacity", { ...completeNotice, buyerCity: city });
+      expect(blocked.ok).toBe(false);
+      if (!blocked.ok) {
+        expect(blocked.step).toBe("notice");
+        expect(blocked.errors.buyerCity).toBe(SERVICE_AREA_CITY_ERROR);
+      }
+    }
+
+    for (const city of ["Alachua", "alachua", "Gainesville", "gainesville"]) {
+      expect(validateStepFields("notice", { ...completeNotice, buyerCity: city }).buyerCity).toBe(
+        undefined,
+      );
+      expect(advanceGate("notice", "capacity", { ...completeNotice, buyerCity: city }).ok).toBe(
+        true,
+      );
     }
   });
 });
