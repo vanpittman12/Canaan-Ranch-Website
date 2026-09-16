@@ -103,6 +103,11 @@ export function dateOnly(isoDateTime: string) {
   return isoDateTime.slice(0, 10);
 }
 
+/** Copy used when Effective Date is not yet known (outgoing envelope / preview). */
+export const PENDING_EFFECTIVE_DATE_PHRASE = "the date Buyer signs this Agreement";
+/** Matches the Term rule (Effective + 1 year) without guessing a calendar day at send. */
+export const PENDING_EXPIRATION_DATE_PHRASE = "one (1) year after the Effective Date";
+
 export function addOneYear(isoDate: string) {
   const date = parseIsoDate(isoDate);
   if (!date) {

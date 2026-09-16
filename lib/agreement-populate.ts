@@ -14,8 +14,16 @@ import {
   populatedAgreementFilename,
 } from "./agreement-template";
 import { brand, getSellerWitness } from "./brand";
-import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
-import { addOneYear, dealEconomics, formatFormalDate, formatLongDate, numberToWords } from "./money";
+import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+import {
+  addOneYear,
+  dealEconomics,
+  formatFormalDate,
+  formatLongDate,
+  numberToWords,
+  PENDING_EFFECTIVE_DATE_PHRASE,
+  PENDING_EXPIRATION_DATE_PHRASE,
+} from "./money";
 import type { Engagement } from "./types";
 
 const DOCUMENT_XML = "word/document.xml";
@@ -60,8 +68,8 @@ const HIDDEN_ANCHOR_RPR =
   '<w:rPr><w:color w:val="FFFFFF"/><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr>';
 
 export const AGREEMENT_UNMAPPED_GAPS = [
-  "Effective Date leftover (“this  day of, 2024”) — not an intake field; stamped from the Buyer’s Date Signed after they sign (DocuSign complete or manual upload), never from Accept or intake",
-  "Expiration leftover (leading underlined tab + “, 202 ,”) — derived as addOneYear(Effective Date) and stamped into the stored/regenerated Word after complete; DocuSign cannot formula-fill Date Signed + 1 year on this leftover",
+  "Effective Date leftover (“this  day of, 2024”) — not an intake field; typed into the outgoing Word as “the date Buyer signs this Agreement”, then the calendar stamp after the Buyer signs (complete / manual upload)",
+  "Expiration leftover (leading underlined tab + “, 202 ,”) — typed into the outgoing Word as “one (1) year after the Effective Date,”; calendar addOneYear after complete. DocuSign has no Date Signed + 1 year formula and no template field #3",
   "Buyer email — Van’s notice block has name / address / phone only",
   "Buyer title (“Its:”) — not collected on intake",
   "Relocation county — no matching blank in the Word file",
@@ -112,9 +120,22 @@ export function formatExpirationDateStamp(isoDate: string) {
   return `${formatLongDate(addOneYear(isoDate))},`;
 }
 
+/** Outgoing envelope / unsigned download — same copy as the HTML contract preview. */
+export function formatEffectiveDatePendingStamp() {
+  return PENDING_EFFECTIVE_DATE_PHRASE;
+}
+
+/** Trailing comma matches Van’s “, 202 ,” leftover so the sentence still reads. */
+export function formatExpirationDatePendingStamp() {
+  return `${PENDING_EXPIRATION_DATE_PHRASE},`;
+}
+
 export function buildAgreementDateStamps(engagement: Engagement): Array<[string, string]> {
   if (!engagement.effectiveDate) {
-    return [];
+    return [
+      [EFFECTIVE_DATE_LEFTOVER, formatEffectiveDatePendingStamp()],
+      [EXPIRATION_DATE_LEFTOVER, formatExpirationDatePendingStamp()],
+    ];
   }
   return [
     [EFFECTIVE_DATE_LEFTOVER, formatEffectiveDateStamp(engagement.effectiveDate)],
@@ -208,12 +229,6 @@ export function populateDocumentXml(xml: string, engagement: Engagement): string
 
     if (text.trim() === "By:" || text.trim() === "By") {
       result = rewriteParagraphText(result, `By: ${engagement.intake.buyerAttention}`);
-    }
-
-    // Place `/date_effective/` immediately after the leftover so the Date Signed
-    // tab sits on the Effective Date blank, not at the end of the opening paragraph.
-    if (!engagement.effectiveDate && paragraphText(result).includes(EFFECTIVE_DATE_LEFTOVER)) {
-      result = insertHiddenAnchorAfter(result, EFFECTIVE_DATE_LEFTOVER, EFFECTIVE_DATE_SIGNED_ANCHOR);
     }
 
     const anchors = anchorsForParagraph(text, witnessSignatureIndex);
@@ -322,26 +337,6 @@ export function replacePlainTextInParagraph(
       fillRpr: AGREEMENT_FILL_RPR,
     }),
   );
-}
-
-/** Insert a hidden AutoPlace run immediately after `find` (same paragraph). */
-export function insertHiddenAnchorAfter(paragraph: string, find: string, anchor: string) {
-  const parsed = parseParagraphAtoms(paragraph);
-  if (!parsed) {
-    return paragraph;
-  }
-  const search = textFromAtoms(parsed.atoms);
-  const idx = search.indexOf(find);
-  if (idx < 0) {
-    return paragraph;
-  }
-  const map = atomIndexByTextOffset(parsed.atoms);
-  const afterAtom = map[idx + find.length - 1]! + 1;
-  return serializeParagraph(parsed, [
-    ...parsed.atoms.slice(0, afterAtom),
-    ...fillAtoms(anchor, HIDDEN_ANCHOR_RPR),
-    ...parsed.atoms.slice(afterAtom),
-  ]);
 }
 
 function parseParagraphAtoms(paragraph: string): ParsedParagraph | null {
