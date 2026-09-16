@@ -34,9 +34,9 @@ export type { DocuSignMode, EnvelopeRecipient };
 export const DEFAULT_ACCOUNT_BASE_URI = "https://demo.docusign.net";
 export const DEFAULT_AUTH_SERVER = "https://account-d.docusign.com";
 
-import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
+import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
 
-export { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR };
+export { DOCUSIGN_ANCHORS };
 
 const REQUIRED_LIVE_VARS = [
   "DOCUSIGN_INTEGRATION_KEY",
@@ -95,10 +95,19 @@ export interface LiveEnvelopeSnapshot {
   buyerSignedDateTime: string | null;
 }
 
+export const DOCUSIGN_DATE_TAB_FONT = "TimesNewRoman" as const;
+export const DOCUSIGN_DATE_TAB_FONT_SIZE = "Size12" as const;
+
 export type DateSignedTab = {
   anchorString: string;
   anchorUnits: "pixels";
   anchorIgnoreIfNotPresent: "false";
+  font: typeof DOCUSIGN_DATE_TAB_FONT;
+  fontSize: typeof DOCUSIGN_DATE_TAB_FONT_SIZE;
+  fontColor: "Black";
+  bold: "false";
+  italic: "false";
+  underline: "false";
 };
 
 type EnvelopeSigner = {
@@ -274,16 +283,18 @@ export function dateSignedTab(anchorString: string): DateSignedTab {
     anchorString,
     anchorUnits: "pixels",
     anchorIgnoreIfNotPresent: "false",
+    font: DOCUSIGN_DATE_TAB_FONT,
+    fontSize: DOCUSIGN_DATE_TAB_FONT_SIZE,
+    fontColor: "Black",
+    bold: "false",
+    italic: "false",
+    underline: "false",
   };
 }
 
-/** Date Signed tabs only — never text tabs the recipient types. */
+/** Signature-block Date Signed tabs only — never body-date or typed text tabs. */
 export function dateSignedAnchorsForRole(role: EnvelopeRecipient["role"]): string[] {
-  const anchors: string[] = [DOCUSIGN_ANCHORS[role].date];
-  if (role === "buyer_signer") {
-    anchors.push(EFFECTIVE_DATE_SIGNED_ANCHOR);
-  }
-  return anchors;
+  return [DOCUSIGN_ANCHORS[role].date];
 }
 
 export function buildEnvelopeDefinition(input: DocuSignSendInput): EnvelopeDefinition {

@@ -14,8 +14,16 @@ import {
   populatedAgreementFilename,
 } from "./agreement-template";
 import { brand, getSellerWitness } from "./brand";
-import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
-import { addOneYear, dealEconomics, formatFormalDate, formatLongDate, numberToWords } from "./money";
+import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+import {
+  addOneYear,
+  dealEconomics,
+  formatFormalDate,
+  formatLongDate,
+  numberToWords,
+  PENDING_EFFECTIVE_DATE_PHRASE,
+  PENDING_EXPIRATION_DATE_PHRASE,
+} from "./money";
 import type { Engagement } from "./types";
 
 const DOCUMENT_XML = "word/document.xml";
@@ -48,9 +56,20 @@ export const EFFECTIVE_DATE_LEFTOVER = "this  day of, 2024";
 /** Van’s Term leftover paragraph starts “, 202 , referred to herein as the “Expiration Date.”” */
 export const EXPIRATION_DATE_LEFTOVER = ", 202 ,";
 
+/**
+ * Van’s body is Times New Roman 12pt (Normal / Body Text, w:sz 24). Filled
+ * dates and intake blanks use this rPr so they read as typed body text, not a
+ * Calibri/theme overlay. Underline is omitted — leftovers were underlined tabs.
+ */
+export const AGREEMENT_FILL_RPR =
+  '<w:rPr><w:rFonts w:ascii="Times New Roman" w:eastAsia="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr>';
+
+const HIDDEN_ANCHOR_RPR =
+  '<w:rPr><w:color w:val="FFFFFF"/><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr>';
+
 export const AGREEMENT_UNMAPPED_GAPS = [
-  "Effective Date leftover (“this  day of, 2024”) — not an intake field; stamped from the Buyer’s Date Signed after they sign (DocuSign complete or manual upload), never from Accept or intake",
-  "Expiration leftover (“, 202 ,”) — derived as addOneYear(Effective Date) and stamped into the stored/regenerated Word after complete; DocuSign cannot formula-fill Date Signed + 1 year on this leftover",
+  "Effective Date leftover (“this  day of, 2024”) — not an intake field; typed into the outgoing Word as “the date Buyer signs this Agreement”, then the calendar stamp after the Buyer signs (complete / manual upload)",
+  "Expiration leftover (leading underlined tab + “, 202 ,”) — typed into the outgoing Word as “one (1) year after the Effective Date,”; calendar addOneYear after complete. DocuSign has no Date Signed + 1 year formula and no template field #3",
   "Buyer email — Van’s notice block has name / address / phone only",
   "Buyer title (“Its:”) — not collected on intake",
   "Relocation county — no matching blank in the Word file",
@@ -101,9 +120,22 @@ export function formatExpirationDateStamp(isoDate: string) {
   return `${formatLongDate(addOneYear(isoDate))},`;
 }
 
+/** Outgoing envelope / unsigned download — same copy as the HTML contract preview. */
+export function formatEffectiveDatePendingStamp() {
+  return PENDING_EFFECTIVE_DATE_PHRASE;
+}
+
+/** Trailing comma matches Van’s “, 202 ,” leftover so the sentence still reads. */
+export function formatExpirationDatePendingStamp() {
+  return `${PENDING_EXPIRATION_DATE_PHRASE},`;
+}
+
 export function buildAgreementDateStamps(engagement: Engagement): Array<[string, string]> {
   if (!engagement.effectiveDate) {
-    return [];
+    return [
+      [EFFECTIVE_DATE_LEFTOVER, formatEffectiveDatePendingStamp()],
+      [EXPIRATION_DATE_LEFTOVER, formatExpirationDatePendingStamp()],
+    ];
   }
   return [
     [EFFECTIVE_DATE_LEFTOVER, formatEffectiveDateStamp(engagement.effectiveDate)],
@@ -189,18 +221,17 @@ export function populateDocumentXml(xml: string, engagement: Engagement): string
 
   return xml.replace(/<w:p\b[\s\S]*?<\/w:p>/g, (paragraph) => {
     const text = paragraphText(paragraph);
-    let next = applyReplacements(text, replacements);
+    let result = applyReplacementsToParagraph(paragraph, replacements);
 
     if (isPrintedNameLabel(text) && printedIndex < printedNames.length) {
-      next = `Printed Name: ${printedNames[printedIndex++]}`;
+      result = rewriteParagraphText(result, `Printed Name: ${printedNames[printedIndex++]}`);
     }
 
     if (text.trim() === "By:" || text.trim() === "By") {
-      next = `By: ${engagement.intake.buyerAttention}`;
+      result = rewriteParagraphText(result, `By: ${engagement.intake.buyerAttention}`);
     }
 
-    let result = next === text ? paragraph : rewriteParagraphText(paragraph, next);
-    const anchors = anchorsForParagraph(text, witnessSignatureIndex, engagement);
+    const anchors = anchorsForParagraph(text, witnessSignatureIndex);
     if (anchors.length > 0) {
       result = appendHiddenAnchors(result, anchors);
     }
@@ -216,10 +247,12 @@ function printedNameValues(engagement: Engagement) {
   return [sellerWitness, engagement.intake.buyerWitnessName, engagement.intake.buyerAttention];
 }
 
-function applyReplacements(text: string, replacements: Array<[string, string]>) {
-  let next = text;
+function applyReplacementsToParagraph(paragraph: string, replacements: Array<[string, string]>) {
+  let next = paragraph;
   for (const [find, replace] of replacements) {
-    next = next.split(find).join(replace);
+    next = replacePlainTextInParagraph(next, find, replace, {
+      consumeLeadingTabs: find === EXPIRATION_DATE_LEFTOVER,
+    });
   }
   return next;
 }
@@ -235,14 +268,7 @@ function isWitnessSignatureParagraph(text: string) {
   return /^(Witness(?:\s*1)?\s+Signature)$/i.test(compact);
 }
 
-function anchorsForParagraph(
-  text: string,
-  witnessSignatureIndex: number,
-  engagement: Engagement,
-) {
-  if (!engagement.effectiveDate && text.includes(EFFECTIVE_DATE_LEFTOVER)) {
-    return [EFFECTIVE_DATE_SIGNED_ANCHOR];
-  }
+function anchorsForParagraph(text: string, witnessSignatureIndex: number) {
   const compact = text.replace(/\s+/g, " ").trim();
   if (compact.includes("By: Name: Andrew V. Pittman, Jr.")) {
     return [DOCUSIGN_ANCHORS.seller_signer.sign, DOCUSIGN_ANCHORS.seller_signer.date];
@@ -269,6 +295,171 @@ function paragraphText(paragraph: string) {
   return [...paragraph.matchAll(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/g)]
     .map((match) => decodeXml(match[1] ?? ""))
     .join("");
+}
+
+type RunAtom =
+  | { kind: "text"; ch: string; rPr: string }
+  | { kind: "tab"; rPr: string };
+
+type ParsedParagraph = {
+  open: string;
+  pPr: string;
+  atoms: RunAtom[];
+};
+
+/**
+ * Replace `find` inside a Word paragraph without collapsing the whole paragraph
+ * into the first run (that left leftover <w:tab/> blanks and inherited the wrong
+ * rPr — dates looked stamped). Optional leading tabs are consumed for Van’s
+ * Expiration leftover, which is an underlined tab plus “, 202 ,”.
+ */
+export function replacePlainTextInParagraph(
+  paragraph: string,
+  find: string,
+  replace: string,
+  options?: { consumeLeadingTabs?: boolean },
+) {
+  if (!find) {
+    return paragraph;
+  }
+  const parsed = parseParagraphAtoms(paragraph);
+  if (!parsed) {
+    return paragraph;
+  }
+  const search = textFromAtoms(parsed.atoms);
+  if (!search.includes(find)) {
+    return paragraph;
+  }
+  return serializeParagraph(
+    parsed,
+    replaceAllInAtoms(parsed.atoms, find, replace, {
+      consumeLeadingTabs: options?.consumeLeadingTabs === true,
+      fillRpr: AGREEMENT_FILL_RPR,
+    }),
+  );
+}
+
+function parseParagraphAtoms(paragraph: string): ParsedParagraph | null {
+  const openMatch = paragraph.match(/^<w:p\b[^>]*>/);
+  if (!openMatch || !paragraph.endsWith("</w:p>")) {
+    return null;
+  }
+  const open = openMatch[0];
+  const inner = paragraph.slice(open.length, -"</w:p>".length);
+  const pPrMatch = inner.match(/^<w:pPr\b[\s\S]*?<\/w:pPr>/);
+  const pPr = pPrMatch?.[0] ?? "";
+  const body = pPrMatch ? inner.slice(pPr.length) : inner;
+  const atoms: RunAtom[] = [];
+  for (const runMatch of body.matchAll(/<w:r\b[\s\S]*?<\/w:r>/g)) {
+    atoms.push(...atomsFromRun(runMatch[0]));
+  }
+  return { open, pPr, atoms };
+}
+
+function atomsFromRun(run: string): RunAtom[] {
+  const rPr = run.match(/<w:rPr>[\s\S]*?<\/w:rPr>/)?.[0] ?? "";
+  const atoms: RunAtom[] = [];
+  const tokenRe = /<w:tab\b[^>]*\/>|<w:tab\b[^>]*>\s*<\/w:tab>|<w:t\b[^>]*>[\s\S]*?<\/w:t>/g;
+  for (const token of run.matchAll(tokenRe)) {
+    const xml = token[0];
+    if (xml.startsWith("<w:tab")) {
+      atoms.push({ kind: "tab", rPr });
+      continue;
+    }
+    const text = decodeXml(xml.match(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/)?.[1] ?? "");
+    for (const ch of text) {
+      atoms.push({ kind: "text", ch, rPr });
+    }
+  }
+  return atoms;
+}
+
+function textFromAtoms(atoms: RunAtom[]) {
+  return atoms.filter((atom) => atom.kind === "text").map((atom) => atom.ch).join("");
+}
+
+function atomIndexByTextOffset(atoms: RunAtom[]) {
+  const map: number[] = [];
+  atoms.forEach((atom, index) => {
+    if (atom.kind === "text") {
+      map.push(index);
+    }
+  });
+  return map;
+}
+
+function fillAtoms(text: string, rPr: string): RunAtom[] {
+  return [...text].map((ch) => ({ kind: "text" as const, ch, rPr }));
+}
+
+function replaceAllInAtoms(
+  atoms: RunAtom[],
+  find: string,
+  replace: string,
+  options: { consumeLeadingTabs: boolean; fillRpr: string },
+) {
+  const search = textFromAtoms(atoms);
+  const matches: number[] = [];
+  let pos = 0;
+  while (pos <= search.length - find.length) {
+    const idx = search.indexOf(find, pos);
+    if (idx < 0) {
+      break;
+    }
+    matches.push(idx);
+    pos = idx + find.length;
+  }
+  if (matches.length === 0) {
+    return atoms;
+  }
+
+  const map = atomIndexByTextOffset(atoms);
+  const fill = fillAtoms(replace, options.fillRpr);
+  let current = atoms;
+  for (const idx of [...matches].reverse()) {
+    let from = map[idx]!;
+    const to = map[idx + find.length - 1]!;
+    if (options.consumeLeadingTabs) {
+      while (from > 0 && atoms[from - 1]?.kind === "tab") {
+        from -= 1;
+      }
+    }
+    current = [...current.slice(0, from), ...fill, ...current.slice(to + 1)];
+  }
+  return current;
+}
+
+function serializeParagraph(parsed: ParsedParagraph, atoms: RunAtom[]) {
+  return `${parsed.open}${parsed.pPr}${serializeAtoms(atoms)}</w:p>`;
+}
+
+function serializeAtoms(atoms: RunAtom[]) {
+  const runs: string[] = [];
+  let index = 0;
+  while (index < atoms.length) {
+    const atom = atoms[index]!;
+    if (atom.kind === "tab") {
+      runs.push(`<w:r>${atom.rPr}<w:tab/></w:r>`);
+      index += 1;
+      continue;
+    }
+    const { rPr } = atom;
+    let text = "";
+    while (index < atoms.length && atoms[index]?.kind === "text" && atoms[index]?.rPr === rPr) {
+      text += (atoms[index] as { ch: string }).ch;
+      index += 1;
+    }
+    if (!text) {
+      continue;
+    }
+    const tAttrs = needsXmlSpace(text) ? ' xml:space="preserve"' : "";
+    runs.push(`<w:r>${rPr}<w:t${tAttrs}>${encodeXml(text)}</w:t></w:r>`);
+  }
+  return runs.join("");
+}
+
+function needsXmlSpace(text: string) {
+  return text.startsWith(" ") || text.endsWith(" ") || text.includes("  ") || text.startsWith("\t");
 }
 
 function rewriteParagraphText(paragraph: string, nextText: string) {

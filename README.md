@@ -180,11 +180,19 @@ The populated Word agreement is the envelope document. Hidden anchor strings (`/
 
 | When | Effective Date | Expiration Date |
 | --- | --- | --- |
-| Accept / envelope send | Left blank (Van’s “this  day of, 2024”). A Buyer **Date Signed** tab (`/date_effective/`) sits on that leftover so the live DocuSign view shows the sign date. | Left blank (Van’s “, 202 ,”). DocuSign has no reliable “Date Signed + 1 year” formula for Word leftovers. |
-| DocuSign completed (Connect / poll / return) | `engagement.effectiveDate` = Buyer `signedDateTime` when the API reports it, else envelope `completedDateTime`. | `addOneYear(effectiveDate)`, formatted into the regenerated / stored executed Word. |
+| Accept / envelope send | Typed into the Word body as **“the date Buyer signs this Agreement”** (Times New Roman 12pt). No `/date_effective/` Date Signed overlay. | Typed into the Word body as **“one (1) year after the Effective Date,”** (consumes the leading underlined tab + `, 202 ,`). No AutoPlace / template field #3. |
+| DocuSign completed (Connect / poll / return) | `engagement.effectiveDate` = Buyer `signedDateTime` when the API reports it, else envelope `completedDateTime`. Regenerated Word stamps “this 15th day of April, 2026” as Times New Roman 12pt body runs. | `addOneYear(effectiveDate)` stamped as “April 15, 2027,” in the same body face. Stored as `{id}-executed-agreement.docx`; contract download regenerates the same stamps. |
 | Manual signed upload | `engagement.effectiveDate` = upload time (already in `applySignedArtifact`). | Same +1 year stamp into the stored executed Word. |
 
-The DocuSign combined PDF is the signed artifact (signatures + Date Signed tabs, including the body Effective Date). Expiration is stamped after complete into the populated Word (`{id}-executed-agreement.docx` and any later contract download). That is not a bait-and-switch: Accept never writes a guessed calendar date into the body.
+Signature-block `/date_*` strings remain Date Signed tabs (auto-fill when that recipient signs), styled Times New Roman 12pt. Body dates are never DocuSign tabs — Formula tabs are numeric-only, and a sent envelope cannot replace the Word file after the Buyer signs.
+
+The DocuSign combined PDF is the signed artifact (signatures + signature-block Date Signed tabs). Body Effective / Expiration in that PDF are the typed phrases from populate-at-send. Calendar dates land in the stored/regenerated Word after complete. Accept never writes a guessed calendar day into the body.
+
+**How to verify without live DocuSign credentials**
+
+1. `npx vitest run lib/agreement-populate.test.ts lib/docusign.test.ts` — send-time populate contains the pending phrases and **not** `, 202 ,` / `/date_effective/`; date runs use `AGREEMENT_FILL_RPR`; envelope Date Signed tabs are signature-block only (`TimesNewRoman` / `Size12`).
+2. Populate with `effectiveDate: "2026-04-15"` (complete/upload → `persistExecutedAgreement`): `this 15th day of April, 2026` and `April 15, 2027,`.
+3. Wiring: `lib/docusign-complete.ts`, admin Simulate DocuSign signed, and manual signed upload all call `persistExecutedAgreement`.
 
 ### Environment variables
 

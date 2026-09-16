@@ -7,6 +7,8 @@ import {
   formatLongDate,
   formatUsd,
   numberToWords,
+  PENDING_EFFECTIVE_DATE_PHRASE,
+  PENDING_EXPIRATION_DATE_PHRASE,
   usdInWords,
 } from "./money";
 import {
@@ -46,9 +48,9 @@ function sellerWitnessLine(intake: IntakeFields) {
 function agreementDates(engagement: Engagement) {
   if (!engagement.effectiveDate) {
     return {
-      effectiveDate: "the date Buyer signs this Agreement",
-      effectiveFormal: "the date Buyer signs this Agreement",
-      expirationDate: "one (1) year after the Effective Date",
+      effectiveDate: PENDING_EFFECTIVE_DATE_PHRASE,
+      effectiveFormal: PENDING_EFFECTIVE_DATE_PHRASE,
+      expirationDate: PENDING_EXPIRATION_DATE_PHRASE,
     };
   }
 
