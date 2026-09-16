@@ -5,6 +5,7 @@ import { strFromU8, unzipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import {
   AGREEMENT_FIELD_MAP,
+  AGREEMENT_FILL_RPR,
   AGREEMENT_UNMAPPED_GAPS,
   EFFECTIVE_DATE_LEFTOVER,
   EXPIRATION_DATE_LEFTOVER,
@@ -12,8 +13,10 @@ import {
   formatEffectiveDateStamp,
   formatExpirationDateStamp,
   generatePopulatedAgreement,
+  insertHiddenAnchorAfter,
   populateAgreementDocx,
   populateAgreementFromParts,
+  replacePlainTextInParagraph,
 } from "./agreement-populate";
 import {
   BLANK_AGREEMENT_DOCX_SHA256,
@@ -301,4 +304,112 @@ describe("Van’s Word agreement populate", () => {
     expect(signed).not.toContain(EXPIRATION_DATE_LEFTOVER);
     expect(signed).not.toContain(EFFECTIVE_DATE_SIGNED_ANCHOR);
   });
+
+  it("stamps dates as Times New Roman 12pt body runs and consumes leftover tabs", () => {
+    const leftoverXml =
+      `<w:p><w:pPr></w:pPr><w:r><w:rPr><w:u w:val="single"/></w:rPr><w:tab/></w:r>` +
+      `<w:r><w:t xml:space="preserve">, </w:t></w:r><w:r><w:t>202</w:t></w:r>` +
+      `<w:r><w:t xml:space="preserve"> </w:t></w:r><w:r><w:t>,</w:t></w:r>` +
+      `<w:r><w:t xml:space="preserve"> referred to herein as the “Expiration Date.”</w:t></w:r></w:p>`;
+    const stampedLeftover = replacePlainTextInParagraph(
+      leftoverXml,
+      EXPIRATION_DATE_LEFTOVER,
+      formatExpirationDateStamp("2026-04-15"),
+      { consumeLeadingTabs: true },
+    );
+    expect(stampedLeftover).toContain("April 15, 2027,");
+    expect(stampedLeftover).toContain("Times New Roman");
+    expect(stampedLeftover).toContain(AGREEMENT_FILL_RPR);
+    expect(stampedLeftover).not.toContain("<w:tab/>");
+    expect(stampedLeftover).not.toContain(EXPIRATION_DATE_LEFTOVER);
+    expect(stampedLeftover).toContain("Expiration Date");
+
+    const withAnchor = insertHiddenAnchorAfter(
+      `<w:p><w:r><w:t>this  day of, 2024, (hereinafter)</w:t></w:r></w:p>`,
+      EFFECTIVE_DATE_LEFTOVER,
+      EFFECTIVE_DATE_SIGNED_ANCHOR,
+    );
+    expect(withAnchor.indexOf(EFFECTIVE_DATE_LEFTOVER)).toBeGreaterThan(-1);
+    expect(withAnchor.indexOf(EFFECTIVE_DATE_SIGNED_ANCHOR)).toBeGreaterThan(
+      withAnchor.indexOf(EFFECTIVE_DATE_LEFTOVER),
+    );
+    expect(withAnchor.indexOf(EFFECTIVE_DATE_SIGNED_ANCHOR)).toBeLessThan(withAnchor.indexOf("(hereinafter)"));
+
+    const blank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
+    const unsignedXml = strFromU8(unzipSync(populateAgreementDocx(blank, engagement()))["word/document.xml"]!);
+    const signedXml = strFromU8(
+      unzipSync(populateAgreementDocx(blank, engagement({ effectiveDate: "2026-04-15" })))[
+        "word/document.xml"
+      ]!,
+    );
+
+    const unsignedOpening = paragraphContaining(unsignedXml, EFFECTIVE_DATE_LEFTOVER);
+    const unsignedOpeningText = paragraphPlainText(unsignedOpening);
+    expect(unsignedOpeningText.indexOf(EFFECTIVE_DATE_SIGNED_ANCHOR)).toBeGreaterThan(
+      unsignedOpeningText.indexOf(EFFECTIVE_DATE_LEFTOVER),
+    );
+    expect(unsignedOpeningText.indexOf(EFFECTIVE_DATE_SIGNED_ANCHOR)).toBeLessThan(
+      unsignedOpeningText.lastIndexOf("Parties"),
+    );
+    // Buyer fill must not collapse the opening paragraph (bold legal terms stay).
+    expect(unsignedOpening).toMatch(/<w:b\/>\s*<w:sz w:val="24"\/>\s*<\/w:rPr>\s*<w:t>Agreement<\/w:t>/);
+
+    const signedOpening = paragraphContaining(signedXml, "this 15th day of April, 2026");
+    expect(signedOpening).toContain(AGREEMENT_FILL_RPR);
+    expect(signedOpening).not.toContain(EFFECTIVE_DATE_LEFTOVER);
+    expect(signedOpening).not.toContain("<w:tab/>");
+    expect(signedOpening).toMatch(/<w:b\/>\s*<w:sz w:val="24"\/>\s*<\/w:rPr>\s*<w:t>Agreement<\/w:t>/);
+
+    const expirationPara = paragraphContaining(signedXml, "April 15, 2027,");
+    expect(expirationPara).toContain(AGREEMENT_FILL_RPR);
+    expect(expirationPara).not.toContain(EXPIRATION_DATE_LEFTOVER);
+    expect(expirationPara).not.toContain("<w:tab/>");
+    expect(expirationPara).toContain("<w:b/>");
+    expect(expirationPara).toContain("Expiration Date");
+    expect(dateRunTypography(expirationPara, "April 15, 2027,")).toContain("Times New Roman");
+    expect(dateRunTypography(expirationPara, "April 15, 2027,")).not.toContain("<w:u ");
+  });
+
+  it("stamps Effective/Expiration on the DocuSign complete and manual-upload paths", () => {
+    const completeSrc = readFileSync(resolve(process.cwd(), "lib/docusign-complete.ts"), "utf8");
+    const executedSrc = readFileSync(resolve(process.cwd(), "lib/executed-agreement.ts"), "utf8");
+    const adminSrc = readFileSync(ADMIN_ACTIONS, "utf8");
+    const uploadSrc = readFileSync(resolve(process.cwd(), "app/actions/engagements.ts"), "utf8");
+    expect(executedSrc).toContain("generatePopulatedAgreement");
+    expect(executedSrc).toContain("executed-agreement.docx");
+    expect(completeSrc).toContain("persistExecutedAgreement(next)");
+    expect(adminSrc).toContain("persistExecutedAgreement(executed)");
+    expect(uploadSrc).toContain("persistExecutedAgreement(next)");
+  });
 });
+
+function paragraphContaining(xml: string, needle: string) {
+  const match = [...xml.matchAll(/<w:p\b[\s\S]*?<\/w:p>/g)].find((row) => {
+    if (row[0].includes(needle)) {
+      return true;
+    }
+    const plain = [...row[0].matchAll(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/g)]
+      .map((token) => token[1] ?? "")
+      .join("");
+    return plain.includes(needle);
+  });
+  if (!match) {
+    throw new Error(`No paragraph contained ${needle}`);
+  }
+  return match[0];
+}
+
+function paragraphPlainText(paragraph: string) {
+  return [...paragraph.matchAll(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/g)]
+    .map((token) => token[1] ?? "")
+    .join("");
+}
+
+function dateRunTypography(paragraph: string, dateText: string) {
+  const runs = [...paragraph.matchAll(/<w:r\b[\s\S]*?<\/w:r>/g)].map((row) => row[0]);
+  const run = runs.find((row) => row.includes(dateText));
+  if (!run) {
+    throw new Error(`No run contained ${dateText}`);
+  }
+  return run;
+}

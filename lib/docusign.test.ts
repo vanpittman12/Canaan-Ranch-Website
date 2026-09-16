@@ -10,6 +10,8 @@ import {
   createJwtAssertion,
   dateSignedAnchorsForRole,
   describeDocuSignSeam,
+  DOCUSIGN_DATE_TAB_FONT,
+  DOCUSIGN_DATE_TAB_FONT_SIZE,
   DOCUSIGN_ENV_VARS,
   extractBuyerSignedDateTime,
   getLiveEnvelopeStatus,
@@ -362,7 +364,13 @@ describe("DocuSign Connect and polling", () => {
       );
       expect(
         signer?.tabs.dateSignedTabs.every(
-          (tab) => tab.anchorUnits === "pixels" && tab.anchorIgnoreIfNotPresent === "false",
+          (tab) =>
+            tab.anchorUnits === "pixels" &&
+            tab.anchorIgnoreIfNotPresent === "false" &&
+            tab.font === DOCUSIGN_DATE_TAB_FONT &&
+            tab.fontSize === DOCUSIGN_DATE_TAB_FONT_SIZE &&
+            tab.fontColor === "Black" &&
+            tab.underline === "false",
         ),
       ).toBe(true);
     }

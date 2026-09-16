@@ -95,10 +95,19 @@ export interface LiveEnvelopeSnapshot {
   buyerSignedDateTime: string | null;
 }
 
+export const DOCUSIGN_DATE_TAB_FONT = "TimesNewRoman" as const;
+export const DOCUSIGN_DATE_TAB_FONT_SIZE = "Size12" as const;
+
 export type DateSignedTab = {
   anchorString: string;
   anchorUnits: "pixels";
   anchorIgnoreIfNotPresent: "false";
+  font: typeof DOCUSIGN_DATE_TAB_FONT;
+  fontSize: typeof DOCUSIGN_DATE_TAB_FONT_SIZE;
+  fontColor: "Black";
+  bold: "false";
+  italic: "false";
+  underline: "false";
 };
 
 type EnvelopeSigner = {
@@ -274,6 +283,12 @@ export function dateSignedTab(anchorString: string): DateSignedTab {
     anchorString,
     anchorUnits: "pixels",
     anchorIgnoreIfNotPresent: "false",
+    font: DOCUSIGN_DATE_TAB_FONT,
+    fontSize: DOCUSIGN_DATE_TAB_FONT_SIZE,
+    fontColor: "Black",
+    bold: "false",
+    italic: "false",
+    underline: "false",
   };
 }
 

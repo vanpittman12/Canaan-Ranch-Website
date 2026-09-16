@@ -4,8 +4,9 @@
  *
  * Signature-block `date` strings are Date Signed tabs (auto-fill on sign),
  * not text tabs the recipient types. `/date_effective/` is an extra Date Signed
- * tab for the Buyer on the body Effective Date leftover so the live envelope
- * shows the sign date. Expiration is stamped after complete (no DocuSign
+ * tab for the Buyer, inserted immediately after Van’s Effective Date leftover
+ * so the live envelope shows the sign date on that leftover (Times New Roman
+ * 12pt). Expiration is stamped after complete (no DocuSign
  * “Date Signed + 1 year” formula for Word leftovers).
  */
 export const DOCUSIGN_ANCHORS = {
