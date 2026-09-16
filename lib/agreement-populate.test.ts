@@ -136,6 +136,8 @@ describe("Van’s Word agreement populate", () => {
     expect(text).toContain("Initial Payment");
     expect(text).toContain("$6,000.00");
     expect(text).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
+    expect(text).toContain("Harbour tract");
+    expect(text).not.toContain("Multi-Project Relocation Agreement");
     expect(text).not.toContain("This Multi-Project Gopher Tortoise Relocation Agreement");
     expect(text).not.toContain("Canaan Ranch LLP, a Florida limited liability partnership");
     expect(text).not.toContain("Hillsborough");
@@ -282,10 +284,44 @@ describe("Van’s Word agreement populate", () => {
   it("documents the Word blanks that intake cannot fill yet", () => {
     expect(AGREEMENT_FIELD_MAP.length).toBeGreaterThanOrEqual(8);
     expect(AGREEMENT_FIELD_MAP.some((row) => row.source === "intake.buyerTitle")).toBe(true);
+    expect(AGREEMENT_FIELD_MAP.some((row) => row.source === "intake.donorSiteName")).toBe(true);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/Buyer email/i);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/Effective Date/i);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/county/i);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).not.toMatch(/Buyer title/i);
+    expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).not.toMatch(/donor site name/i);
+  });
+
+  it("stamps project name onto the Heading2 subtitle leftover only", () => {
+    const blank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
+    const blankText = extractDocxPlainText(blank);
+    expect(blankText).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
+    expect(blankText).toContain("Multi-Project Relocation Agreement");
+
+    const populated = populateAgreementDocx(blank, engagement());
+    const text = extractDocxPlainText(populated);
+    const xml = strFromU8(unzipSync(populated)["word/document.xml"]!);
+    expect(text).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
+    expect(text).toContain("Harbour tract");
+    expect(text).not.toContain("Multi-Project Relocation Agreement");
+    expect(paragraphContaining(xml, "Harbour tract")).toContain('w:val="Heading2"');
+    expect(paragraphContaining(xml, "GOPHER")).toMatch(/GOPHER[\s\S]*TORTOISE[\s\S]*RELOCATION[\s\S]*AGREEMENT/);
+
+    const oak = extractDocxPlainText(
+      populateAgreementDocx(
+        blank,
+        engagement({ intake: { ...intake, donorSiteName: "  Oak Grove Phase 2  " } }),
+      ),
+    );
+    expect(oak).toContain("Oak Grove Phase 2");
+    expect(oak).not.toContain("Multi-Project Relocation Agreement");
+    expect(oak).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
+
+    const emptyName = extractDocxPlainText(
+      populateAgreementDocx(blank, engagement({ intake: { ...intake, donorSiteName: "   " } })),
+    );
+    expect(emptyName).toContain("Multi-Project Relocation Agreement");
+    expect(emptyName).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
   });
 
   it("stamps buyer title into the buyer Its: leftover and leaves the seller Its: line alone", () => {

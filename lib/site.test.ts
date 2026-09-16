@@ -130,7 +130,23 @@ describe("public site SEO and copy hygiene", () => {
     expect(intakeForm).toContain("advanceGate");
     expect(intakeForm).toContain("tryGoTo");
     expect(intakeForm).toContain("tryGoTo(REVIEW_STEP_ID)");
+    expect(intakeForm).toContain("continueControlLabel");
+    expect(intakeForm).toContain("intakeFormSubmitIntent");
+    expect(intakeForm).toContain('key="intake-continue"');
+    expect(intakeForm).toContain('key="intake-submit"');
+    expect(intakeForm).toContain('data-intake-continue="true"');
+    expect(intakeForm).toContain('data-intake-submit="true"');
+    expect(intakeForm).toContain("submitArmed");
+    expect(intakeForm).toContain("submitReady");
+    expect(intakeForm).toContain("requestAnimationFrame");
+    expect(intakeForm).toContain("submitReady ? formAction : undefined");
+    expect(intakeForm).not.toMatch(
+      /step === REVIEW_STEP_ID \?\s*\(\s*<button[\s\S]*type="submit"/,
+    );
     expect(intakeForm).toContain(
+      "Continue or click any step to browse. Required fields are checked when you submit on Review.",
+    );
+    expect(intakeForm).not.toContain(
       "Required fields must be complete before Continue or Review.",
     );
   });

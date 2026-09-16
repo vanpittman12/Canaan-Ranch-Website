@@ -48,12 +48,15 @@ export const AGREEMENT_FIELD_MAP = [
   { placeholder: "Printed Name: (buyer signatory)", source: "intake.buyerAttention" },
   { placeholder: "By: (buyer)", source: "intake.buyerAttention" },
   { placeholder: "Its: (buyer)", source: "intake.buyerTitle" },
+  { placeholder: "Multi-Project Relocation Agreement", source: "intake.donorSiteName" },
 ] as const;
 
 /** Van’s opening leftover: “entered into this  day of, 2024,” */
 export const EFFECTIVE_DATE_LEFTOVER = "this  day of, 2024";
 /** Van’s Term leftover paragraph starts “, 202 , referred to herein as the “Expiration Date.”” */
 export const EXPIRATION_DATE_LEFTOVER = ", 202 ,";
+/** Van’s Heading2 subtitle under GOPHER TORTOISE RELOCATION AGREEMENT. */
+export const PROJECT_SUBTITLE_LEFTOVER = "Multi-Project Relocation Agreement";
 
 /**
  * Van’s body is Times New Roman 12pt (Normal / Body Text, w:sz 24). Filled
@@ -72,7 +75,7 @@ export const AGREEMENT_UNMAPPED_GAPS = [
   "Buyer email — Van’s notice block has name / address / phone only",
   "Relocation county — no matching blank in the Word file",
   "Buyer authorized agent name/company — Word only blanks Canaan Agent",
-  "Donor company affiliation, donor site name, and project description — no Word blanks",
+  "Donor company affiliation and project description — no Word blanks",
   "Buyer / seller witness emails — used for DocuSign routing, not printed in the file",
   "Per GT Rate body text stays $6,000.00; an admin rate override updates only the Total Estimated Payment blank",
 ] as const;
@@ -223,6 +226,13 @@ export function populateDocumentXml(xml: string, engagement: Engagement): string
       }
     }
 
+    if (isProjectSubtitleLeftover(text)) {
+      const projectName = engagement.intake.donorSiteName.trim();
+      if (projectName) {
+        result = rewriteParagraphText(result, projectName);
+      }
+    }
+
     const anchors = anchorsForParagraph(text, witnessSignatureIndex);
     if (anchors.length > 0) {
       result = appendHiddenAnchors(result, anchors);
@@ -256,6 +266,11 @@ function isPrintedNameLabel(text: string) {
 /** Buyer signature leftover is a paragraph of only “Its:” (seller already has a title). */
 function isBuyerItsLabel(text: string) {
   return /^Its:?\s*$/.test(text.trim());
+}
+
+/** Exact Heading2 leftover under the main GOPHER TORTOISE heading — not body “project” text. */
+function isProjectSubtitleLeftover(text: string) {
+  return text.replace(/\s+/g, " ").trim() === PROJECT_SUBTITLE_LEFTOVER;
 }
 
 function isWitnessSignatureParagraph(text: string) {

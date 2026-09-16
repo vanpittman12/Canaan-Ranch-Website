@@ -177,6 +177,8 @@ When `DOCUSIGN_ENABLED=true`, intake submit (DocuSign path) sends a live envelop
 
 The populated Word agreement is the envelope document. Hidden anchor strings (`/sn_buyer/`, `/wit_buyer/`, `/sn_seller/`, `/wit_seller/`, plus matching `/date_*` strings) are injected into the populated copy only so Sign Here and **Date Signed** tabs can place. Those date anchors are `dateSignedTabs` (auto-fill when that recipient signs) — not typed text fields.
 
+Each Sign Here / Date Signed tab also sends `anchorUnits: "pixels"` plus per-role `anchorXOffset` / `anchorYOffset` (see `DOCUSIGN_TAB_OFFSETS` in [`lib/docusign-anchors.ts`](lib/docusign-anchors.ts)) so the stamp sits on the By: / Witness underline instead of on the printed name. Positive X is right; positive Y is down. After a live `demo.docusign.net` visual check, re-tune those pixel strings only — do not store the agreement as a DocuSign-hosted template.
+
 **Effective Date and Expiration**
 
 | When | Effective Date | Expiration Date |
