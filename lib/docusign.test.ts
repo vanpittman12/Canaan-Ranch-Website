@@ -411,7 +411,7 @@ describe("DocuSign Connect and polling", () => {
     expect(Number(dateSignedTabForRole("seller_signer").anchorXOffset)).toBeLessThan(
       Number(dateSignedTabForRole("buyer_signer").anchorXOffset),
     );
-    expect(signHereTab("buyer_witness")).toEqual(signHereTab("seller_witness"));
+    expect(DOCUSIGN_TAB_OFFSETS.buyer_witness).toEqual(DOCUSIGN_TAB_OFFSETS.seller_witness);
   });
 
   it("reads the Buyer Date Signed from an envelope or Connect payload", () => {
