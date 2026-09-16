@@ -396,9 +396,10 @@ describe("Van’s Word agreement populate", () => {
       ]!,
     );
 
-    const unsignedOpening = paragraphContaining(unsignedXml, EFFECTIVE_DATE_LEFTOVER);
+    const unsignedOpening = paragraphContaining(unsignedXml, EFFECTIVE_DATE_SIGNED_ANCHOR);
     expect(unsignedOpening).toContain(EFFECTIVE_DATE_SIGNED_ANCHOR);
-    expect(unsignedOpening).toContain(EFFECTIVE_DATE_LEFTOVER);
+    expect(unsignedOpening).toContain("entered into this");
+    expect(unsignedOpening).toContain("2024,");
     expect(unsignedOpening).not.toContain(PENDING_EFFECTIVE_DATE_PHRASE);
     // Buyer fill must not collapse the opening paragraph (bold legal terms stay).
     expect(unsignedOpening).toMatch(/<w:b\/>\s*<w:sz w:val="24"\/>\s*<\/w:rPr>\s*<w:t>Agreement<\/w:t>/);
