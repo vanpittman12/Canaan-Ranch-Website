@@ -42,6 +42,7 @@ export function createEmptyEngagement(intake: IntakeFields): Engagement {
     submittedAt: null,
     acceptedAt: null,
     executedAt: null,
+    archivedAt: null,
   };
 }
 

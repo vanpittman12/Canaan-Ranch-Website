@@ -69,6 +69,7 @@ function draft(): Engagement {
     submittedAt: null,
     acceptedAt: null,
     executedAt: null,
+    archivedAt: null,
   };
 }
 

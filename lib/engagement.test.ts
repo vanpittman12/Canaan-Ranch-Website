@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   applyDocuSignCompleted,
   applyDocuSignSent,
+  applyHideFromLedger,
+  applyMarkDeclined,
   applyReview,
   applySignedArtifact,
   applySubmit,
@@ -9,8 +11,10 @@ import {
   canReview,
   canSubmitForReview,
   isAwaitingSellerSignature,
+  isHiddenFromLedger,
   isOpenEngagement,
   nextStatusAfterAccept,
+  reviewLedgerItems,
 } from "./engagement";
 import {
   emptyReservationLetter,
@@ -71,6 +75,7 @@ function draft(): Engagement {
     submittedAt: null,
     acceptedAt: null,
     executedAt: null,
+    archivedAt: null,
   };
 }
 
@@ -267,6 +272,86 @@ describe("engagement status machine", () => {
       uploadedAt: "2026-06-03T16:00:00.000Z",
     });
     expect(executed.effectiveDate).toBe("2026-09-16");
+  });
+
+  it("soft-hides any status from the review ledger without dropping stored data", () => {
+    const statuses = [
+      "draft",
+      "pending_review",
+      "changes_requested",
+      "declined",
+      "accepted",
+      "executed",
+    ] as const;
+    for (const status of statuses) {
+      const source = {
+        ...draft(),
+        status,
+        docusign: {
+          ...draft().docusign,
+          envelopeId: "env-keep-1",
+          status: "sent" as const,
+        },
+        signedArtifact: artifact(),
+      };
+      const hidden = applyHideFromLedger(source);
+      expect(hidden.status).toBe(status);
+      expect(hidden.archivedAt).toBe("2026-04-01T18:00:00.000Z");
+      expect(hidden.docusign.envelopeId).toBe("env-keep-1");
+      expect(hidden.signedArtifact?.storedName).toBe("eng-1-signed.pdf");
+      expect(isHiddenFromLedger(hidden)).toBe(true);
+      expect(() => applyHideFromLedger(hidden)).toThrow(/already hidden/i);
+    }
+  });
+
+  it("keeps archivedAt through submit and review so hidden deals stay off the ledger", () => {
+    const hiddenDraft = applyHideFromLedger(draft());
+    const submitted = applySubmit(hiddenDraft, "manual");
+    expect(submitted.archivedAt).toBe("2026-04-01T18:00:00.000Z");
+    expect(isHiddenFromLedger(submitted)).toBe(true);
+    const reviewed = applyReview(submitted, "accept", "");
+    expect(reviewed.archivedAt).toBe("2026-04-01T18:00:00.000Z");
+    expect(reviewLedgerItems([reviewed])).toEqual([]);
+    expect(reviewLedgerItems([reviewed], { includeHidden: true })).toEqual([reviewed]);
+  });
+
+  it("marks any non-declined status as declined without dropping stored data", () => {
+    const statuses = [
+      "draft",
+      "pending_review",
+      "changes_requested",
+      "accepted",
+      "executed",
+    ] as const;
+    for (const status of statuses) {
+      const source = {
+        ...draft(),
+        status,
+        docusign: {
+          ...draft().docusign,
+          envelopeId: "env-keep-2",
+          status: "sent" as const,
+        },
+        signedArtifact: artifact(),
+      };
+      const declined = applyMarkDeclined(source);
+      expect(declined.status).toBe("declined");
+      expect(declined.archivedAt).toBeNull();
+      expect(declined.docusign.envelopeId).toBe("env-keep-2");
+      expect(declined.signedArtifact?.storedName).toBe("eng-1-signed.pdf");
+      expect(declined.reviews.at(-1)?.decision).toBe("decline");
+      expect(reviewLedgerItems([declined])).toEqual([declined]);
+      expect(() => applyMarkDeclined(declined)).toThrow(/already declined/i);
+    }
+  });
+
+  it("omits hidden rows from the default ledger and lists them when asked", () => {
+    const open = draft();
+    const hidden = applyHideFromLedger({ ...draft(), id: "eng-hidden" });
+    expect(reviewLedgerItems([open, hidden]).map((item) => item.id)).toEqual(["eng-1"]);
+    expect(reviewLedgerItems([open, hidden], { includeHidden: true }).map((item) => item.id)).toEqual([
+      "eng-hidden",
+    ]);
   });
 
   it("recovers Effective Date from submittedAt when the stored field is missing", () => {

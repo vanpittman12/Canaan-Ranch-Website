@@ -60,6 +60,70 @@ export function isOpenEngagement(status: EngagementStatus) {
   );
 }
 
+export function isHiddenFromLedger(engagement: Pick<Engagement, "archivedAt">) {
+  return Boolean(engagement.archivedAt);
+}
+
+/** Default ledger omits hidden rows. Pass includeHidden to audit archived deals. */
+export function reviewLedgerItems(
+  engagements: Engagement[],
+  options: { includeHidden?: boolean } = {},
+) {
+  if (options.includeHidden) {
+    return engagements.filter(isHiddenFromLedger);
+  }
+  return engagements.filter((item) => !isHiddenFromLedger(item));
+}
+
+/**
+ * Soft-hide from the admin review ledger. Allowed for every status.
+ * Does not delete the D1 payload, R2 artifacts, or DocuSign envelope data.
+ */
+export function applyHideFromLedger(engagement: Engagement): Engagement {
+  if (isHiddenFromLedger(engagement)) {
+    throw new EngagementError(
+      "This engagement is already hidden from the review ledger.",
+    );
+  }
+
+  const now = new Date().toISOString();
+  return {
+    ...engagement,
+    archivedAt: now,
+    updatedAt: now,
+  };
+}
+
+/**
+ * Move any non-declined engagement to declined so it leaves the active
+ * review queue but remains visible on the ledger under Declined.
+ * Does not delete the D1 payload, R2 artifacts, or DocuSign data.
+ */
+export function applyMarkDeclined(
+  engagement: Engagement,
+  reviewer = "Canaan Preserve team",
+): Engagement {
+  if (engagement.status === "declined") {
+    throw new EngagementError("This engagement is already declined.");
+  }
+
+  const now = new Date().toISOString();
+  return {
+    ...engagement,
+    status: "declined",
+    updatedAt: now,
+    reviews: [
+      ...engagement.reviews,
+      {
+        decision: "decline",
+        note: "Marked declined from the admin review ledger.",
+        reviewedAt: now,
+        reviewer,
+      },
+    ],
+  };
+}
+
 export function nextStatusAfterAccept(
   hasSignedArtifact: boolean,
   signingMethod: SigningMethod | null = null,

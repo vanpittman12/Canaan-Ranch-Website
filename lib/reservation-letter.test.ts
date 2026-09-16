@@ -62,6 +62,7 @@ function engagement(overrides: Partial<Engagement> = {}): Engagement {
     submittedAt: "2026-04-01T12:00:00.000Z",
     acceptedAt: "2026-04-02T15:30:00.000Z",
     executedAt: null,
+    archivedAt: null,
     ...overrides,
   };
 }

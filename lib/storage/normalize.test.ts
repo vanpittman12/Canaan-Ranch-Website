@@ -34,6 +34,7 @@ describe("engagement normalize", () => {
     expect(engagement.effectiveDate).toBe("2026-04-15");
     expect(engagement.docusign.status).toBe("not_sent");
     expect(engagement.docusign.recipients).toEqual([]);
+    expect(engagement.archivedAt).toBeNull();
   });
 
   it("maps a legacy live_placeholder DocuSign mode to live", () => {
@@ -61,5 +62,26 @@ describe("engagement normalize", () => {
     expect(engagement.docusign.envelopeId).toBe("env-1");
     expect(engagement.reservationLetter.status).toBe("none");
     expect(engagement.reservationLetter.sentAt).toBeNull();
+    expect(engagement.archivedAt).toBeNull();
+  });
+
+  it("keeps a stored archivedAt so soft-deleted ledger rows stay hidden", () => {
+    const engagement = normalizeEngagement({
+      id: "eng-1",
+      reference: "CP-2026-TEST",
+      status: "executed",
+      intake: { buyerLegalName: "Suncoast" },
+      signingMethod: "docusign",
+      signedArtifact: null,
+      reviews: [],
+      changeRequestNote: null,
+      createdAt: "2026-04-01T00:00:00.000Z",
+      updatedAt: "2026-04-01T00:00:00.000Z",
+      submittedAt: null,
+      acceptedAt: null,
+      executedAt: null,
+      archivedAt: "2026-09-16T18:00:00.000Z",
+    });
+    expect(engagement.archivedAt).toBe("2026-09-16T18:00:00.000Z");
   });
 });

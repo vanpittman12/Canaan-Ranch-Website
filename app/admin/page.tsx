@@ -4,8 +4,9 @@ import { EmptyState } from "@/components/empty-state";
 import { SiteHeader } from "@/components/site-header";
 import { StatusBadge } from "@/components/status-badge";
 import { describeDocuSignSeam } from "@/lib/docusign";
+import { HideFromLedgerForm } from "@/components/hide-from-ledger-form";
 import { listEngagements } from "@/lib/store";
-import { isAwaitingSellerSignature } from "@/lib/engagement";
+import { isAwaitingSellerSignature, reviewLedgerItems } from "@/lib/engagement";
 import {
   LETTER_STATUS_LABELS,
   STATUS_PILL_LABELS,
@@ -18,16 +19,21 @@ export const dynamic = "force-dynamic";
 export default async function AdminQueuePage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; archived?: string }>;
 }) {
   await requireAdmin();
-  const { status } = await searchParams;
+  const { status, archived } = await searchParams;
+  const showHidden = archived === "1";
   const filter = (status ?? "all") as EngagementStatus | "all";
   const engagements = await listEngagements();
+  const ledger = reviewLedgerItems(engagements, { includeHidden: showHidden });
   const visible =
-    filter === "all" ? engagements : engagements.filter((item) => item.status === filter);
-  const pendingCount = engagements.filter((item) => item.status === "pending_review").length;
-  const awaitingSellerCount = engagements.filter((item) =>
+    showHidden || filter === "all"
+      ? ledger
+      : ledger.filter((item) => item.status === filter);
+  const activeCountBase = reviewLedgerItems(engagements);
+  const pendingCount = activeCountBase.filter((item) => item.status === "pending_review").length;
+  const awaitingSellerCount = activeCountBase.filter((item) =>
     isAwaitingSellerSignature(item.status),
   ).length;
   const seam = describeDocuSignSeam();
@@ -60,7 +66,7 @@ export default async function AdminQueuePage({
         </div>
 
         <div className="pill-row mt-8">
-          <FilterLink href="/admin" active={filter === "all"} label="All" />
+          <FilterLink href="/admin" active={!showHidden && filter === "all"} label="All" />
           {(
             [
               "pending_review",
@@ -74,17 +80,26 @@ export default async function AdminQueuePage({
             <FilterLink
               key={value}
               href={`/admin?status=${value}`}
-              active={filter === value}
+              active={!showHidden && filter === value}
               label={STATUS_PILL_LABELS[value]}
             />
           ))}
+          <FilterLink
+            href="/admin?archived=1"
+            active={showHidden}
+            label="Hidden"
+          />
         </div>
 
         <div className="mt-8 overflow-hidden rounded-[16px] border border-line bg-white">
           {visible.length === 0 ? (
             <EmptyState
-              title="The ledger is clear."
-              body="New client intake submissions will appear here for Accept, request changes, or decline."
+              title={showHidden ? "No hidden engagements." : "The ledger is clear."}
+              body={
+                showHidden
+                  ? "Hidden deals stay on file in D1 and R2. They are omitted from the default ledger."
+                  : "New client intake submissions will appear here for Accept, request changes, or decline."
+              }
             />
           ) : (
             <>
@@ -99,6 +114,7 @@ export default async function AdminQueuePage({
                       <th className="px-4 py-3 font-semibold">Signing</th>
                       <th className="px-4 py-3 font-semibold">Letter</th>
                       <th className="px-4 py-3 font-semibold">Status</th>
+                      <th className="px-4 py-3 font-semibold">Ledger</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -125,6 +141,13 @@ export default async function AdminQueuePage({
                         <StatusBadge status={item.status} />
                       </div>
                     </Link>
+                    <div className="mt-3">
+                      <HideFromLedgerForm
+                        engagementId={item.id}
+                        archivedAt={item.archivedAt}
+                        variant="compact"
+                      />
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -165,6 +188,13 @@ function LedgerRow({ item }: { item: Engagement }) {
       </td>
       <td className="px-4 py-3">
         <StatusBadge status={item.status} />
+      </td>
+      <td className="px-4 py-3">
+        <HideFromLedgerForm
+          engagementId={item.id}
+          archivedAt={item.archivedAt}
+          variant="compact"
+        />
       </td>
     </tr>
   );

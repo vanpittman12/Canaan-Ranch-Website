@@ -49,6 +49,7 @@ describe("file store", () => {
   it("creates, lists, updates, and stores uploads", async () => {
     const created = await fileStore.createEngagementRecord(intake);
     expect(created.reference).toMatch(/^CP-\d{4}-[A-F0-9]{4}$/);
+    expect(created.archivedAt).toBeNull();
 
     const listed = await fileStore.listEngagements();
     expect(listed).toHaveLength(1);
@@ -75,6 +76,16 @@ describe("file store", () => {
     await fileStore.putUpload(`${created.id}-signed.pdf`, bytes);
     const read = await fileStore.getUpload(`${created.id}-signed.pdf`);
     expect(read).toEqual(bytes);
+
+    const hidden = await fileStore.saveEngagement({
+      ...saved,
+      archivedAt: "2026-09-16T18:00:00.000Z",
+    });
+    expect(hidden.archivedAt).toBe("2026-09-16T18:00:00.000Z");
+    expect(hidden.docusign.envelopeId).toBe("env-lookup-1");
+    const stored = await fileStore.getEngagement(created.id);
+    expect(stored?.archivedAt).toBe("2026-09-16T18:00:00.000Z");
+    expect(await fileStore.getUpload(`${created.id}-signed.pdf`)).toEqual(bytes);
   });
 
   it("returns null for a missing upload and throws when saving an unknown id", async () => {
@@ -117,6 +128,7 @@ describe("file store", () => {
         submittedAt: null,
         acceptedAt: null,
         executedAt: null,
+        archivedAt: null,
       }),
     ).rejects.toThrow("Engagement not found.");
   });
