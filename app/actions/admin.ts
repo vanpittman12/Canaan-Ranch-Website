@@ -11,21 +11,22 @@ import {
   verifyAdminSession,
 } from "@/lib/auth";
 import {
-  sendEnvelope,
   buildStubSignedFilename,
-  buildEnvelopeRecipients,
   getLiveEnvelopeStatus,
   isDocuSignEnabled,
 } from "@/lib/docusign";
 import { syncLiveEnvelope } from "@/lib/docusign-complete";
 import {
+  recordDocuSignSendFailure,
+  sendDocuSignForEngagement,
+  shouldSendDocuSignOnSubmit,
+} from "@/lib/docusign-send";
+import {
   applyDocuSignCompleted,
-  applyDocuSignSent,
   applyReview,
   artifactFromUpload,
   EngagementError,
 } from "@/lib/engagement";
-import { generatePopulatedAgreement } from "@/lib/agreement-populate";
 import { persistExecutedAgreement } from "@/lib/executed-agreement";
 import { generateStubSignedPdf } from "@/lib/pdf";
 import {
@@ -33,7 +34,7 @@ import {
   persistReservationLetter,
 } from "@/lib/reservation-letter-persist";
 import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
-import type { Engagement, ReviewDecision } from "@/lib/types";
+import type { ReviewDecision } from "@/lib/types";
 
 export type AdminActionState = {
   error?: string;
@@ -96,7 +97,7 @@ export async function reviewEngagement(
     };
   }
 
-  if (decision === "accept" && next.signingMethod === "docusign") {
+  if (decision === "accept" && shouldSendDocuSignOnSubmit(next)) {
     try {
       next = await sendDocuSignForEngagement(next);
       await saveEngagement(next);
@@ -104,14 +105,7 @@ export async function reviewEngagement(
       const message =
         error instanceof Error ? error.message : "Unable to send DocuSign envelope.";
       // Keep Accepted; surface the send failure for Resend DocuSign.
-      next = {
-        ...next,
-        docusign: {
-          ...next.docusign,
-          lastMessage: `DocuSign send failed after Accept: ${message}`,
-        },
-        updatedAt: new Date().toISOString(),
-      };
+      next = recordDocuSignSendFailure(next, message, "accept");
       await saveEngagement(next);
     }
   }
@@ -128,27 +122,6 @@ export async function reviewEngagement(
   revalidatePath(`/admin/engagements/${engagementId}`);
   revalidatePath(`/engagements/${engagementId}`);
   redirect(`/admin/engagements/${engagementId}`);
-}
-
-async function sendDocuSignForEngagement(engagement: Engagement) {
-  const populated = await generatePopulatedAgreement(engagement);
-  const sent = await sendEnvelope({
-    engagementId: engagement.id,
-    reference: engagement.reference,
-    recipients: buildEnvelopeRecipients(engagement.intake),
-    document: {
-      name: populated.filename,
-      bytes: populated.bytes,
-      fileExtension: populated.fileExtension,
-    },
-  });
-  return applyDocuSignSent(
-    engagement,
-    sent.envelopeId,
-    sent.message,
-    sent.mode,
-    sent.recipients,
-  );
 }
 
 export async function resendDocuSign(
@@ -179,14 +152,7 @@ export async function resendDocuSign(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unable to resend DocuSign envelope.";
-    await saveEngagement({
-      ...engagement,
-      docusign: {
-        ...engagement.docusign,
-        lastMessage: `DocuSign resend failed: ${message}`,
-      },
-      updatedAt: new Date().toISOString(),
-    });
+    await saveEngagement(recordDocuSignSendFailure(engagement, message, "resend"));
     return { error: message };
   }
 
@@ -315,7 +281,7 @@ export async function approveReservationLetterSend(
     return { error: "Check “Send reservation letter” to email the PDF." };
   }
   if (engagement.status !== "accepted" && engagement.status !== "executed") {
-    return { error: "Generate the letter after Accept. It is not emailed until you approve send." };
+    return { error: "Generate the letter after Accept or seller signature. It is not emailed until you approve send." };
   }
   if (engagement.reservationLetter.status === "sent" && engagement.reservationLetter.sentAt) {
     return {

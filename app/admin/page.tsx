@@ -44,10 +44,11 @@ export default async function AdminQueuePage({
             <h1 className="type-h1 mt-2 text-forest">Review ledger</h1>
             <p className="mt-2 text-sm text-muted">
               {pendingCount} awaiting a decision. {awaitingSellerCount} awaiting seller
-              signature. Accept is not complete — the deal stays pending until Van/seller
-              signs. DocuSign is in {seam.mode} mode
+              signature. DocuSign goes out when the buyer submits — Accept is not required to
+              start signing. The deal stays pending until Van/seller signs. DocuSign is in{" "}
+              {seam.mode} mode
               {seam.makesNetworkCalls
-                ? " and sends live envelopes after Accept."
+                ? " and sends live envelopes on intake submit."
                 : " (local stub — no live API calls)."}
             </p>
           </div>

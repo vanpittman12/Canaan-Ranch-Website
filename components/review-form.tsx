@@ -22,8 +22,9 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
         <h2 className="type-h2 text-forest">Review</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
           This engagement is no longer in the review queue. Decisions can only be recorded
-          while the status is pending review. Accept is not complete — the deal stays
-          awaiting seller signature until Van signs on DocuSign.
+          while the status is pending review. DocuSign is sent when the buyer submits — Accept
+          is not required to start signing. The deal stays awaiting seller signature until Van
+          signs on DocuSign.
         </p>
         {engagement.status === "accepted" &&
         engagement.signingMethod === "docusign" &&
@@ -49,10 +50,11 @@ export function ReviewForm({ engagement }: { engagement: Engagement }) {
       <div>
         <h2 className="type-h2 text-forest">Team decision</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Accept starts DocuSign (or records a manual signed copy). It does not mark the
-          deal done. Status stays awaiting seller signature until Van/seller has signed
-          and the envelope is complete. A reservation letter draft is generated on Accept
-          and is not emailed until you approve send.
+          Accept records a manual signed copy or sends DocuSign only if the envelope was not
+          already created at intake submit. It does not mark the deal done. Status stays
+          awaiting seller signature until Van/seller has signed and the envelope is complete. A
+          reservation letter draft is generated on Accept (manual path) or when the seller
+          signs, and is not emailed until you approve send.
         </p>
       </div>
       {state.error ? (
@@ -147,7 +149,8 @@ function ResendDocuSign({ engagement }: { engagement: Engagement }) {
       <p className="text-sm font-medium text-ink">Resend DocuSign</p>
       <p className="mt-1 text-sm text-muted">
         Accept already saved, but no envelope was created. Retry sending the populated
-        agreement to DocuSign without changing engagement status.
+        agreement to DocuSign without changing engagement status. Also used when intake
+        submit failed to create the envelope.
       </p>
       {engagement.docusign.lastMessage ? (
         <p className="mt-2 text-sm text-terracotta">{engagement.docusign.lastMessage}</p>

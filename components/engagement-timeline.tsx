@@ -14,12 +14,12 @@ const stages = [
   {
     id: "signing",
     title: "Choose signing",
-    body: "DocuSign after Accept is the usual signing path. The fallback is to download the Word agreement and upload a signed copy.",
+    body: "DocuSign on submit is the usual signing path. Check your email for DocuSign after you submit. The fallback is to download the Word agreement and upload a signed copy.",
   },
   {
     id: "review",
-    title: "Canaan Preserve review",
-    body: "Accept is not complete. The engagement stays awaiting seller signature until Van signs on DocuSign (or a complete signed copy is on file).",
+    title: "Signatures",
+    body: "Buyer and Buyer witness sign first. Canaan Preserve may counter-sign later. The engagement stays awaiting seller signature until Van signs on DocuSign (or a complete signed copy is on file).",
   },
   {
     id: "executed",

@@ -124,8 +124,11 @@ function ConfirmationCard({ engagement }: { engagement: Engagement }) {
       </p>
       <ol className="mt-4 list-decimal space-y-1 pl-5 text-sm leading-6 text-muted">
         <li>Download the populated Word agreement.</li>
-        <li>Choose DocuSign after Accept, or a manual signed PDF.</li>
-        <li>Canaan Preserve reviews. Nothing is executed until Accept and a signed copy are on file.</li>
+        <li>Choose DocuSign to sign now, or a manual signed PDF.</li>
+        <li>
+          DocuSign emails you on submit. Nothing is executed until a signed copy is on file.
+          Canaan Preserve may counter-sign later.
+        </li>
       </ol>
     </section>
   );
@@ -179,10 +182,14 @@ function StatusCopy({
   if (engagement.status === "accepted") {
     return (
       <div className="mt-6 rounded-[16px] border border-sage bg-cream p-5">
-        <p className="font-medium text-forest">Awaiting seller signature</p>
+        <p className="font-medium text-forest">
+          {engagement.signingMethod === "docusign"
+            ? "Check your email for DocuSign"
+            : "Awaiting seller signature"}
+        </p>
         <p className="mt-2 text-sm leading-6 text-muted">
           {engagement.signingMethod === "docusign"
-            ? `Accept is recorded. The engagement stays pending until Van/seller signs on DocuSign. Envelope ${engagement.docusign.envelopeId ?? "is pending"} (${docusignMode}). ${engagement.docusign.lastMessage ?? ""}`
+            ? `DocuSign was sent when you submitted. Sign as soon as the email arrives — admin Accept is not required. Buyer and Buyer witness are first in the routing; Canaan Preserve may counter-sign later. Envelope ${engagement.docusign.envelopeId ?? "is pending"} (${docusignMode}). ${engagement.docusign.lastMessage ?? ""}`
             : "Accept is recorded. Upload the signed PDF to complete execution. The agreement is not done until the seller-signed file is on file."}
         </p>
       </div>
@@ -194,7 +201,7 @@ function StatusCopy({
       <div className="mt-6 rounded-[16px] border border-forest bg-forest p-5 text-cream">
         <p className="font-medium">Agreement executed</p>
         <p className="mt-2 text-sm leading-6 text-cream/80">
-          Canaan Preserve accepted this engagement and a signed artifact is on file
+          Canaan Preserve has a signed artifact on file
           {engagement.signedArtifact
             ? ` (${engagement.signedArtifact.filename}).`
             : "."}
@@ -222,7 +229,7 @@ function SubmittedPanel({
         <p className="mt-2 text-sm leading-6 text-muted">
           Signing method:{" "}
           {engagement.signingMethod === "docusign"
-            ? "DocuSign after accept"
+            ? "DocuSign on submit"
             : engagement.signingMethod === "manual"
               ? "Download and upload a signed copy"
               : "Not selected"}

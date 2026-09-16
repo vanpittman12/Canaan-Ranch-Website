@@ -22,9 +22,9 @@ export function ReservationLetterForm({ engagement }: { engagement: Engagement }
     <section className="surface-card">
       <h2 className="type-h2 text-forest">Reservation letter</h2>
       <p className="mt-2 text-sm leading-6 text-muted">
-        Generated from intake after Accept. Refreshed when the Seller signs (Effective
-        Date). Email goes out only after you check Send reservation letter — never
-        automatically.
+        Generated from intake after Accept (manual path) or when the Seller signs. Refreshed
+        when the Seller signs (Effective Date). Email goes out only after you check Send
+        reservation letter — never automatically.
       </p>
       <dl className="mt-4 grid gap-3 text-sm">
         <div className="grid grid-cols-[8.25rem_1fr] gap-3">

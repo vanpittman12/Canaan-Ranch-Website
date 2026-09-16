@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   applyDocuSignCompleted,
+  applyDocuSignSent,
   applyReview,
   applySignedArtifact,
   applySubmit,
   artifactFromUpload,
+  canReview,
   canSubmitForReview,
   isAwaitingSellerSignature,
   isOpenEngagement,
@@ -16,6 +18,7 @@ import {
   STATUS_PILL_LABELS,
   type Engagement,
   type IntakeFields,
+  type SigningMethod,
 } from "./types";
 
 const intake: IntakeFields = {
@@ -70,6 +73,15 @@ function draft(): Engagement {
   };
 }
 
+function pendingReview(method: SigningMethod = "manual"): Engagement {
+  return {
+    ...applySubmit(draft(), "manual"),
+    signingMethod: method,
+    status: "pending_review",
+    acceptedAt: null,
+  };
+}
+
 function artifact() {
   return artifactFromUpload({
     filename: "signed.pdf",
@@ -86,16 +98,30 @@ describe("engagement status machine", () => {
     expect(canSubmitForReview("pending_review")).toBe(false);
   });
 
-  it("moves draft to pending_review on submit", () => {
+  it("moves draft to pending_review on manual submit", () => {
     const next = applySubmit(draft(), "manual");
     expect(next.status).toBe("pending_review");
     expect(next.signingMethod).toBe("manual");
     expect(next.submittedAt).toBeTruthy();
+    expect(next.acceptedAt).toBeNull();
+    expect(canReview(next.status)).toBe(true);
+  });
+
+  it("moves DocuSign submit to accepted-for-signing without admin Accept", () => {
+    const next = applySubmit(draft(), "docusign");
+    expect(next.status).toBe("accepted");
+    expect(next.signingMethod).toBe("docusign");
+    expect(next.submittedAt).toBeTruthy();
+    expect(next.acceptedAt).toBeTruthy();
+    expect(next.executedAt).toBeNull();
+    expect(canReview(next.status)).toBe(false);
+    expect(canSubmitForReview(next.status)).toBe(false);
+    expect(isAwaitingSellerSignature(next.status)).toBe(true);
+    expect(STATUS_LABELS.accepted).toBe("Awaiting seller signature");
   });
 
   it("does not execute on accept without a signed artifact", () => {
-    const pending = applySubmit(draft(), "docusign");
-    const accepted = applyReview(pending, "accept", "");
+    const accepted = applyReview(pendingReview("docusign"), "accept", "");
     expect(accepted.status).toBe("accepted");
     expect(accepted.executedAt).toBeNull();
     expect(accepted.effectiveDate).toBeNull();
@@ -108,8 +134,7 @@ describe("engagement status machine", () => {
   });
 
   it("does not execute a DocuSign engagement on Accept even if a file is already on file", () => {
-    const pending = applySubmit(draft(), "docusign");
-    const withFile = applySignedArtifact(pending, artifact());
+    const withFile = applySignedArtifact(pendingReview("docusign"), artifact());
     const accepted = applyReview(withFile, "accept", "");
     expect(accepted.status).toBe("accepted");
     expect(accepted.executedAt).toBeNull();
@@ -156,8 +181,11 @@ describe("engagement status machine", () => {
   });
 
   it("returns to customer edit after request changes", () => {
-    const pending = applySubmit(draft(), "docusign");
-    const next = applyReview(pending, "request_changes", "Please refine the scope.");
+    const next = applyReview(
+      pendingReview("docusign"),
+      "request_changes",
+      "Please refine the scope.",
+    );
     expect(next.status).toBe("changes_requested");
     expect(next.changeRequestNote).toBe("Please refine the scope.");
     expect(canSubmitForReview(next.status)).toBe(true);
@@ -170,33 +198,45 @@ describe("engagement status machine", () => {
     expect(() => applySignedArtifact(declined, artifact())).toThrow();
   });
 
-  it("marks DocuSign complete only after accept and stamps the Effective Date", () => {
-    const pending = applySubmit(draft(), "docusign");
-    expect(() => applyDocuSignCompleted(pending, artifact())).toThrow();
-    const accepted = applyReview(pending, "accept", "");
+  it("marks DocuSign complete after intake submit without admin Accept", () => {
+    const draftEng = draft();
+    expect(() => applyDocuSignCompleted(draftEng, artifact())).toThrow(/accepted for signing/);
+    const submitted = applySubmit(draftEng, "docusign");
     const completedArtifact = {
       ...artifact(),
       uploadedAt: "2026-06-02T09:00:00.000Z",
     };
-    const executed = applyDocuSignCompleted(accepted, completedArtifact);
+    const executed = applyDocuSignCompleted(submitted, completedArtifact);
     expect(executed.status).toBe("executed");
     expect(executed.docusign.status).toBe("completed");
     expect(executed.effectiveDate).toBe("2026-06-02");
     expect(executed.docusign.lastMessage).toMatch(/stub/i);
   });
 
+  it("promotes a leftover pending-review DocuSign send to accepted-for-signing", () => {
+    const sent = applyDocuSignSent(
+      pendingReview("docusign"),
+      "env-1",
+      "DocuSign stub: envelope queued",
+      "stub",
+    );
+    expect(sent.status).toBe("accepted");
+    expect(sent.acceptedAt).toBeTruthy();
+    expect(sent.docusign.envelopeId).toBe("env-1");
+    expect(sent.docusign.status).toBe("sent");
+  });
+
   it("records a live DocuSign completion message when the envelope mode is live", () => {
-    const pending = applySubmit(draft(), "docusign");
-    const accepted = {
-      ...applyReview(pending, "accept", ""),
+    const submitted = {
+      ...applySubmit(draft(), "docusign"),
       docusign: {
-        ...pending.docusign,
+        ...draft().docusign,
         mode: "live" as const,
         envelopeId: "env-live-1",
         status: "sent" as const,
       },
     };
-    const executed = applyDocuSignCompleted(accepted, {
+    const executed = applyDocuSignCompleted(submitted, {
       ...artifact(),
       source: "docusign",
       uploadedAt: "2026-06-02T09:00:00.000Z",
@@ -206,10 +246,9 @@ describe("engagement status machine", () => {
   });
 
   it("prefers the Buyer Date Signed over the artifact upload time for Effective Date", () => {
-    const pending = applySubmit(draft(), "docusign");
-    const accepted = applyReview(pending, "accept", "");
+    const submitted = applySubmit(draft(), "docusign");
     const executed = applyDocuSignCompleted(
-      accepted,
+      submitted,
       {
         ...artifact(),
         uploadedAt: "2026-06-03T16:00:00.000Z",

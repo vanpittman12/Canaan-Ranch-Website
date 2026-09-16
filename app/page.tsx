@@ -37,8 +37,8 @@ const steps = [
   },
   {
     n: "04",
-    title: "Canaan Preserve accepts, then sign",
-    body: "Review happens first. After Accept, DocuSign is the usual signing path. The fallback is to download the Word agreement and upload a signed copy. Nothing is executed until Accept and a signed copy are on file.",
+    title: "Submit, then sign",
+    body: "DocuSign is the usual signing path and emails you as soon as you submit. The fallback is to download the Word agreement and upload a signed copy. Nothing is executed until a signed copy is on file.",
   },
 ];
 

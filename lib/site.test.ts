@@ -108,10 +108,10 @@ describe("public site SEO and copy hygiene", () => {
     expect(nextConfig).toContain('destination: "/privacy"');
     expect(proxy).toContain('"/privacy-policy"');
     expect(proxy).toContain("301");
-    expect(landing).toContain("Canaan Preserve accepts, then sign");
-    expect(landing).not.toContain("Canaan Preserve Accepts, then sign");
+    expect(landing).toContain("Submit, then sign");
+    expect(landing).not.toContain("Canaan Preserve accepts, then sign");
     expect(brand.heroSlogan).toContain("Long Term");
-    expect(brand.flowInvite).toContain("Canaan Preserve accepts");
+    expect(brand.flowInvite).toContain("After you submit, DocuSign is the usual signing path");
     expect(adminLogin).toContain("Sign in with the team password.");
     expect(adminLogin).not.toContain("canaan-admin");
     expect(adminLogin).not.toContain("ADMIN_PASSWORD");

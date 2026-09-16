@@ -71,11 +71,15 @@ export function applySubmit(
   }
 
   const now = new Date().toISOString();
+  const docusignPath = signingMethod === "docusign";
   return {
     ...engagement,
     signingMethod,
-    status: "pending_review",
+    // DocuSign: accepted-for-signing immediately so the buyer envelope is not
+    // gated on admin Accept. Manual still waits in the review queue.
+    status: docusignPath ? "accepted" : "pending_review",
     submittedAt: now,
+    acceptedAt: docusignPath ? now : engagement.acceptedAt,
     updatedAt: now,
     changeRequestNote:
       engagement.status === "changes_requested"
@@ -174,8 +178,15 @@ export function applyDocuSignSent(
   recipients = engagement.docusign.recipients,
 ): Engagement {
   const now = new Date().toISOString();
+  const promoteFromReview =
+    engagement.signingMethod === "docusign" &&
+    engagement.status === "pending_review";
   return {
     ...engagement,
+    status: promoteFromReview ? "accepted" : engagement.status,
+    acceptedAt: promoteFromReview
+      ? (engagement.acceptedAt ?? now)
+      : engagement.acceptedAt,
     docusign: {
       mode,
       envelopeId,
@@ -214,7 +225,7 @@ export function applyDocuSignCompleted(
 ): Engagement {
   if (engagement.status !== "accepted" && engagement.status !== "executed") {
     throw new EngagementError(
-      "DocuSign completion can only be recorded after the engagement is accepted.",
+      "DocuSign completion can only be recorded after the envelope has been sent (accepted for signing).",
     );
   }
 
