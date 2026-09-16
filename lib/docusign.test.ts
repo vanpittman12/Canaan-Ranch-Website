@@ -3,12 +3,17 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { brand, getSellerWitness } from "./brand";
-import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+import {
+  DOCUSIGN_ANCHOR_UNITS,
+  DOCUSIGN_ANCHORS,
+  DOCUSIGN_TAB_OFFSETS,
+} from "./docusign-anchors";
 import {
   buildEnvelopeDefinition,
   buildEnvelopeRecipients,
   createJwtAssertion,
   dateSignedAnchorsForRole,
+  dateSignedTabForRole,
   describeDocuSignSeam,
   DOCUSIGN_DATE_TAB_FONT,
   DOCUSIGN_DATE_TAB_FONT_SIZE,
@@ -20,6 +25,7 @@ import {
   parseConnectPayload,
   resetDocuSignTokenCache,
   sendEnvelope,
+  signHereTab,
   verifyConnectSignature,
 } from "./docusign";
 import type { EnvelopeRecipient, IntakeFields } from "./types";
@@ -362,7 +368,9 @@ describe("DocuSign Connect and polling", () => {
       expect(
         signer?.tabs.dateSignedTabs.every(
           (tab) =>
-            tab.anchorUnits === "pixels" &&
+            tab.anchorUnits === DOCUSIGN_ANCHOR_UNITS &&
+            tab.anchorXOffset === DOCUSIGN_TAB_OFFSETS[role].date.anchorXOffset &&
+            tab.anchorYOffset === DOCUSIGN_TAB_OFFSETS[role].date.anchorYOffset &&
             tab.anchorIgnoreIfNotPresent === "false" &&
             tab.font === DOCUSIGN_DATE_TAB_FONT &&
             tab.fontSize === DOCUSIGN_DATE_TAB_FONT_SIZE &&
@@ -374,6 +382,36 @@ describe("DocuSign Connect and polling", () => {
         false,
       );
     }
+  });
+
+  it("offsets Sign Here and Date Signed tabs per role so they sit on the signature line", () => {
+    const definition = buildEnvelopeDefinition(sendInput());
+    const roles = ["buyer_signer", "seller_signer", "buyer_witness", "seller_witness"] as const;
+
+    for (const role of roles) {
+      const signer = definition.recipients.signers.find((row) => row.roleName === role);
+      const sign = signer?.tabs.signHereTabs[0];
+      const date = signer?.tabs.dateSignedTabs[0];
+      const expectedSign = signHereTab(role);
+      const expectedDate = dateSignedTabForRole(role);
+
+      expect(sign).toEqual(expectedSign);
+      expect(date).toEqual(expectedDate);
+      expect(sign?.anchorUnits).toBe("pixels");
+      expect(sign?.anchorXOffset).toMatch(/^-?\d+$/);
+      expect(sign?.anchorYOffset).toMatch(/^-?\d+$/);
+      expect(Number(sign?.anchorYOffset)).toBeLessThan(0);
+      expect(Number(date?.anchorXOffset)).toBeGreaterThan(0);
+      expect(Number(date?.anchorYOffset)).toBeLessThan(0);
+    }
+
+    const buyerSign = signHereTab("buyer_signer");
+    const sellerSign = signHereTab("seller_signer");
+    expect(Number(sellerSign.anchorXOffset)).toBeLessThan(Number(buyerSign.anchorXOffset));
+    expect(Number(dateSignedTabForRole("seller_signer").anchorXOffset)).toBeLessThan(
+      Number(dateSignedTabForRole("buyer_signer").anchorXOffset),
+    );
+    expect(DOCUSIGN_TAB_OFFSETS.buyer_witness).toEqual(DOCUSIGN_TAB_OFFSETS.seller_witness);
   });
 
   it("reads the Buyer Date Signed from an envelope or Connect payload", () => {
