@@ -26,6 +26,7 @@ const notice = {
   reference: "CP-2026-TEST",
   buyerLegalName: "Suncoast Land Partners LLC",
   buyerAttention: "Morgan Hale",
+  buyerTitle: "President",
   buyerEmail: "morgan@suncoast.example",
   buyerPhone: "813-555-0190",
   buyerStreet: "400 Harbour Island Boulevard",
@@ -50,6 +51,7 @@ function engagement() {
     intake: {
       buyerLegalName: notice.buyerLegalName,
       buyerAttention: notice.buyerAttention,
+      buyerTitle: notice.buyerTitle,
       buyerEmail: notice.buyerEmail,
       buyerPhone: notice.buyerPhone,
       buyerStreet: notice.buyerStreet,
@@ -345,6 +347,7 @@ describe("new engagement notify seam", () => {
     expect(email.to[0]).toBe(NEW_ENGAGEMENT_NOTIFY_TO);
     expect(email.from).toBe(`${brand.name} <${DEFAULT_GMAIL_USER}>`);
     expect(email.text).toMatch(/Reference: CP-2026-TEST/);
+    expect(email.text).toContain("Buyer title: President");
     expect(email.text).toContain("Buyer email: morgan@suncoast.example");
     expect(email.text).toContain("Authorized agent: Casey Nguyen, Suncoast Permitting");
     expect(email.text).toContain("Project name: Harbour tract");

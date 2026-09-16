@@ -18,6 +18,7 @@ import { intakeSchema } from "./validation";
 const completeNotice = {
   buyerLegalName: "Cypress Ridge Holdings LLC",
   buyerAttention: "Avery Cole",
+  buyerTitle: "President",
   buyerEmail: "avery@cypressridge.example",
   buyerStreet: "200 Bay Street",
   buyerCity: "Tampa",
@@ -55,6 +56,10 @@ describe("intake wizard", () => {
     expect(INTAKE_STEPS.find((step) => step.id === "project")?.fields).toContain(
       "donorSiteName",
     );
+    expect(INTAKE_STEPS.find((step) => step.id === "notice")?.fields).toContain(
+      "buyerTitle",
+    );
+    expect(PREPARE_ITEMS.join(" ")).toMatch(/title/i);
     const schemaKeys = Object.keys(intakeSchema.shape);
     for (const step of INTAKE_STEPS) {
       for (const field of step.fields) {
@@ -75,6 +80,7 @@ describe("intake wizard", () => {
       buyerPhone: "",
     });
     expect(errors.buyerEmail).toBe("Enter a valid email address.");
+    expect(errors.buyerTitle).toBe("This field is required.");
     expect(errors.buyerPhone).toBe("This field is required.");
     expect(firstStepForErrors(errors)).toBe("notice");
     expect(validateThrough("review", { tortoiseCount: "2" }).buyerLegalName).toBe(

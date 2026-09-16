@@ -12,6 +12,7 @@ import type { IntakeFields } from "./types";
 const intake: IntakeFields = {
   buyerLegalName: "Example Buyer LLC",
   buyerAttention: "Jordan Lee",
+  buyerTitle: "Manager",
   buyerEmail: "jordan@example.com",
   buyerStreet: "100 Main Street",
   buyerCity: "Tampa",

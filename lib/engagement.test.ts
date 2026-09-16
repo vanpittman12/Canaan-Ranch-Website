@@ -24,6 +24,7 @@ import {
 const intake: IntakeFields = {
   buyerLegalName: "Suncoast Land Partners LLC",
   buyerAttention: "Morgan Hale",
+  buyerTitle: "President",
   buyerEmail: "morgan@suncoast.example",
   buyerStreet: "400 Harbour Island Boulevard",
   buyerCity: "Tampa",

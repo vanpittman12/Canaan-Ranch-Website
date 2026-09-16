@@ -5,6 +5,7 @@ import { intakeSchema, publicIntakeFields } from "./validation";
 const posted = {
   buyerLegalName: "Cypress Ridge Holdings LLC",
   buyerAttention: "Avery Cole",
+  buyerTitle: "President",
   buyerEmail: "avery@cypressridge.example",
   buyerStreet: "200 Bay Street",
   buyerCity: "Tampa",
@@ -36,6 +37,15 @@ describe("public intake rate lock and seller witness", () => {
   it("requires project name on public intake", () => {
     const parsed = intakeSchema.safeParse({ ...posted, donorSiteName: "" });
     expect(parsed.success).toBe(false);
+  });
+
+  it("requires buyer signatory title on public intake", () => {
+    const parsed = intakeSchema.safeParse({ ...posted, buyerTitle: "" });
+    expect(parsed.success).toBe(false);
+    if (parsed.success) {
+      return;
+    }
+    expect(parsed.error.issues.some((issue) => issue.path.includes("buyerTitle"))).toBe(true);
   });
 
   it("strips a client-posted perGtRate and locks the brand default", () => {

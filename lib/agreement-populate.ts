@@ -47,6 +47,7 @@ export const AGREEMENT_FIELD_MAP = [
   { placeholder: "Printed Name: (buyer witness)", source: "intake.buyerWitnessName" },
   { placeholder: "Printed Name: (buyer signatory)", source: "intake.buyerAttention" },
   { placeholder: "By: (buyer)", source: "intake.buyerAttention" },
+  { placeholder: "Its: (buyer)", source: "intake.buyerTitle" },
 ] as const;
 
 /** Van’s opening leftover: “entered into this  day of, 2024,” */
@@ -69,7 +70,6 @@ export const AGREEMENT_UNMAPPED_GAPS = [
   "Effective Date leftover (“this  day of, 2024”) — not a form field; stamped from the intake-submission Florida/Eastern calendar date once the buyer submits",
   "Expiration leftover (leading underlined tab + “, 202 ,”) — stamped as addOneYear(Effective Date) into the outgoing Word/DocuSign at submit. Signature-block Date Signed tabs stay audit dates only",
   "Buyer email — Van’s notice block has name / address / phone only",
-  "Buyer title (“Its:”) — not collected on intake",
   "Relocation county — no matching blank in the Word file",
   "Buyer authorized agent name/company — Word only blanks Canaan Agent",
   "Donor company affiliation, donor site name, and project description — no Word blanks",
@@ -216,6 +216,13 @@ export function populateDocumentXml(xml: string, engagement: Engagement): string
       result = rewriteParagraphText(result, `By: ${engagement.intake.buyerAttention}`);
     }
 
+    if (isBuyerItsLabel(text)) {
+      const title = (engagement.intake.buyerTitle ?? "").trim();
+      if (title) {
+        result = rewriteParagraphText(result, `Its: ${title}`);
+      }
+    }
+
     const anchors = anchorsForParagraph(text, witnessSignatureIndex);
     if (anchors.length > 0) {
       result = appendHiddenAnchors(result, anchors);
@@ -244,6 +251,11 @@ function applyReplacementsToParagraph(paragraph: string, replacements: Array<[st
 
 function isPrintedNameLabel(text: string) {
   return /^Printed\s*Name:\s*$/.test(text.trim());
+}
+
+/** Buyer signature leftover is a paragraph of only “Its:” (seller already has a title). */
+function isBuyerItsLabel(text: string) {
+  return /^Its:?\s*$/.test(text.trim());
 }
 
 function isWitnessSignatureParagraph(text: string) {

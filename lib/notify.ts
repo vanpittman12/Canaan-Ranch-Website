@@ -38,6 +38,7 @@ export type NewEngagementNotice = {
   reference: string;
   buyerLegalName: string;
   buyerAttention: string;
+  buyerTitle: string;
   buyerEmail: string;
   buyerPhone: string;
   buyerStreet: string;
@@ -84,6 +85,7 @@ export type EngagementLike = Pick<Engagement, "id" | "reference"> & {
     IntakeFields,
     | "buyerLegalName"
     | "buyerAttention"
+    | "buyerTitle"
     | "buyerEmail"
     | "buyerPhone"
     | "buyerStreet"
@@ -180,6 +182,7 @@ export function toNewEngagementNotice(engagement: EngagementLike): NewEngagement
     reference: engagement.reference,
     buyerLegalName: intake.buyerLegalName,
     buyerAttention: intake.buyerAttention,
+    buyerTitle: intake.buyerTitle ?? "",
     buyerEmail: intake.buyerEmail,
     buyerPhone: intake.buyerPhone,
     buyerStreet: intake.buyerStreet,
@@ -210,6 +213,7 @@ export function buildNewEngagementEmail(notice: NewEngagementNotice): NewEngagem
     `Project name: ${notice.projectName}`,
     `Buyer legal name: ${notice.buyerLegalName}`,
     `Buyer attention: ${notice.buyerAttention}`,
+    `Buyer title: ${notice.buyerTitle}`,
     `Buyer email: ${notice.buyerEmail}`,
     `Buyer phone: ${notice.buyerPhone}`,
     `Buyer notice address: ${noticeAddress}`,
@@ -229,6 +233,7 @@ export function buildNewEngagementEmail(notice: NewEngagementNotice): NewEngagem
     `<li><strong>Project name:</strong> ${escapeHtml(notice.projectName)}</li>`,
     `<li><strong>Buyer legal name:</strong> ${escapeHtml(notice.buyerLegalName)}</li>`,
     `<li><strong>Buyer attention:</strong> ${escapeHtml(notice.buyerAttention)}</li>`,
+    `<li><strong>Buyer title:</strong> ${escapeHtml(notice.buyerTitle)}</li>`,
     `<li><strong>Buyer email:</strong> ${escapeHtml(notice.buyerEmail)}</li>`,
     `<li><strong>Buyer phone:</strong> ${escapeHtml(notice.buyerPhone)}</li>`,
     `<li><strong>Buyer notice address:</strong> ${escapeHtml(noticeAddress)}</li>`,

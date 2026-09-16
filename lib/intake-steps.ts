@@ -22,7 +22,7 @@ export function formatGopherTortoiseCount(count: number | string) {
 
 export const PREPARE_ITEMS = [
   "Buyer legal name",
-  "Buyer notice: signatory, street, city, state, postal code, phone, and email",
+  "Buyer notice: signatory, title, street, city, state, postal code, phone, and email",
   "Reserved tortoise count",
   "Project name",
   "County of relocation",
@@ -38,6 +38,7 @@ export const INTAKE_STEPS = [
     fields: [
       "buyerLegalName",
       "buyerAttention",
+      "buyerTitle",
       "buyerEmail",
       "buyerStreet",
       "buyerCity",
@@ -191,6 +192,7 @@ export function intakeValuesFromDefaults(
   return {
     buyerLegalName: defaults?.buyerLegalName ?? "",
     buyerAttention: defaults?.buyerAttention ?? "",
+    buyerTitle: defaults?.buyerTitle ?? "",
     buyerEmail: defaults?.buyerEmail ?? "",
     buyerStreet: defaults?.buyerStreet ?? "",
     buyerCity: defaults?.buyerCity ?? "",

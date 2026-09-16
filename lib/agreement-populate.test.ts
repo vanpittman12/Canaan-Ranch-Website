@@ -40,6 +40,7 @@ const ADMIN_ACTIONS = resolve(process.cwd(), "app/actions/admin.ts");
 const intake: IntakeFields = {
   buyerLegalName: "Suncoast Land Partners LLC",
   buyerAttention: "Morgan Hale",
+  buyerTitle: "President",
   buyerEmail: "morgan@suncoast.example",
   buyerStreet: "400 Harbour Island Boulevard",
   buyerCity: "Tampa",
@@ -120,6 +121,7 @@ describe("Van’s Word agreement populate", () => {
     expect(text).toContain("Printed Name: Andrew Fuddy");
     expect(text).toContain("Printed Name: Riley Chen");
     expect(text).toContain("By: Morgan Hale");
+    expect(text).toContain("Its: President");
 
     expect(text).not.toContain("Responsible party entity name");
     expect(text).not.toContain("seventeen (17)");
@@ -278,9 +280,30 @@ describe("Van’s Word agreement populate", () => {
 
   it("documents the Word blanks that intake cannot fill yet", () => {
     expect(AGREEMENT_FIELD_MAP.length).toBeGreaterThanOrEqual(8);
+    expect(AGREEMENT_FIELD_MAP.some((row) => row.source === "intake.buyerTitle")).toBe(true);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/Buyer email/i);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/Effective Date/i);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/county/i);
+    expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).not.toMatch(/Buyer title/i);
+  });
+
+  it("stamps buyer title into the buyer Its: leftover and leaves the seller Its: line alone", () => {
+    const blank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
+    const blankText = extractDocxPlainText(blank);
+    expect(blankText).toMatch(/Its:\s*Authorized Agent/);
+    expect(blankText.split("Its:").length - 1).toBe(2);
+
+    const populated = extractDocxPlainText(populateAgreementDocx(blank, engagement()));
+    expect(populated).toContain("Its: President");
+    expect(populated).toMatch(/Its:\s*Authorized Agent/);
+    expect(populated).toContain("By: Morgan Hale");
+
+    const untitled = extractDocxPlainText(
+      populateAgreementDocx(blank, engagement({ intake: { ...intake, buyerTitle: "" } })),
+    );
+    expect(untitled).not.toContain("Its: President");
+    expect(untitled).toMatch(/Its:\s*Authorized Agent/);
+    expect(untitled.split("Its:").length - 1).toBe(2);
   });
 
   it("leaves Van’s date leftovers blank until intake submission, with no phrase substitutes or body Date Signed tab", () => {
