@@ -94,22 +94,10 @@ describe("intake wizard", () => {
     );
   });
 
-  it("gates Continue and Review on required fields, including City", () => {
+  it("lets Continue and step pills browse empty steps; submit still validates", () => {
     const emptyCity = { ...completeNotice, buyerCity: "" };
-    const blockedContinue = advanceGate("notice", "capacity", emptyCity);
-    expect(blockedContinue.ok).toBe(false);
-    if (!blockedContinue.ok) {
-      expect(blockedContinue.errors.buyerCity).toBe("City is required.");
-      expect(blockedContinue.step).toBe("notice");
-    }
-
-    const blockedReview = advanceGate("notice", "review", emptyCity);
-    expect(blockedReview.ok).toBe(false);
-    if (!blockedReview.ok) {
-      expect(blockedReview.errors.buyerCity).toBe("City is required.");
-      expect(blockedReview.step).toBe("notice");
-    }
-
+    expect(advanceGate("notice", "capacity", emptyCity).ok).toBe(true);
+    expect(advanceGate("notice", "review", emptyCity).ok).toBe(true);
     expect(advanceGate("notice", "capacity", completeNotice).ok).toBe(true);
     expect(advanceGate("capacity", "notice", emptyCity).ok).toBe(true);
 
@@ -117,10 +105,15 @@ describe("intake wizard", () => {
       ...completeNotice,
       tortoiseCount: "2",
     });
-    expect(skippedProject.ok).toBe(false);
-    if (!skippedProject.ok) {
-      expect(skippedProject.step).toBe("project");
-      expect(skippedProject.errors.donorSiteName).toBe("This field is required.");
-    }
+    expect(skippedProject.ok).toBe(true);
+
+    const submitErrors = validateThrough("review", {
+      ...completeNotice,
+      buyerCity: "",
+      tortoiseCount: "2",
+    });
+    expect(submitErrors.buyerCity).toBe("City is required.");
+    expect(submitErrors.donorSiteName).toBe("This field is required.");
+    expect(firstStepForErrors(submitErrors)).toBe("notice");
   });
 });
