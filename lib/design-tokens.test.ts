@@ -122,7 +122,10 @@ describe("site builder visual lock", () => {
     expect(header).toContain("shrink-0 overflow-visible whitespace-nowrap");
     expect(header).toContain("px-3.5");
     expect(header).not.toContain("!px-3");
-    expect(header).toContain("xl:inline-flex");
+    expect(header).toContain("hover:text-forest 2xl:inline-flex");
+    expect(header).not.toContain("hover:text-forest xl:inline-flex");
+    expect(header).not.toContain("xl:gap-5");
+    expect(header).not.toContain("xl:px-8");
     expect(footer).toContain("{brand.intakeCta}");
     expect(brand.intakeCta).toBe("Start intake");
     expect(landing).not.toContain("Start relocation intake");
