@@ -34,9 +34,16 @@ export type { DocuSignMode, EnvelopeRecipient };
 export const DEFAULT_ACCOUNT_BASE_URI = "https://demo.docusign.net";
 export const DEFAULT_AUTH_SERVER = "https://account-d.docusign.com";
 
-import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+import {
+  DOCUSIGN_ANCHOR_UNITS,
+  DOCUSIGN_ANCHORS,
+  DOCUSIGN_TAB_OFFSETS,
+  type DocuSignRole,
+  type TabAnchorOffset,
+} from "./docusign-anchors";
 
-export { DOCUSIGN_ANCHORS };
+export { DOCUSIGN_ANCHOR_UNITS, DOCUSIGN_ANCHORS, DOCUSIGN_TAB_OFFSETS };
+export type { DocuSignRole, TabAnchorOffset };
 
 const REQUIRED_LIVE_VARS = [
   "DOCUSIGN_INTEGRATION_KEY",
@@ -98,9 +105,19 @@ export interface LiveEnvelopeSnapshot {
 export const DOCUSIGN_DATE_TAB_FONT = "TimesNewRoman" as const;
 export const DOCUSIGN_DATE_TAB_FONT_SIZE = "Size12" as const;
 
+export type SignHereTab = {
+  anchorString: string;
+  anchorUnits: typeof DOCUSIGN_ANCHOR_UNITS;
+  anchorXOffset: string;
+  anchorYOffset: string;
+  anchorIgnoreIfNotPresent: "false";
+};
+
 export type DateSignedTab = {
   anchorString: string;
-  anchorUnits: "pixels";
+  anchorUnits: typeof DOCUSIGN_ANCHOR_UNITS;
+  anchorXOffset: string;
+  anchorYOffset: string;
   anchorIgnoreIfNotPresent: "false";
   font: typeof DOCUSIGN_DATE_TAB_FONT;
   fontSize: typeof DOCUSIGN_DATE_TAB_FONT_SIZE;
@@ -117,11 +134,7 @@ type EnvelopeSigner = {
   routingOrder: string;
   roleName: EnvelopeRecipient["role"];
   tabs: {
-    signHereTabs: Array<{
-      anchorString: string;
-      anchorUnits: string;
-      anchorIgnoreIfNotPresent: string;
-    }>;
+    signHereTabs: SignHereTab[];
     dateSignedTabs: DateSignedTab[];
   };
 };
@@ -278,10 +291,26 @@ export function documentFileExtension(document: DocuSignDocument) {
   return match?.[1]?.toLowerCase() || "docx";
 }
 
-export function dateSignedTab(anchorString: string): DateSignedTab {
+export function signHereTab(role: EnvelopeRecipient["role"]): SignHereTab {
+  const offset = DOCUSIGN_TAB_OFFSETS[role].sign;
+  return {
+    anchorString: DOCUSIGN_ANCHORS[role].sign,
+    anchorUnits: DOCUSIGN_ANCHOR_UNITS,
+    anchorXOffset: offset.anchorXOffset,
+    anchorYOffset: offset.anchorYOffset,
+    anchorIgnoreIfNotPresent: "false",
+  };
+}
+
+export function dateSignedTab(
+  anchorString: string,
+  offset: TabAnchorOffset,
+): DateSignedTab {
   return {
     anchorString,
-    anchorUnits: "pixels",
+    anchorUnits: DOCUSIGN_ANCHOR_UNITS,
+    anchorXOffset: offset.anchorXOffset,
+    anchorYOffset: offset.anchorYOffset,
     anchorIgnoreIfNotPresent: "false",
     font: DOCUSIGN_DATE_TAB_FONT,
     fontSize: DOCUSIGN_DATE_TAB_FONT_SIZE,
@@ -290,6 +319,10 @@ export function dateSignedTab(anchorString: string): DateSignedTab {
     italic: "false",
     underline: "false",
   };
+}
+
+export function dateSignedTabForRole(role: EnvelopeRecipient["role"]): DateSignedTab {
+  return dateSignedTab(DOCUSIGN_ANCHORS[role].date, DOCUSIGN_TAB_OFFSETS[role].date);
 }
 
 /** Signature-block Date Signed tabs only — never body-date or typed text tabs. */
@@ -319,7 +352,6 @@ export function buildEnvelopeDefinition(input: DocuSignSendInput): EnvelopeDefin
     recipients: {
       signers: input.recipients.map((recipient) => {
         const routing = RECIPIENT_ROUTING[recipient.role];
-        const anchors = DOCUSIGN_ANCHORS[recipient.role];
         return {
           email: recipient.email,
           name: recipient.name,
@@ -327,14 +359,8 @@ export function buildEnvelopeDefinition(input: DocuSignSendInput): EnvelopeDefin
           routingOrder: routing.routingOrder,
           roleName: recipient.role,
           tabs: {
-            signHereTabs: [
-              {
-                anchorString: anchors.sign,
-                anchorUnits: "pixels",
-                anchorIgnoreIfNotPresent: "false",
-              },
-            ],
-            dateSignedTabs: dateSignedAnchorsForRole(recipient.role).map(dateSignedTab),
+            signHereTabs: [signHereTab(recipient.role)],
+            dateSignedTabs: [dateSignedTabForRole(recipient.role)],
           },
         };
       }),
