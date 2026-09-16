@@ -606,7 +606,7 @@ function emptyConnectEvent(): ConnectEvent {
   };
 }
 
-/** Prefer the Buyer signer’s Date Signed; fall back to envelope completedDateTime. */
+/** Envelope metadata only — never used for agreement Effective Date. */
 export function extractBuyerSignedDateTime(source: unknown): string | null {
   const record = asRecord(source);
   if (!record) {
@@ -625,12 +625,6 @@ export function extractBuyerSignedDateTime(source: unknown): string | null {
     }
   }
   return null;
-}
-
-export function resolveSignedAt(
-  ...candidates: Array<string | null | undefined>
-): string | undefined {
-  return candidates.find((value) => typeof value === "string" && value.trim())?.trim();
 }
 
 export function normalizeEnvelopeStatus(

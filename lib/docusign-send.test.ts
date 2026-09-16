@@ -106,6 +106,7 @@ describe("intake submit DocuSign send", () => {
     const submitted = applySubmit(draft(), "docusign");
     expect(shouldSendDocuSignOnSubmit(submitted)).toBe(true);
     expect(submitted.status).toBe("accepted");
+    expect(submitted.effectiveDate).toBeTruthy();
   });
 
   it("does not send DocuSign on manual submit", () => {

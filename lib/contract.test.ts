@@ -79,16 +79,19 @@ describe("gopher tortoise agreement mapping", () => {
     expect(text).not.toContain("Bio-Tech");
   });
 
-  it("leaves Effective Date and Expiration open until the Buyer signs", () => {
+  it("leaves Effective Date and Expiration open until intake is submitted", () => {
     const contract = buildContract(engagement());
     const body = contractBody(contract);
-    expect(contract.effectiveDate).toBe("the date Buyer signs this Agreement");
-    expect(contract.expirationDate).toBe("one (1) year after the Effective Date");
-    expect(body).toContain("the date Buyer signs this Agreement");
+    expect(contract.effectiveDate).toBe("—");
+    expect(contract.expirationDate).toBe("—");
+    expect(body).toContain("entered into as of the Effective Date");
+    expect(body).toContain("expires on the Expiration Date");
+    expect(body).not.toContain("the date Buyer signs this Agreement");
+    expect(body).not.toContain("one (1) year after the Effective Date");
     expect(body).not.toContain("April 15, 2027");
   });
 
-  it("fills expiration from the signature Effective Date once signed", () => {
+  it("fills expiration from the intake-submission Effective Date", () => {
     const contract = buildContract(engagement({ effectiveDate: "2026-04-15" }));
     const body = contractBody(contract);
     expect(contract.effectiveDate).toBe("April 15, 2026");

@@ -248,12 +248,7 @@ export async function refreshDocuSignStatus(
 
   try {
     const snapshot = await getLiveEnvelopeStatus(engagement.docusign.envelopeId);
-    await syncLiveEnvelope(
-      engagement,
-      snapshot.status,
-      undefined,
-      snapshot.buyerSignedDateTime ?? snapshot.completedDateTime,
-    );
+    await syncLiveEnvelope(engagement, snapshot.status);
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Unable to refresh DocuSign status.",

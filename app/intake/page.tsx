@@ -30,9 +30,11 @@ export default function IntakePage() {
         <p className="mt-4 max-w-2xl text-[17px] leading-[27px] text-muted">
           Buyer notice block, reserved tortoise count, county of relocation, authorized agent,
           donor affiliation, and one Buyer witness. The Canaan Ranch LLP witness is seller-side
-          and is not collected here. The Effective Date is the date the Buyer signs — not a field
-          on this form. The Expiration Date is one year after the Buyer Date Signed / Effective
-          Date. After submission, download the populated Word agreement to review.
+          and is not collected here. The Effective Date is the Florida/Eastern calendar date you
+          submit this intake — not a field on this form. The Expiration Date is that same
+          calendar day one year later. Both dates are typed into the Word agreement and DocuSign
+          envelope when you submit. After submission, download the populated Word agreement to
+          review.
         </p>
         <div className="mt-4">
           <FwcBadge />

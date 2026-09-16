@@ -155,7 +155,8 @@ describe("site builder visual lock", () => {
     expect(signingPanel).not.toContain("when available");
     expect(signingPanel.toLowerCase()).not.toContain("this demo");
     expect(signingPanel.toLowerCase()).not.toContain("go-live");
-    expect(timeline).toContain("DocuSign on submit is the usual signing path");
+    expect(timeline).toContain("Effective Date is the intake submission date");
+    expect(timeline).not.toContain("Buyer signature date");
     expect(timeline).toContain("The fallback is to download the Word agreement");
     expect(timeline.toLowerCase()).not.toContain("this demo");
     expect(timeline.toLowerCase()).not.toContain("go-live");
@@ -184,12 +185,13 @@ describe("site builder visual lock", () => {
     expect(intakePage).toContain("Have these agreement details ready");
     expect(intakePage).not.toContain("existing agreement details");
     expect(intakePage).not.toContain("Have these existing agreement details ready");
-    expect(intakePage).toContain("The Effective Date is the date the Buyer signs");
-    expect(intakePage).toContain(
-      "The Expiration Date is one year after the Buyer Date Signed / Effective",
-    );
-    expect(intakeForm).toContain("The Expiration Date is one year");
-    expect(intakeForm).toContain("Buyer Date Signed / Effective Date.");
+    expect(intakePage).toContain("The Effective Date is the Florida/Eastern calendar date you");
+    expect(intakePage).toContain("The Expiration Date is that same");
+    expect(intakePage).not.toContain("the date the Buyer signs");
+    expect(intakePage).not.toContain("Buyer Date Signed");
+    expect(intakeForm).toContain("The Expiration Date is that same calendar day one year later.");
+    expect(intakeForm).toContain("Florida/Eastern calendar date you submit");
+    expect(intakeForm).not.toContain("Buyer Date Signed / Effective Date.");
     expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
     expect(footer).toContain("{brand.footerLine}");
     expect(footer).toContain("brandMailtoHref");

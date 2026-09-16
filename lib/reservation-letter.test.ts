@@ -96,12 +96,13 @@ describe("reservation letter fields", () => {
     expect(fields.reservationPeriod).toContain("June 2, 2027");
   });
 
-  it("keeps a draft period when Accept happens before Effective Date is known", () => {
+  it("keeps a draft period when Effective Date is not yet known", () => {
     const fields = buildReservationLetterFields(engagement());
     expect(fields.effectiveDate).toBeNull();
     expect(fields.reservationPeriod).toMatch(/date of permit issuance/);
-    expect(fields.reservationPeriod).toMatch(/Effective Date \+ 1 year/);
-    expect(fields.reservationPeriod).toMatch(/Seller signs/);
+    expect(fields.reservationPeriod).toMatch(/when intake is submitted/);
+    expect(fields.reservationPeriod).not.toMatch(/Seller signs/);
+    expect(fields.reservationPeriod).not.toMatch(/Effective Date \+ 1 year/);
   });
 
   it("formats a singular tortoise count", () => {

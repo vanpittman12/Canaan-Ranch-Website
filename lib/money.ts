@@ -103,10 +103,35 @@ export function dateOnly(isoDateTime: string) {
   return isoDateTime.slice(0, 10);
 }
 
-/** Copy used when Effective Date is not yet known (outgoing envelope / preview). */
-export const PENDING_EFFECTIVE_DATE_PHRASE = "the date Buyer signs this Agreement";
-/** Matches the Term rule (Effective + 1 year) without guessing a calendar day at send. */
-export const PENDING_EXPIRATION_DATE_PHRASE = "one (1) year after the Effective Date";
+/** Florida / Eastern business calendar used for agreement Effective Date. */
+export const BUSINESS_TIME_ZONE = "America/New_York";
+
+/**
+ * Calendar date (YYYY-MM-DD) in the Florida business timezone.
+ * Avoids UTC midnight rollover: 2026-09-17T03:30Z is still 2026-09-16 in EDT.
+ */
+export function businessDateOnly(
+  isoDateTime: string,
+  timeZone = BUSINESS_TIME_ZONE,
+): string {
+  const date = new Date(isoDateTime);
+  if (Number.isNaN(date.getTime())) {
+    return dateOnly(isoDateTime);
+  }
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  if (!year || !month || !day) {
+    return dateOnly(isoDateTime);
+  }
+  return `${year}-${month}-${day}`;
+}
 
 export function addOneYear(isoDate: string) {
   const date = parseIsoDate(isoDate);

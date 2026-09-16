@@ -24,7 +24,7 @@ const stages = [
   {
     id: "executed",
     title: "Executed",
-    body: "Effective Date is the Buyer signature date. Expiration is one year later.",
+    body: "Effective Date is the intake submission date. Expiration is the same calendar day one year later.",
   },
 ] as const;
 
