@@ -9,6 +9,7 @@ import {
   AGREEMENT_UNMAPPED_GAPS,
   EFFECTIVE_DATE_LEFTOVER,
   EXPIRATION_DATE_LEFTOVER,
+  buildAgreementDateStamps,
   extractDocxPlainText,
   formatEffectiveDateStamp,
   formatExpirationDatePendingStamp,
@@ -17,6 +18,7 @@ import {
   populateAgreementDocx,
   populateAgreementFromParts,
   replacePlainTextInParagraph,
+  utcSendDate,
 } from "./agreement-populate";
 import {
   BLANK_AGREEMENT_DOCX_SHA256,
@@ -28,7 +30,7 @@ import {
   resetBlankAgreementTemplateCache,
 } from "./agreement-template";
 import { brand } from "./brand";
-import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
 import { addOneYear, formatLongDate, PENDING_EFFECTIVE_DATE_PHRASE, PENDING_EXPIRATION_DATE_PHRASE } from "./money";
 import { emptyReservationLetter, type Engagement, type IntakeFields } from "./types";
 
@@ -151,7 +153,7 @@ describe("Van’s Word agreement populate", () => {
     expect(files).toContain(DOCUSIGN_ANCHORS.seller_signer.sign);
     expect(files).toContain(DOCUSIGN_ANCHORS.buyer_witness.sign);
     expect(files).toContain(DOCUSIGN_ANCHORS.seller_witness.sign);
-    expect(files).not.toContain("/date_effective/");
+    expect(files).toContain(EFFECTIVE_DATE_SIGNED_ANCHOR);
 
     const blankText = extractDocxPlainText(blank);
     expect(blankText).not.toContain(DOCUSIGN_ANCHORS.buyer_signer.sign);
@@ -160,8 +162,8 @@ describe("Van’s Word agreement populate", () => {
     expect(blankText).toMatch(/Witness(?:\s*1)?\s+Signature/);
   });
 
-  it("places signature Date Signed anchors without a body Effective Date tab", () => {
-    const signatureAnchors = [
+  it("places signature Date Signed anchors plus the Effective Date Date Signed tab without vanish", () => {
+    const allEight = [
       DOCUSIGN_ANCHORS.buyer_signer.sign,
       DOCUSIGN_ANCHORS.buyer_signer.date,
       DOCUSIGN_ANCHORS.seller_signer.sign,
@@ -170,6 +172,7 @@ describe("Van’s Word agreement populate", () => {
       DOCUSIGN_ANCHORS.buyer_witness.date,
       DOCUSIGN_ANCHORS.seller_witness.sign,
       DOCUSIGN_ANCHORS.seller_witness.date,
+      EFFECTIVE_DATE_SIGNED_ANCHOR,
     ];
 
     // Public blank download template (Witness Signature ×2).
@@ -177,12 +180,11 @@ describe("Van’s Word agreement populate", () => {
     const publicPopulated = populateAgreementDocx(publicBlank, engagement());
     const publicText = extractDocxPlainText(publicPopulated);
     const publicXml = strFromU8(unzipSync(publicPopulated)["word/document.xml"]!);
-    for (const anchor of signatureAnchors) {
+    for (const anchor of allEight) {
       expect(publicText).toContain(anchor);
       expect(publicText.split(anchor).length - 1).toBe(1);
       expect(extractDocxPlainText(publicBlank)).not.toContain(anchor);
     }
-    expect(publicText).not.toContain("/date_effective/");
     expect(publicXml).not.toContain("<w:vanish");
     expect(publicXml).toContain('w:val="FFFFFF"');
 
@@ -195,11 +197,10 @@ describe("Van’s Word agreement populate", () => {
     const vanPopulated = populateAgreementDocx(vanOriginal, engagement());
     const vanText = extractDocxPlainText(vanPopulated);
     const vanXml = strFromU8(unzipSync(vanPopulated)["word/document.xml"]!);
-    for (const anchor of signatureAnchors) {
+    for (const anchor of allEight) {
       expect(vanText).toContain(anchor);
       expect(vanText.split(anchor).length - 1).toBe(1);
     }
-    expect(vanText).not.toContain("/date_effective/");
     expect(vanXml).not.toContain("<w:vanish");
     expect(vanXml).toContain('w:val="FFFFFF"');
     // Labels may be split across w:t runs in Van’s OOXML — assert via joined plain text.
@@ -223,6 +224,7 @@ describe("Van’s Word agreement populate", () => {
     expect(contractSrc).toContain("generatePopulatedAgreement");
     expect(contractSrc).not.toContain("generateContractPdf");
     expect(sendSrc).toContain("generatePopulatedAgreement");
+    expect(sendSrc).toContain("stampProvisionalExpiration: true");
     expect(adminSrc).toContain("sendDocuSignForEngagement");
     expect(adminSrc).not.toMatch(/bytes:\s*await generateContractPdf/);
   });
@@ -246,7 +248,7 @@ describe("Van’s Word agreement populate", () => {
     expect(populateSrc).toContain("loadBlankAgreementParts");
     // Anchor run markup must not use vanish (comment mentions are fine).
     expect(populateSrc).not.toMatch(/<w:rPr><w:vanish/);
-    expect(populateSrc).not.toContain("/date_effective/");
+    expect(populateSrc).toContain("EFFECTIVE_DATE_SIGNED_ANCHOR");
     expect(populateSrc).toContain("Witness(?:\\s*1)?");
 
     const adminSrc = readFileSync(ADMIN_ACTIONS, "utf8");
@@ -276,20 +278,43 @@ describe("Van’s Word agreement populate", () => {
     expect(AGREEMENT_FIELD_MAP.length).toBeGreaterThanOrEqual(8);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/Buyer email/i);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/Effective Date/i);
+    expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/provisional/i);
     expect(AGREEMENT_UNMAPPED_GAPS.join(" ")).toMatch(/county/i);
   });
 
-  it("types Effective/Expiration into the outgoing envelope as body text, not Date Signed tabs", () => {
+  it("leaves Effective leftover (and download Expiration leftover) empty until send or sign", () => {
     const blank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
     const unsigned = extractDocxPlainText(populateAgreementDocx(blank, engagement()));
-    expect(unsigned).toContain(PENDING_EFFECTIVE_DATE_PHRASE);
-    expect(unsigned).toContain(`${PENDING_EXPIRATION_DATE_PHRASE},`);
-    expect(unsigned).not.toContain(EFFECTIVE_DATE_LEFTOVER);
-    expect(unsigned).not.toContain(EXPIRATION_DATE_LEFTOVER);
-    expect(unsigned).not.toContain("/date_effective/");
+    expect(unsigned).toContain(EFFECTIVE_DATE_LEFTOVER);
+    expect(unsigned).toContain(EXPIRATION_DATE_LEFTOVER);
+    expect(unsigned).toContain(EFFECTIVE_DATE_SIGNED_ANCHOR);
+    expect(unsigned).not.toContain(PENDING_EFFECTIVE_DATE_PHRASE);
+    expect(unsigned).not.toContain(PENDING_EXPIRATION_DATE_PHRASE);
     expect(unsigned).not.toContain("this 15th day of April, 2026");
     expect(unsigned).not.toContain("April 15, 2027");
+    expect(buildAgreementDateStamps(engagement())).toEqual([]);
+  });
+
+  it("populate-for-send without effectiveDate fills a calendar Expiration leftover and keeps Effective for Date Signed", () => {
+    const now = new Date("2026-09-16T22:00:00.000Z");
+    expect(utcSendDate(now)).toBe("2026-09-16");
+    expect(buildAgreementDateStamps(engagement(), { stampProvisionalExpiration: true, now })).toEqual([
+      [EXPIRATION_DATE_LEFTOVER, "September 16, 2027,"],
+    ]);
     expect(formatExpirationDatePendingStamp()).toBe("one (1) year after the Effective Date,");
+
+    const blank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
+    const forSend = extractDocxPlainText(
+      populateAgreementDocx(blank, engagement(), { stampProvisionalExpiration: true, now }),
+    );
+    expect(forSend).toContain("September 16, 2027,");
+    expect(forSend).toContain("referred to herein as the “Expiration Date.”");
+    expect(forSend).not.toContain(EXPIRATION_DATE_LEFTOVER);
+    expect(forSend).not.toContain(PENDING_EXPIRATION_DATE_PHRASE);
+    expect(forSend).toContain(EFFECTIVE_DATE_LEFTOVER);
+    expect(forSend).toContain(EFFECTIVE_DATE_SIGNED_ANCHOR);
+    expect(forSend).not.toContain("this 16th day of September, 2026");
+    expect(forSend).not.toContain(PENDING_EFFECTIVE_DATE_PHRASE);
   });
 
   it("stamps Effective leftover from the sign date and Expiration as addOneYear", () => {
@@ -298,13 +323,28 @@ describe("Van’s Word agreement populate", () => {
     expect(addOneYear("2026-04-15")).toBe("2027-04-15");
     expect(formatLongDate(addOneYear("2026-04-15"))).toBe("April 15, 2027");
 
+    const sendNow = new Date("2026-09-16T22:00:00.000Z");
+    expect(
+      buildAgreementDateStamps(engagement({ effectiveDate: "2026-04-15" }), {
+        stampProvisionalExpiration: true,
+        now: sendNow,
+      }),
+    ).toEqual([
+      [EFFECTIVE_DATE_LEFTOVER, "this 15th day of April, 2026"],
+      [EXPIRATION_DATE_LEFTOVER, "April 15, 2027,"],
+    ]);
+
     const blank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
     const signed = extractDocxPlainText(
-      populateAgreementDocx(blank, engagement({ effectiveDate: "2026-04-15" })),
+      populateAgreementDocx(blank, engagement({ effectiveDate: "2026-04-15" }), {
+        stampProvisionalExpiration: true,
+        now: sendNow,
+      }),
     );
     expect(signed).toContain("this 15th day of April, 2026");
     expect(signed).toContain("April 15, 2027,");
     expect(signed).toContain("referred to herein as the “Expiration Date.”");
+    expect(signed).not.toContain("September 16, 2027,");
     expect(signed).not.toContain(EFFECTIVE_DATE_LEFTOVER);
     expect(signed).not.toContain(EXPIRATION_DATE_LEFTOVER);
     expect(signed).not.toContain("/date_effective/");
@@ -334,39 +374,42 @@ describe("Van’s Word agreement populate", () => {
     const pendingExpiration = replacePlainTextInParagraph(
       leftoverXml,
       EXPIRATION_DATE_LEFTOVER,
-      formatExpirationDatePendingStamp(),
+      formatExpirationDateStamp(utcSendDate(new Date("2026-09-16T22:00:00.000Z"))),
       { consumeLeadingTabs: true },
     );
-    expect(pendingExpiration).toContain("one (1) year after the Effective Date,");
+    expect(pendingExpiration).toContain("September 16, 2027,");
     expect(pendingExpiration).toContain(AGREEMENT_FILL_RPR);
     expect(pendingExpiration).not.toContain("<w:tab/>");
+    expect(pendingExpiration).not.toContain(PENDING_EXPIRATION_DATE_PHRASE);
 
+    const sendNow = new Date("2026-09-16T22:00:00.000Z");
     const blank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
     const unsignedXml = strFromU8(unzipSync(populateAgreementDocx(blank, engagement()))["word/document.xml"]!);
+    const sendXml = strFromU8(
+      unzipSync(
+        populateAgreementDocx(blank, engagement(), { stampProvisionalExpiration: true, now: sendNow }),
+      )["word/document.xml"]!,
+    );
     const signedXml = strFromU8(
       unzipSync(populateAgreementDocx(blank, engagement({ effectiveDate: "2026-04-15" })))[
         "word/document.xml"
       ]!,
     );
 
-    const unsignedOpening = paragraphContaining(unsignedXml, PENDING_EFFECTIVE_DATE_PHRASE);
-    expect(unsignedOpening).toContain(AGREEMENT_FILL_RPR);
-    expect(unsignedOpening).not.toContain(EFFECTIVE_DATE_LEFTOVER);
-    expect(unsignedOpening).not.toContain("/date_effective/");
-    expect(unsignedOpening).not.toContain("<w:tab/>");
+    const unsignedOpening = paragraphContaining(unsignedXml, EFFECTIVE_DATE_LEFTOVER);
+    expect(unsignedOpening).toContain(EFFECTIVE_DATE_SIGNED_ANCHOR);
+    expect(unsignedOpening).toContain(EFFECTIVE_DATE_LEFTOVER);
+    expect(unsignedOpening).not.toContain(PENDING_EFFECTIVE_DATE_PHRASE);
     // Buyer fill must not collapse the opening paragraph (bold legal terms stay).
     expect(unsignedOpening).toMatch(/<w:b\/>\s*<w:sz w:val="24"\/>\s*<\/w:rPr>\s*<w:t>Agreement<\/w:t>/);
 
-    const unsignedExpiration = paragraphContaining(unsignedXml, PENDING_EXPIRATION_DATE_PHRASE);
-    expect(unsignedExpiration).toContain(AGREEMENT_FILL_RPR);
-    expect(unsignedExpiration).not.toContain(EXPIRATION_DATE_LEFTOVER);
-    expect(unsignedExpiration).not.toContain("<w:tab/>");
-    expect(dateRunTypography(unsignedExpiration, "one (1) year after the Effective Date,")).toContain(
-      "Times New Roman",
-    );
-    expect(dateRunTypography(unsignedExpiration, "one (1) year after the Effective Date,")).not.toContain(
-      "<w:u ",
-    );
+    const sendExpiration = paragraphContaining(sendXml, "September 16, 2027,");
+    expect(sendExpiration).toContain(AGREEMENT_FILL_RPR);
+    expect(sendExpiration).not.toContain(EXPIRATION_DATE_LEFTOVER);
+    expect(sendExpiration).not.toContain("<w:tab/>");
+    expect(sendExpiration).not.toContain(PENDING_EXPIRATION_DATE_PHRASE);
+    expect(dateRunTypography(sendExpiration, "September 16, 2027,")).toContain("Times New Roman");
+    expect(dateRunTypography(sendExpiration, "September 16, 2027,")).not.toContain("<w:u ");
 
     const signedOpening = paragraphContaining(signedXml, "this 15th day of April, 2026");
     expect(signedOpening).toContain(AGREEMENT_FILL_RPR);

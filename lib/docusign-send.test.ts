@@ -210,5 +210,8 @@ describe("intake submit DocuSign send", () => {
     expect(adminSrc.indexOf("Persist Accept before DOCX populate")).toBeLessThan(
       adminSrc.indexOf("next = await sendDocuSignForEngagement(next)"),
     );
+    expect(readFileSync(resolve(process.cwd(), "lib/docusign-send.ts"), "utf8")).toContain(
+      "stampProvisionalExpiration: true",
+    );
   });
 });

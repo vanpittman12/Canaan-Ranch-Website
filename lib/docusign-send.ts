@@ -1,7 +1,9 @@
 /**
  * Shared DocuSign send used by public intake submit and admin Resend/Accept.
- * Populate Van’s Word file, then sendEnvelope (live when DOCUSIGN_ENABLED=true,
- * otherwise a local stub). Never throws past the caller — actions persist first.
+ * Populate Van’s Word file (provisional Expiration = UTC send date + 1 year
+ * when Effective Date is still unset), then sendEnvelope (live when
+ * DOCUSIGN_ENABLED=true, otherwise a local stub). Never throws past the caller
+ * — actions persist first.
  */
 import { generatePopulatedAgreement } from "./agreement-populate";
 import {
@@ -46,7 +48,9 @@ export async function sendDocuSignForEngagement(
   engagement: Engagement,
   http?: DocuSignHttp,
 ): Promise<Engagement> {
-  const populated = await generatePopulatedAgreement(engagement);
+  const populated = await generatePopulatedAgreement(engagement, {
+    stampProvisionalExpiration: true,
+  });
   const sent = await sendEnvelope(
     {
       engagementId: engagement.id,

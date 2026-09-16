@@ -14,9 +14,10 @@ import {
   populatedAgreementFilename,
 } from "./agreement-template";
 import { brand, getSellerWitness } from "./brand";
-import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
 import {
   addOneYear,
+  dateOnly,
   dealEconomics,
   formatFormalDate,
   formatLongDate,
@@ -68,8 +69,8 @@ const HIDDEN_ANCHOR_RPR =
   '<w:rPr><w:color w:val="FFFFFF"/><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr>';
 
 export const AGREEMENT_UNMAPPED_GAPS = [
-  "Effective Date leftover (“this  day of, 2024”) — not an intake field; typed into the outgoing Word as “the date Buyer signs this Agreement”, then the calendar stamp after the Buyer signs (complete / manual upload)",
-  "Expiration leftover (leading underlined tab + “, 202 ,”) — typed into the outgoing Word as “one (1) year after the Effective Date,”; calendar addOneYear after complete. DocuSign has no Date Signed + 1 year formula and no template field #3",
+  "Effective Date leftover (“this  day of, 2024”) — not an intake field; Date Signed tab while the envelope is open; calendar stamp after the Buyer signs (DocuSign complete or manual upload), never from Accept or intake",
+  "Expiration leftover (leading underlined tab + “, 202 ,”) — envelope send types a provisional calendar date (UTC send date + 1 year, Times New Roman 12pt), not the “one (1) year after the Effective Date” phrase; exact addOneYear(Effective Date) after complete. DocuSign has no Date Signed + 1 year formula",
   "Buyer email — Van’s notice block has name / address / phone only",
   "Buyer title (“Its:”) — not collected on intake",
   "Relocation county — no matching blank in the Word file",
@@ -120,30 +121,55 @@ export function formatExpirationDateStamp(isoDate: string) {
   return `${formatLongDate(addOneYear(isoDate))},`;
 }
 
-/** Outgoing envelope / unsigned download — same copy as the HTML contract preview. */
+/** HTML contract preview copy when Effective Date is not yet known. Not used in the outgoing Word. */
 export function formatEffectiveDatePendingStamp() {
   return PENDING_EFFECTIVE_DATE_PHRASE;
 }
 
-/** Trailing comma matches Van’s “, 202 ,” leftover so the sentence still reads. */
+/** HTML preview copy. Outgoing DocuSign Word uses a calendar date instead. */
 export function formatExpirationDatePendingStamp() {
   return `${PENDING_EXPIRATION_DATE_PHRASE},`;
 }
 
-export function buildAgreementDateStamps(engagement: Engagement): Array<[string, string]> {
-  if (!engagement.effectiveDate) {
-    return [
-      [EFFECTIVE_DATE_LEFTOVER, formatEffectiveDatePendingStamp()],
-      [EXPIRATION_DATE_LEFTOVER, formatExpirationDatePendingStamp()],
-    ];
-  }
-  return [
-    [EFFECTIVE_DATE_LEFTOVER, formatEffectiveDateStamp(engagement.effectiveDate)],
-    [EXPIRATION_DATE_LEFTOVER, formatExpirationDateStamp(engagement.effectiveDate)],
-  ];
+export type AgreementPopulateOptions = {
+  /**
+   * DocuSign send only. When Effective Date is still unset, type Term Expiration
+   * as UTC send date + 1 year (Times New Roman 12pt) so Part 3 is a real calendar
+   * date, not Van’s “, 202 ,” leftover or the “one (1) year after…” phrase.
+   * Do not stamp Effective — that leftover stays for the Buyer Date Signed tab.
+   * persistExecutedAgreement overwrites both from the real effectiveDate after complete.
+   */
+  stampProvisionalExpiration?: boolean;
+  /** Clock for provisional Expiration (tests). Defaults to now. */
+  now?: Date;
+};
+
+export function utcSendDate(now: Date = new Date()) {
+  return dateOnly(now.toISOString());
 }
 
-export function buildAgreementReplacements(engagement: Engagement): Array<[string, string]> {
+export function buildAgreementDateStamps(
+  engagement: Engagement,
+  options: AgreementPopulateOptions = {},
+): Array<[string, string]> {
+  if (engagement.effectiveDate) {
+    return [
+      [EFFECTIVE_DATE_LEFTOVER, formatEffectiveDateStamp(engagement.effectiveDate)],
+      [EXPIRATION_DATE_LEFTOVER, formatExpirationDateStamp(engagement.effectiveDate)],
+    ];
+  }
+  if (options.stampProvisionalExpiration) {
+    return [
+      [EXPIRATION_DATE_LEFTOVER, formatExpirationDateStamp(utcSendDate(options.now))],
+    ];
+  }
+  return [];
+}
+
+export function buildAgreementReplacements(
+  engagement: Engagement,
+  options: AgreementPopulateOptions = {},
+): Array<[string, string]> {
   const { intake } = engagement;
   const economics = dealEconomics(intake);
   return [
@@ -155,16 +181,17 @@ export function buildAgreementReplacements(engagement: Engagement): Array<[strin
     [BUYER_CITY_LINE, `${intake.buyerCity}, ${intake.buyerState} ${intake.buyerPostalCode}`],
     [BUYER_PHONE, intake.buyerPhone],
     [CANAAN_AGENT_BLANK, canaanAgentFill()],
-    ...buildAgreementDateStamps(engagement),
+    ...buildAgreementDateStamps(engagement, options),
   ];
 }
 
 export function populateAgreementDocx(
   templateBytes: Uint8Array,
   engagement: Engagement,
+  options: AgreementPopulateOptions = {},
 ): Uint8Array {
   const files = unzipSync(templateBytes);
-  return zipPopulatedParts(files, engagement);
+  return zipPopulatedParts(files, engagement, options);
 }
 
 /**
@@ -175,29 +202,32 @@ export function populateAgreementDocx(
 export function populateAgreementFromParts(
   parts: Record<string, Uint8Array>,
   engagement: Engagement,
+  options: AgreementPopulateOptions = {},
 ): Uint8Array {
-  return zipPopulatedParts({ ...parts }, engagement);
+  return zipPopulatedParts({ ...parts }, engagement, options);
 }
 
 function zipPopulatedParts(
   files: Record<string, Uint8Array>,
   engagement: Engagement,
+  options: AgreementPopulateOptions = {},
 ): Uint8Array {
   const xmlFile = files[DOCUMENT_XML];
   if (!xmlFile) {
     throw new Error("Van’s agreement template is missing word/document.xml.");
   }
-  files[DOCUMENT_XML] = strToU8(populateDocumentXml(strFromU8(xmlFile), engagement));
+  files[DOCUMENT_XML] = strToU8(populateDocumentXml(strFromU8(xmlFile), engagement, options));
   // level 0 (store) — deflating the 424KB document.xml was the Error 1102 culprit.
   return zipSync(files, { level: POPULATED_ZIP_LEVEL });
 }
 
 export async function generatePopulatedAgreement(
   engagement: Engagement,
+  options: AgreementPopulateOptions = {},
 ): Promise<PopulatedAgreement> {
   const parts = await loadBlankAgreementParts();
   return {
-    bytes: populateAgreementFromParts(parts, engagement),
+    bytes: populateAgreementFromParts(parts, engagement, options),
     filename: populatedAgreementFilename(engagement.reference),
     mimeType: POPULATED_AGREEMENT_MIME,
     fileExtension: "docx",
@@ -213,8 +243,12 @@ export function extractDocxPlainText(bytes: Uint8Array) {
   return paragraphTexts(strFromU8(xmlFile)).join("\n");
 }
 
-export function populateDocumentXml(xml: string, engagement: Engagement): string {
-  const replacements = buildAgreementReplacements(engagement);
+export function populateDocumentXml(
+  xml: string,
+  engagement: Engagement,
+  options: AgreementPopulateOptions = {},
+): string {
+  const replacements = buildAgreementReplacements(engagement, options);
   const printedNames = printedNameValues(engagement);
   let printedIndex = 0;
   let witnessSignatureIndex = 0;
@@ -231,7 +265,7 @@ export function populateDocumentXml(xml: string, engagement: Engagement): string
       result = rewriteParagraphText(result, `By: ${engagement.intake.buyerAttention}`);
     }
 
-    const anchors = anchorsForParagraph(text, witnessSignatureIndex);
+    const anchors = anchorsForParagraph(text, witnessSignatureIndex, engagement);
     if (anchors.length > 0) {
       result = appendHiddenAnchors(result, anchors);
     }
@@ -268,7 +302,14 @@ function isWitnessSignatureParagraph(text: string) {
   return /^(Witness(?:\s*1)?\s+Signature)$/i.test(compact);
 }
 
-function anchorsForParagraph(text: string, witnessSignatureIndex: number) {
+function anchorsForParagraph(
+  text: string,
+  witnessSignatureIndex: number,
+  engagement: Engagement,
+) {
+  if (!engagement.effectiveDate && text.includes(EFFECTIVE_DATE_LEFTOVER)) {
+    return [EFFECTIVE_DATE_SIGNED_ANCHOR];
+  }
   const compact = text.replace(/\s+/g, " ").trim();
   if (compact.includes("By: Name: Andrew V. Pittman, Jr.")) {
     return [DOCUSIGN_ANCHORS.seller_signer.sign, DOCUSIGN_ANCHORS.seller_signer.date];

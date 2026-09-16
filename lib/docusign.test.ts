@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { brand, getSellerWitness } from "./brand";
-import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
 import {
   buildEnvelopeDefinition,
   buildEnvelopeRecipients,
@@ -343,10 +343,13 @@ describe("DocuSign Connect and polling", () => {
     expect(isCompleteEnvelopeStatus(snapshot.status)).toBe(true);
   });
 
-  it("places Date Signed tabs only on signature blocks, never on body leftovers", () => {
+  it("places Date Signed tabs on every signer and the Effective Date leftover", () => {
     const definition = buildEnvelopeDefinition(sendInput());
     const roles = ["buyer_signer", "seller_signer", "buyer_witness", "seller_witness"] as const;
-    expect(dateSignedAnchorsForRole("buyer_signer")).toEqual([DOCUSIGN_ANCHORS.buyer_signer.date]);
+    expect(dateSignedAnchorsForRole("buyer_signer")).toEqual([
+      DOCUSIGN_ANCHORS.buyer_signer.date,
+      EFFECTIVE_DATE_SIGNED_ANCHOR,
+    ]);
     expect(dateSignedAnchorsForRole("buyer_witness")).toEqual([DOCUSIGN_ANCHORS.buyer_witness.date]);
     expect(dateSignedAnchorsForRole("seller_signer")).toEqual([DOCUSIGN_ANCHORS.seller_signer.date]);
     expect(dateSignedAnchorsForRole("seller_witness")).toEqual([DOCUSIGN_ANCHORS.seller_witness.date]);
@@ -370,8 +373,8 @@ describe("DocuSign Connect and polling", () => {
             tab.underline === "false",
         ),
       ).toBe(true);
-      expect(signer?.tabs.dateSignedTabs.some((tab) => tab.anchorString === "/date_effective/")).toBe(
-        false,
+      expect(signer?.tabs.dateSignedTabs.some((tab) => tab.anchorString === EFFECTIVE_DATE_SIGNED_ANCHOR)).toBe(
+        role === "buyer_signer",
       );
     }
   });

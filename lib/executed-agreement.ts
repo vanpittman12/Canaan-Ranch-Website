@@ -7,10 +7,11 @@ export function executedAgreementStoredName(engagementId: string) {
 }
 
 /**
- * After Effective Date is known, regenerate the populated Word with calendar
- * Effective + Expiration stamps (Times New Roman 12pt). The outgoing envelope
- * already has typed pending phrases; this post-complete file is the executed
- * body copy with addOneYear dates. Contract download regenerates the same stamps.
+ * After Effective Date is known, regenerate the populated Word with exact
+ * calendar Effective + Expiration stamps (Times New Roman 12pt, Effective + 1
+ * year). Envelope send may already have a provisional Expiration (UTC send date
+ * + 1 year); this overwrite is the executed body copy. DocuSign cannot
+ * formula-fill Date Signed + 1 year on Van’s “, 202 ,” leftover.
  */
 export async function persistExecutedAgreement(engagement: Engagement) {
   if (!engagement.effectiveDate) {

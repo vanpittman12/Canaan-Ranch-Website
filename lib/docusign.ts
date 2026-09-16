@@ -34,9 +34,9 @@ export type { DocuSignMode, EnvelopeRecipient };
 export const DEFAULT_ACCOUNT_BASE_URI = "https://demo.docusign.net";
 export const DEFAULT_AUTH_SERVER = "https://account-d.docusign.com";
 
-import { DOCUSIGN_ANCHORS } from "./docusign-anchors";
+import { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR } from "./docusign-anchors";
 
-export { DOCUSIGN_ANCHORS };
+export { DOCUSIGN_ANCHORS, EFFECTIVE_DATE_SIGNED_ANCHOR };
 
 const REQUIRED_LIVE_VARS = [
   "DOCUSIGN_INTEGRATION_KEY",
@@ -292,9 +292,13 @@ export function dateSignedTab(anchorString: string): DateSignedTab {
   };
 }
 
-/** Signature-block Date Signed tabs only — never body-date or typed text tabs. */
+/** Date Signed tabs on signature blocks, plus the body Effective Date leftover for the Buyer. */
 export function dateSignedAnchorsForRole(role: EnvelopeRecipient["role"]): string[] {
-  return [DOCUSIGN_ANCHORS[role].date];
+  const anchors: string[] = [DOCUSIGN_ANCHORS[role].date];
+  if (role === "buyer_signer") {
+    anchors.push(EFFECTIVE_DATE_SIGNED_ANCHOR);
+  }
+  return anchors;
 }
 
 export function buildEnvelopeDefinition(input: DocuSignSendInput): EnvelopeDefinition {
