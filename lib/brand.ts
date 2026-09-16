@@ -16,7 +16,7 @@ export const brand = {
   /** Primary buyer-facing intake CTA. Keep nav, hero, footer, and bottom CTA in sync. */
   intakeCta: "Start intake",
   flowInvite:
-    "Review the template, complete intake, and download your signature-ready relocation agreement. After Canaan Preserve accepts, DocuSign is the usual signing path.",
+    "Review the template, complete intake, and download your signature-ready relocation agreement. After you submit, DocuSign is the usual signing path.",
   footerLine:
     "Canaan Ranch LLP operates this FWC Approved Tier 1 Long-Term recipient site.",
   fwcBadge: "FWC Approved Tier 1",

@@ -215,9 +215,11 @@ describe("Van’s Word agreement populate", () => {
 
     const contractSrc = readFileSync(CONTRACT_ROUTE, "utf8");
     const adminSrc = readFileSync(ADMIN_ACTIONS, "utf8");
+    const sendSrc = readFileSync(resolve(process.cwd(), "lib/docusign-send.ts"), "utf8");
     expect(contractSrc).toContain("generatePopulatedAgreement");
     expect(contractSrc).not.toContain("generateContractPdf");
-    expect(adminSrc).toContain("generatePopulatedAgreement");
+    expect(sendSrc).toContain("generatePopulatedAgreement");
+    expect(adminSrc).toContain("sendDocuSignForEngagement");
     expect(adminSrc).not.toMatch(/bytes:\s*await generateContractPdf/);
   });
 
@@ -243,12 +245,26 @@ describe("Van’s Word agreement populate", () => {
     expect(populateSrc).toContain("Witness(?:\\s*1)?");
 
     const adminSrc = readFileSync(ADMIN_ACTIONS, "utf8");
-    // Accept must persist before DocuSign send so a 400 cannot roll back to Pending.
-    expect(adminSrc.indexOf("await saveEngagement(next)")).toBeLessThan(
-      adminSrc.indexOf("sendDocuSignForEngagement"),
+    const submitSrc = readFileSync(
+      resolve(process.cwd(), "app/actions/engagements.ts"),
+      "utf8",
+    );
+    const sendSrc = readFileSync(resolve(process.cwd(), "lib/docusign-send.ts"), "utf8");
+    // Submit / Accept persist before DocuSign send so a 400 cannot roll back status.
+    expect(submitSrc).toContain("await saveEngagement(next)");
+    expect(submitSrc).toContain("next = await sendDocuSignForEngagement(next)");
+    expect(submitSrc.indexOf("Persist submit before populate")).toBeLessThan(
+      submitSrc.indexOf("next = await sendDocuSignForEngagement(next)"),
+    );
+    expect(adminSrc).toContain("Persist Accept before DOCX populate");
+    expect(adminSrc).toContain("next = await sendDocuSignForEngagement(next)");
+    expect(adminSrc.indexOf("Persist Accept before DOCX populate")).toBeLessThan(
+      adminSrc.indexOf("next = await sendDocuSignForEngagement(next)"),
     );
     expect(adminSrc).toContain("resendDocuSign");
-    expect(adminSrc).toContain("DocuSign send failed after Accept");
+    expect(adminSrc).toContain("shouldSendDocuSignOnSubmit");
+    expect(sendSrc).toContain("DocuSign send failed after Accept");
+    expect(sendSrc).toContain("DocuSign send failed after intake submit");
   });
 
   it("documents the Word blanks that intake cannot fill yet", () => {

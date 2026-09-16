@@ -4,7 +4,7 @@
  *
  * Cloudflare Workers: avoid repeated inflate/deflate of the 424KB document.xml.
  * generatePopulatedAgreement() reuses cached unzipped parts and zips at store
- * level so contract download / Accept stay under CPU limits (Error 1102).
+ * level so contract download / intake submit / Accept stay under CPU limits (Error 1102).
  */
 import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import {

@@ -23,10 +23,11 @@ export function SigningPanel({
       <div>
         <h2 className="type-h2 text-forest">Choose how you will sign</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Download the populated Word agreement first. After Canaan Preserve accepts, DocuSign
-          is the usual signing path. The fallback is to download the Word agreement and upload
-          a signed copy. The Canaan Ranch LLP witness is already routed from brand config.
-          Nothing is executed until the team Accepts and a signed artifact is on file.
+          Download the populated Word agreement first. DocuSign is the usual signing path and
+          emails you as soon as you submit — no admin Accept is required to start signing.
+          The fallback is to download the Word agreement and upload a signed copy. The Canaan
+          Ranch LLP witness is already routed from brand config. Nothing is executed until a
+          signed artifact is on file.
         </p>
       </div>
 
@@ -50,12 +51,13 @@ export function SigningPanel({
             />
             <span>
               <span className="block font-medium text-ink">
-                DocuSign after Accept (usual signing path)
+                DocuSign on submit (usual signing path)
               </span>
               <span className="mt-1 block text-sm leading-6 text-muted">
-                After Canaan Preserve accepts, DocuSign emails the Buyer signatory, Canaan Ranch
-                LLP signatory, the Buyer witness from intake, and the fixed Canaan Ranch LLP
-                witness.
+                Submitting sends DocuSign to the Buyer signatory and Buyer witness first, then
+                Canaan Ranch LLP and the fixed Canaan Ranch LLP witness. Check your email for
+                DocuSign. Seller counter-sign can follow later and is not required to start
+                your signature.
               </span>
             </span>
           </label>
@@ -83,7 +85,11 @@ export function SigningPanel({
             Download populated agreement
           </a>
           <button className="btn-primary" type="submit" disabled={pending}>
-            {pending ? "Submitting…" : "Submit for Canaan Preserve review"}
+            {pending
+              ? "Submitting…"
+              : method === "docusign"
+                ? "Submit and send DocuSign"
+                : "Submit for Canaan Preserve review"}
           </button>
         </div>
       </form>

@@ -3,6 +3,11 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
+  recordDocuSignSendFailure,
+  sendDocuSignForEngagement,
+  shouldSendDocuSignOnSubmit,
+} from "@/lib/docusign-send";
+import {
   applySignedArtifact,
   applySubmit,
   artifactFromUpload,
@@ -95,8 +100,21 @@ export async function submitEngagement(
   }
 
   try {
-    const next = applySubmit(engagement, method as SigningMethod);
+    let next = applySubmit(engagement, method as SigningMethod);
+    // Persist submit before populate + DocuSign so a Worker CPU limit or
+    // DocuSign 400 does not roll the engagement back to Draft.
     await saveEngagement(next);
+    if (shouldSendDocuSignOnSubmit(next)) {
+      try {
+        next = await sendDocuSignForEngagement(next);
+        await saveEngagement(next);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Unable to send DocuSign envelope.";
+        next = recordDocuSignSendFailure(next, message, "intake_submit");
+        await saveEngagement(next);
+      }
+    }
   } catch (error) {
     return {
       error: error instanceof EngagementError ? error.message : "Unable to submit.",

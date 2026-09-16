@@ -4,7 +4,7 @@ Gopher tortoise recipient-site intake, downloadable relocation agreement, signat
 
 **Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site.**
 
-Buyer intake populates Van’s **Gopher Tortoise Relocation Agreement** Word file. After intake the buyer **downloads** that same document with intake fields filled (there is no on-screen contract preview). The client then chooses DocuSign or a manual signed upload. **Nothing is executed until the team Accepts and a signed artifact is on file.**
+Buyer intake populates Van’s **Gopher Tortoise Relocation Agreement** Word file. After intake the buyer **downloads** that same document with intake fields filled (there is no on-screen contract preview). The client then chooses DocuSign or a manual signed upload. **Nothing is executed until a signed artifact is on file.** Seller counter-sign may follow later and is not required to send the buyer DocuSign envelope.
 
 ## Run locally
 
@@ -94,10 +94,12 @@ Adult vs juvenile is not collected at intake. The $3,000 juvenile price stays in
 1. Buyer may download the blank agreement template from the landing page or intake.
 2. Buyer completes intake (legal name, notice / signatory, reserved capacity, project/ops fields, Buyer witness only).
 3. Submit fills Van’s Word agreement (`public/agreements/Canaan-Preserve-Relocation-Agreement-template.docx`) with intake fields. The buyer downloads that populated DOCX to review — not a separately authored PDF from `lib/contract.ts`. A successful public create also calls `notifyNewEngagement` so Van is emailed (intake still succeeds if that send fails).
-4. Usual path is **Accept, then DocuSign**. After Accept the envelope goes to the Buyer signer, Canaan Ranch LLP signer, the Buyer witness from intake, and the fixed Canaan witness. The envelope document is the populated DOCX. Manual signed upload remains a fallback. Contract and signed files require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
+4. Usual path is **submit, then DocuSign**. Submitting with DocuSign selected creates and sends the envelope immediately (live API when `DOCUSIGN_ENABLED=true`, otherwise the local stub). Admin **Accept is not required** to start buyer signing. Routing is Buyer signer, Buyer witness, Canaan Ranch LLP signer, then the fixed Canaan witness. The envelope document is the populated DOCX. Manual signed upload remains a fallback and still waits in the review queue until Accept. Contract and signed files require an admin session or a short-lived signed download token — they are not served by engagement UUID alone.
 5. Team reviews at `/admin`:
-   - **Accept** — if DocuSign, send the envelope (live API when `DOCUSIGN_ENABLED=true`, otherwise the local stub). Accept is **not** complete. Status stays **Awaiting seller signature**. A reservation-letter draft is generated from intake and is **not** emailed.
-   - **Request changes** — buyer can edit and resubmit.
+   - **DocuSign submit** — status becomes **Awaiting seller signature**. Accept is a no-op when an envelope is already on file. A reservation-letter draft is generated when the seller signs (and still on Accept for the manual path) and is **not** emailed automatically.
+   - **Accept** — for manual deals, or to retry DocuSign only if intake submit did not create an envelope. Accept is **not** complete.
+   - **Resend DocuSign** — retries send for Accepted engagements that have no envelope (intake or Accept send failures).
+   - **Request changes** — buyer can edit and resubmit (manual / pending-review path).
    - **Decline** — closed without execution.
 6. Status becomes **Executed** only when the Seller has signed: DocuSign envelope complete (Connect / polling / stub “Simulate DocuSign signed”), or a complete manual signed copy after Accept. The Effective Date is stamped from that signature completion. The reservation letter is refreshed if the Effective Date or intake fields changed.
 7. **Send reservation letter** is an admin checkbox. Checking it emails the letter PDF to Van (`vpittman@beachparkcap.com`) and the buyer notice email via the existing Gmail notify path. Generation never sends mail.
@@ -115,11 +117,11 @@ After a **public intake create** succeeds, [`lib/notify.ts`](lib/notify.ts) `not
 
 ### Reservation letter email (admin send hold)
 
-The FWC-style **Gopher Tortoise Acceptance Letter** is generated from intake (`buyerLegalName`, `authorizedAgentName`, `authorizedAgentCompany`, `donorSiteName`, `relocationCounty`, `tortoiseCount`) after Accept, then refreshed when the Seller signs (Effective Date + 1 year). It is addressed to the FWC Gopher Tortoise Conservation Program in Tallahassee, advises that the buyer through their consultant has reserved capacity at Canaan Preserve (Tier 1), and is signed by Andrew Fuddy, Senior Ecologist/Principal, on behalf of Canaan Ranch LLP. Acres / Unit # are not on intake and do not block generation. State lives on the engagement JSON payload (`reservationLetter`: draft generated → awaiting send approval → sent with timestamp).
+The FWC-style **Gopher Tortoise Acceptance Letter** is generated from intake (`buyerLegalName`, `authorizedAgentName`, `authorizedAgentCompany`, `donorSiteName`, `relocationCounty`, `tortoiseCount`) after Accept on the manual path, or when the Seller signs (Effective Date + 1 year). It is addressed to the FWC Gopher Tortoise Conservation Program in Tallahassee, advises that the buyer through their consultant has reserved capacity at Canaan Preserve (Tier 1), and is signed by Andrew Fuddy, Senior Ecologist/Principal, on behalf of Canaan Ranch LLP. Acres / Unit # are not on intake and do not block generation. State lives on the engagement JSON payload (`reservationLetter`: draft generated → awaiting send approval → sent with timestamp).
 
 | Field | Value |
 | --- | --- |
-| When generated | After Accept (draft). Regenerated on envelope complete / seller-sign if the Effective Date or fields changed. |
+| When generated | After Accept on the manual path (draft), or when the Seller signs. Regenerated on envelope complete / seller-sign if the Effective Date or fields changed. |
 | When emailed | Only after admin checks **Send reservation letter** on `/admin/engagements/[id]`. |
 | To | `vpittman@beachparkcap.com` and `intake.buyerEmail` (deduped). Same Gmail API path as new-engagement notify, with the PDF attached. |
 
@@ -161,7 +163,7 @@ Integration lives in [`lib/docusign.ts`](lib/docusign.ts). Code reads credential
 
 When `DOCUSIGN_ENABLED` is not `true` (default), `sendEnvelope()` stores a `stub-…` envelope ID and makes **no** DocuSign API call. The admin **Simulate DocuSign signed** control still works for testing.
 
-When `DOCUSIGN_ENABLED=true`, Accept sends a live envelope: JWT grant, then `Envelopes:create` with the populated Word agreement (same bytes as the buyer download). Connect (`POST /api/docusign/webhook`) and polling (`Refresh envelope status`, plus `GET /api/docusign/return?engagementId=…`) mark the engagement executed when DocuSign reports completed.
+When `DOCUSIGN_ENABLED=true`, intake submit (DocuSign path) sends a live envelope: JWT grant, then `Envelopes:create` with the populated Word agreement (same bytes as the buyer download). Accept does not send again if an envelope already exists. Connect (`POST /api/docusign/webhook`) and polling (`Refresh envelope status`, plus `GET /api/docusign/return?engagementId=…`) mark the engagement executed when DocuSign reports completed.
 
 ### Recipient roles
 

@@ -150,12 +150,12 @@ describe("site builder visual lock", () => {
     expect(landing).not.toContain("when available");
     expect(landing.toLowerCase()).not.toContain("this demo");
     expect(landing.toLowerCase()).not.toContain("go-live");
-    expect(signingPanel).toContain("DocuSign after Accept (usual signing path)");
+    expect(signingPanel).toContain("DocuSign on submit (usual signing path)");
     expect(signingPanel).toContain("The fallback is to download the Word agreement");
     expect(signingPanel).not.toContain("when available");
     expect(signingPanel.toLowerCase()).not.toContain("this demo");
     expect(signingPanel.toLowerCase()).not.toContain("go-live");
-    expect(timeline).toContain("DocuSign after Accept is the usual signing path");
+    expect(timeline).toContain("DocuSign on submit is the usual signing path");
     expect(timeline).toContain("The fallback is to download the Word agreement");
     expect(timeline.toLowerCase()).not.toContain("this demo");
     expect(timeline.toLowerCase()).not.toContain("go-live");
