@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/app/actions/admin";
 import { DocumentDesk } from "@/components/document-desk";
+import { HideFromLedgerForm } from "@/components/hide-from-ledger-form";
 import { RateOverrideForm } from "@/components/rate-override-form";
 import { ReservationLetterForm } from "@/components/reservation-letter-form";
 import { ReviewForm } from "@/components/review-form";
@@ -54,6 +55,12 @@ export default async function AdminEngagementPage({
             <p className="mt-2 text-muted">
               {engagement.intake.buyerLegalName} · {engagement.intake.buyerAttention}
             </p>
+            {engagement.archivedAt ? (
+              <p className="mt-2 text-sm text-terracotta">
+                Hidden from the review ledger ·{" "}
+                {new Date(engagement.archivedAt).toLocaleString("en-US")}
+              </p>
+            ) : null}
           </div>
           <StatusBadge status={engagement.status} />
         </div>
@@ -192,6 +199,11 @@ export default async function AdminEngagementPage({
             <ReservationLetterForm engagement={engagement} />
 
             <ReviewForm engagement={engagement} />
+
+            <HideFromLedgerForm
+              engagementId={engagement.id}
+              archivedAt={engagement.archivedAt}
+            />
 
             {engagement.reviews.length > 0 ? (
               <section className="surface-card">

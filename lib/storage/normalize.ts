@@ -10,9 +10,10 @@ export type StoredIntake = Partial<IntakeFields> & { effectiveDate?: string };
 
 export type StoredEngagement = Omit<
   Engagement,
-  "intake" | "effectiveDate" | "docusign" | "reservationLetter"
+  "intake" | "effectiveDate" | "docusign" | "reservationLetter" | "archivedAt"
 > & {
   effectiveDate?: string | null;
+  archivedAt?: string | null;
   intake: StoredIntake;
   docusign?: Partial<Omit<Engagement["docusign"], "mode">> & {
     mode?: Engagement["docusign"]["mode"] | "live_placeholder";
@@ -63,6 +64,7 @@ export function normalizeEngagement(raw: StoredEngagement): Engagement {
       recipients: raw.docusign?.recipients ?? [],
     },
     reservationLetter: normalizeReservationLetter(raw.reservationLetter),
+    archivedAt: raw.archivedAt ?? null,
   };
 }
 

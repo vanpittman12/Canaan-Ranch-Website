@@ -264,5 +264,6 @@ export function buildTemplateEngagement(): Engagement {
     submittedAt: null,
     acceptedAt: null,
     executedAt: null,
+    archivedAt: null,
   };
 }

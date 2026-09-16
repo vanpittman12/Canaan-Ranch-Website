@@ -60,6 +60,40 @@ export function isOpenEngagement(status: EngagementStatus) {
   );
 }
 
+export function isHiddenFromLedger(engagement: Pick<Engagement, "archivedAt">) {
+  return Boolean(engagement.archivedAt);
+}
+
+/** Default ledger omits hidden rows. Pass includeHidden to audit archived deals. */
+export function reviewLedgerItems(
+  engagements: Engagement[],
+  options: { includeHidden?: boolean } = {},
+) {
+  if (options.includeHidden) {
+    return engagements.filter(isHiddenFromLedger);
+  }
+  return engagements.filter((item) => !isHiddenFromLedger(item));
+}
+
+/**
+ * Soft-hide from the admin review ledger. Allowed for every status.
+ * Does not delete the D1 payload, R2 artifacts, or DocuSign envelope data.
+ */
+export function applyHideFromLedger(engagement: Engagement): Engagement {
+  if (isHiddenFromLedger(engagement)) {
+    throw new EngagementError(
+      "This engagement is already hidden from the review ledger.",
+    );
+  }
+
+  const now = new Date().toISOString();
+  return {
+    ...engagement,
+    archivedAt: now,
+    updatedAt: now,
+  };
+}
+
 export function nextStatusAfterAccept(
   hasSignedArtifact: boolean,
   signingMethod: SigningMethod | null = null,

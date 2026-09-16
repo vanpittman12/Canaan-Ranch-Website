@@ -106,6 +106,8 @@ export interface Engagement {
   submittedAt: string | null;
   acceptedAt: string | null;
   executedAt: string | null;
+  /** ISO timestamp when hidden from the admin review ledger. Null = visible. */
+  archivedAt: string | null;
 }
 
 export const STATUS_LABELS: Record<EngagementStatus, string> = {

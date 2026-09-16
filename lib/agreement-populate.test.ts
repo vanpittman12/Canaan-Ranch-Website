@@ -87,6 +87,7 @@ function engagement(overrides: Partial<Engagement> = {}): Engagement {
     submittedAt: null,
     acceptedAt: null,
     executedAt: null,
+    archivedAt: null,
     ...overrides,
   };
 }
