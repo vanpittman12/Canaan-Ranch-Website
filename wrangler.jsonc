@@ -18,7 +18,9 @@
     "DOCUSIGN_ENABLED": "true",
     "DOCUSIGN_ACCOUNT_BASE_URI": "https://demo.docusign.net",
     "DOCUSIGN_AUTH_SERVER": "https://account-d.docusign.com",
-    "APP_URL": "https://canaanpreserve.com"
+    "APP_URL": "https://canaanpreserve.com",
+    // TEMP Van test — remove when done
+    "CANAAN_BUYER_WITNESS_EMAIL": "vanpittman12@yahoo.com"
   },
   "services": [
     {

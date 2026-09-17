@@ -171,7 +171,7 @@ When `DOCUSIGN_ENABLED=true`, intake submit (DocuSign path) sends a live envelop
 | Role | Source | DocuSign routing |
 | --- | --- | --- |
 | `buyer_signer` | Intake: Buyer attention + email | Routing order 1 |
-| `buyer_witness` | Intake: Buyer witness name + email | Routing order 2 |
+| `buyer_witness` | Intake: Buyer witness name + email (`CANAAN_BUYER_WITNESS_EMAIL` overrides email when set; TEMP Van test in `wrangler.jsonc` vars) | Routing order 2 |
 | `seller_signer` | Brand: Andrew V. Pittman, Jr. / `vpittman@beachparkcap.com` | Routing order 3 |
 | `seller_witness` | Brand/env: Andrew Fuddy / `witness@canaanpreserve.com` (not on the public form) | Routing order 4 |
 
