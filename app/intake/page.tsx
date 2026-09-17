@@ -31,8 +31,7 @@ export default function IntakePage() {
           Enter the Buyer notice, reserved tortoise count, county of relocation, authorized
           agent, donor affiliation, and one Buyer witness. Dates are set automatically when you
           submit. The Effective Date is the Florida/Eastern calendar date you submit this
-          intake. The Expiration Date is that same calendar day one year later. After you
-          submit, download the Word agreement to review.
+          intake. The Expiration Date is that same calendar day one year later. After you submit, download the Word agreement to review.
         </p>
         <div className="mt-4">
           <FwcBadge />

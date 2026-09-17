@@ -196,7 +196,8 @@ describe("site builder visual lock", () => {
     expect(intakeForm).toContain("The Expiration Date is that same calendar day one year later.");
     expect(intakeForm).toContain("Florida/Eastern calendar date you submit");
     expect(intakeForm).toContain("Dates are set automatically when you");
-    expect(intakeForm).toContain("Word agreement and DocuSign envelope when you submit.");
+    expect(intakeForm).toContain("Word agreement and DocuSign");
+    expect(intakeForm).toContain("envelope when you submit.");
     expect(intakeForm).not.toContain("Both dates are typed");
     expect(intakeForm).not.toContain("These fields become the Buyer notice in Parties and Notices");
     expect(intakeForm).toContain('label="Buyer signatory"');

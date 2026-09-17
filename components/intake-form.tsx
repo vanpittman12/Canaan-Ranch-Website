@@ -324,10 +324,9 @@ export function IntakeForm({
         <div>
           <h2 className="type-h2 text-forest">Buyer notice block</h2>
           <p className="mt-2 text-sm text-muted">
-            These fields are the Buyer notice on the agreement. Dates are set automatically when
-            you submit. The Effective Date is the Florida/Eastern calendar date you submit this
-            intake — it is not collected here. The Expiration Date is that same calendar day one
-            year later.
+            These fields are the Buyer notice on the agreement. Dates are set automatically when you
+            submit. The Effective Date is the Florida/Eastern calendar date you submit this
+            intake — it is not collected here. The Expiration Date is that same calendar day one year later.
           </p>
         </div>
         <Field
