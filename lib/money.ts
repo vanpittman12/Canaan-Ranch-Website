@@ -157,6 +157,23 @@ export function toIsoDate(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Preview of the dates stamped at intake submit: Florida/Eastern “today”
+ * as Effective Date, and that calendar day one year later as Expiration.
+ * Same rule as applySubmit (`businessDateOnly(now)` + `addOneYear`).
+ */
+export function agreementDatePreview(now: Date | string = new Date()) {
+  const iso = typeof now === "string" ? now : now.toISOString();
+  const effectiveDate = businessDateOnly(iso);
+  const expirationDate = addOneYear(effectiveDate);
+  return {
+    effectiveDate,
+    expirationDate,
+    effectiveLong: formatLongDate(effectiveDate),
+    expirationLong: formatLongDate(expirationDate),
+  };
+}
+
 export function formatLongDate(isoDate: string) {
   const date = parseIsoDate(isoDate);
   if (!date) {

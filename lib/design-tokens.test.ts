@@ -193,6 +193,14 @@ describe("site builder visual lock", () => {
     expect(intakeForm).toContain("Florida/Eastern calendar date you submit");
     expect(intakeForm).toContain("Both dates are typed");
     expect(intakeForm).toContain("Word agreement and DocuSign envelope when you submit.");
+    expect(intakeForm).toContain("agreementDatePreview");
+    expect(intakeForm).toContain("Agreement dates");
+    expect(intakeForm).toContain("Preview of the dates that will be typed");
+    expect(intakeForm).toContain("These are not editable fields.");
+    expect(intakeForm).toContain("{datePreview.effectiveLong}");
+    expect(intakeForm).toContain("{datePreview.expirationLong}");
+    expect(intakeForm).not.toContain('name="effectiveDate"');
+    expect(intakeForm).not.toContain('name="expirationDate"');
     expect(intakeForm).not.toContain("the date the Buyer signs");
     expect(intakeForm).not.toContain("Buyer Date Signed");
     expect(intakeForm).not.toContain("Buyer Date Signed / Effective Date.");
