@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   addOneYear,
+  agreementDatePreview,
   businessDateOnly,
   dateOnly,
   dealEconomics,
+  formatLongDate,
   numberToWords,
   usdInWords,
 } from "./money";
@@ -55,6 +57,22 @@ describe("deal economics", () => {
     expect(businessDateOnly("2026-09-17T04:00:00.000Z")).toBe("2026-09-17");
     // EST (UTC-5): 2026-01-16 04:30 UTC is still 2026-01-15 23:30.
     expect(businessDateOnly("2026-01-16T04:30:00.000Z")).toBe("2026-01-15");
+  });
+
+  it("previews Effective Date as Florida/Eastern today and Expiration as addOneYear", () => {
+    const beforeMidnightEdt = agreementDatePreview("2026-09-17T03:30:00.000Z");
+    expect(beforeMidnightEdt.effectiveDate).toBe("2026-09-16");
+    expect(beforeMidnightEdt.expirationDate).toBe(addOneYear("2026-09-16"));
+    expect(beforeMidnightEdt.effectiveLong).toBe(formatLongDate("2026-09-16"));
+    expect(beforeMidnightEdt.expirationLong).toBe(formatLongDate(addOneYear("2026-09-16")));
+    expect(beforeMidnightEdt.effectiveLong).toBe("September 16, 2026");
+    expect(beforeMidnightEdt.expirationLong).toBe("September 16, 2027");
+
+    const afterMidnightEdt = agreementDatePreview("2026-09-17T04:00:00.000Z");
+    expect(afterMidnightEdt.effectiveDate).toBe(businessDateOnly("2026-09-17T04:00:00.000Z"));
+    expect(afterMidnightEdt.expirationDate).toBe(addOneYear("2026-09-17"));
+    expect(afterMidnightEdt.effectiveLong).toBe("September 17, 2026");
+    expect(afterMidnightEdt.expirationLong).toBe("September 17, 2027");
   });
 
   it("adds one calendar year with the existing Date setFullYear overflow policy", () => {

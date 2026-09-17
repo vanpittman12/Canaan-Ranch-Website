@@ -69,6 +69,10 @@ describe("service area map", () => {
       "Shaded land is inside the service area. The dashed line marks the southern limit.",
     );
     expect(serviceAreaCopy.mapLabel).toBe(
+      "Map of Florida showing the Canaan Preserve service area north of a line about 100 nautical miles south of Alachua, including the Panhandle.",
+    );
+    expect(serviceAreaCopy.mapLabel).toContain(serviceAreaCopy.title);
+    expect(serviceAreaCopy.mapLabel).not.toBe(
       "Map of Florida showing the Canaan Preserve service area north of Alachua.",
     );
     expect(new Set([

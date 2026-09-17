@@ -16,7 +16,7 @@ import {
   previousStep,
   type IntakeWizardStep,
 } from "@/lib/intake-steps";
-import { estimatedPayment, formatUsd } from "@/lib/money";
+import { agreementDatePreview, estimatedPayment, formatUsd } from "@/lib/money";
 import {
   buyerNoticeAddress,
   displayValue,
@@ -178,6 +178,7 @@ export function IntakeForm({
     () => estimatedPayment(Number.isFinite(count) ? count : 0, rate || 0),
     [count, rate],
   );
+  const datePreview = agreementDatePreview();
 
   function update(name: string, value: string) {
     setValues((current) => ({ ...current, [name]: value }));
@@ -750,6 +751,25 @@ export function IntakeForm({
             ["Canaan Ranch LLP witness", "Seller-side, already on file"],
           ]}
         />
+        <div className="rounded-[12px] border border-line bg-cream/60 p-4">
+          <h3 className="font-serif text-xl font-medium text-forest">Agreement dates</h3>
+          <p className="mt-2 text-sm text-muted">
+            Preview of the dates that will be typed into the Word agreement and DocuSign
+            envelope when you submit. These are not editable fields. Effective Date is
+            today’s Florida/Eastern calendar date; Expiration Date is that same calendar
+            day one year later.
+          </p>
+          <dl className="mt-3 grid gap-2 text-sm">
+            <div className="grid gap-1 sm:grid-cols-[10rem_1fr]">
+              <dt className="type-label">Effective Date</dt>
+              <dd className="text-ink">{datePreview.effectiveLong}</dd>
+            </div>
+            <div className="grid gap-1 sm:grid-cols-[10rem_1fr]">
+              <dt className="type-label">Expiration Date</dt>
+              <dd className="text-ink">{datePreview.expirationLong}</dd>
+            </div>
+          </dl>
+        </div>
       </section>
 
       <div className="intake-sticky flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
