@@ -325,7 +325,8 @@ export function IntakeForm({
           <p className="mt-2 text-sm text-muted">
             These fields become the Buyer notice in Parties and Notices. The Effective Date is
             the Florida/Eastern calendar date you submit this intake — it is not collected here.
-            The Expiration Date is that same calendar day one year later.
+            The Expiration Date is that same calendar day one year later. Both dates are typed
+            into the Word agreement and DocuSign envelope when you submit.
           </p>
         </div>
         <Field

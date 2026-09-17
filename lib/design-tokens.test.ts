@@ -191,6 +191,9 @@ describe("site builder visual lock", () => {
     expect(intakePage).not.toContain("Buyer Date Signed");
     expect(intakeForm).toContain("The Expiration Date is that same calendar day one year later.");
     expect(intakeForm).toContain("Florida/Eastern calendar date you submit");
+    expect(intakeForm).toContain("Both dates are typed into the Word agreement and DocuSign");
+    expect(intakeForm).not.toContain("the date the Buyer signs");
+    expect(intakeForm).not.toContain("Buyer Date Signed");
     expect(intakeForm).not.toContain("Buyer Date Signed / Effective Date.");
     expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
     expect(footer).toContain("{brand.footerLine}");
