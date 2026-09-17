@@ -86,6 +86,7 @@ afterEach(() => {
   delete process.env.DOCUSIGN_RETURN_URL;
   delete process.env.CANAAN_WITNESS_NAME;
   delete process.env.CANAAN_WITNESS_EMAIL;
+  delete process.env.CANAAN_BUYER_WITNESS_EMAIL;
   resetDocuSignTokenCache();
 });
 
@@ -254,6 +255,62 @@ describe("DocuSign seam", () => {
       email: "vpittman@beachparkcap.com",
     });
     expect(brand.sellerWitnessEmail).toBe("witness@canaanpreserve.com");
+    expect(routed.find((row) => row.role === "buyer_witness")).toEqual({
+      role: "buyer_witness",
+      name: "Lee Park",
+      email: "lee@ridge.example",
+    });
+  });
+
+  it("uses intake Buyer witness email when CANAAN_BUYER_WITNESS_EMAIL is unset", () => {
+    delete process.env.CANAAN_BUYER_WITNESS_EMAIL;
+    const intake = {
+      buyerAttention: "Avery Cole",
+      buyerEmail: "avery@ridge.example",
+      buyerWitnessName: "Lee Park",
+      buyerWitnessEmail: "lee@ridge.example",
+    } as IntakeFields;
+    const routed = buildEnvelopeRecipients(intake);
+    expect(routed.find((row) => row.role === "buyer_witness")).toEqual({
+      role: "buyer_witness",
+      name: "Lee Park",
+      email: "lee@ridge.example",
+    });
+    expect(routed.find((row) => row.role === "buyer_signer")).toEqual({
+      role: "buyer_signer",
+      name: "Avery Cole",
+      email: "avery@ridge.example",
+    });
+    expect(routed.find((row) => row.role === "seller_signer")?.email).toBe(brand.email);
+  });
+
+  it("overrides Buyer witness email from CANAAN_BUYER_WITNESS_EMAIL and keeps intake name", () => {
+    process.env.CANAAN_BUYER_WITNESS_EMAIL = "vanpittman12@yahoo.com";
+    const intake = {
+      buyerAttention: "Avery Cole",
+      buyerEmail: "avery@ridge.example",
+      buyerWitnessName: "Lee Park",
+      buyerWitnessEmail: "lee@ridge.example",
+    } as IntakeFields;
+    const routed = buildEnvelopeRecipients(intake);
+    expect(routed.find((row) => row.role === "buyer_witness")).toEqual({
+      role: "buyer_witness",
+      name: "Lee Park",
+      email: "vanpittman12@yahoo.com",
+    });
+    expect(routed.find((row) => row.role === "buyer_signer")).toEqual({
+      role: "buyer_signer",
+      name: "Avery Cole",
+      email: "avery@ridge.example",
+    });
+    expect(routed.find((row) => row.role === "seller_signer")).toEqual({
+      role: "seller_signer",
+      name: brand.signatoryName,
+      email: brand.email,
+    });
+    expect(routed.find((row) => row.role === "seller_witness")?.email).not.toBe(
+      "vanpittman12@yahoo.com",
+    );
   });
 
   it("uses env-overridable Canaan witness on stub routing", () => {

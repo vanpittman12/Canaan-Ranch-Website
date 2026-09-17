@@ -231,7 +231,8 @@ export function buildEnvelopeRecipients(intake: IntakeFields): EnvelopeRecipient
     {
       role: "buyer_witness",
       name: intake.buyerWitnessName,
-      email: intake.buyerWitnessEmail,
+      // TEMP Van test — remove CANAAN_BUYER_WITNESS_EMAIL (wrangler.jsonc vars) when done.
+      email: process.env.CANAAN_BUYER_WITNESS_EMAIL?.trim() || intake.buyerWitnessEmail,
     },
     {
       role: "seller_witness",
