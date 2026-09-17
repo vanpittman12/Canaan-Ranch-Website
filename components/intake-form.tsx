@@ -597,14 +597,14 @@ export function IntakeForm({
         <Field
           name="donorCompanyAffiliation"
           label="Donor company affiliation"
-          hint="Maps to “Donor company affiliation” in the reserved-capacity paragraph. For example Lennar, D.R. Horton."
+          hint="Maps to “Donor company affiliation” in the reserved-capacity paragraph. For example, Lennar, D.R. Horton."
           error={errors.donorCompanyAffiliation}
         >
           <input
             {...controlProps(
               "donorCompanyAffiliation",
               errors.donorCompanyAffiliation,
-              "Maps to “Donor company affiliation” in the reserved-capacity paragraph. For example Lennar, D.R. Horton.",
+              "Maps to “Donor company affiliation” in the reserved-capacity paragraph. For example, Lennar, D.R. Horton.",
             )}
             value={values.donorCompanyAffiliation}
             onChange={(event) => update("donorCompanyAffiliation", event.target.value)}
