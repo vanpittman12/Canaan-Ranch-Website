@@ -15,8 +15,7 @@ export function DocumentDesk({
       <h2 className="type-h2 mt-2 text-forest">Download the populated agreement</h2>
       <p className="mt-2 text-[17px] leading-[27px] text-muted">
         {reference} is ready as a Word file — the same document as the blank download, with
-        intake fields filled. There is no on-screen contract preview. Download first, then
-        choose a signing path.
+        intake fields filled. Download the Word file to review it, then choose a signing path.
       </p>
       <div className="mt-5 flex flex-col gap-3 sm:flex-row">
         <a className="btn-primary" href={contractUrl}>
