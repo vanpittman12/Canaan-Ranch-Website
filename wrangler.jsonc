@@ -16,11 +16,12 @@
   "vars": {
     "STORAGE_ADAPTER": "cloudflare",
     "DOCUSIGN_ENABLED": "true",
-    "DOCUSIGN_ACCOUNT_BASE_URI": "https://demo.docusign.net",
-    "DOCUSIGN_AUTH_SERVER": "https://account-d.docusign.com",
-    "APP_URL": "https://canaanpreserve.com",
-    // TEMP Van test — remove when done
-    "CANAAN_BUYER_WITNESS_EMAIL": "vanpittman12@yahoo.com"
+    // Temporary production default. Manager must set this on deploy to Van’s
+    // Apps & Keys “Account Base URI” (often https://na1.docusign.net,
+    // https://na2.docusign.net, etc.).
+    "DOCUSIGN_ACCOUNT_BASE_URI": "https://na1.docusign.net",
+    "DOCUSIGN_AUTH_SERVER": "https://account.docusign.com",
+    "APP_URL": "https://canaanpreserve.com"
   },
   "services": [
     {

@@ -171,13 +171,13 @@ When `DOCUSIGN_ENABLED=true`, intake submit (DocuSign path) sends a live envelop
 | Role | Source | DocuSign routing |
 | --- | --- | --- |
 | `buyer_signer` | Intake: Buyer attention + email | Routing order 1 |
-| `buyer_witness` | Intake: Buyer witness name + email (`CANAAN_BUYER_WITNESS_EMAIL` overrides email when set; TEMP Van test in `wrangler.jsonc` vars) | Routing order 2 |
+| `buyer_witness` | Intake: Buyer witness name + email (no env override — the address from intake is sent) | Routing order 2 |
 | `seller_signer` | Brand: Andrew V. Pittman, Jr. / `vpittman@beachparkcap.com` | Routing order 3 |
 | `seller_witness` | Brand/env: Andrew Fuddy / `witness@canaanpreserve.com` (not on the public form) | Routing order 4 |
 
 The populated Word agreement is the envelope document. Hidden anchor strings (`/sn_buyer/`, `/wit_buyer/`, `/sn_seller/`, `/wit_seller/`, plus matching `/date_*` strings) are injected into the populated copy only so Sign Here and **Date Signed** tabs can place. Those date anchors are `dateSignedTabs` (auto-fill when that recipient signs) — not typed text fields.
 
-Each Sign Here / Date Signed tab also sends `anchorUnits: "pixels"` plus per-role `anchorXOffset` / `anchorYOffset` (see `DOCUSIGN_TAB_OFFSETS` in [`lib/docusign-anchors.ts`](lib/docusign-anchors.ts)) so the stamp sits on the By: / Witness underline instead of on the printed name. Positive X is right; positive Y is down. After a live `demo.docusign.net` visual check, re-tune those pixel strings only — do not store the agreement as a DocuSign-hosted template.
+Each Sign Here / Date Signed tab also sends `anchorUnits: "pixels"` plus per-role `anchorXOffset` / `anchorYOffset` (see `DOCUSIGN_TAB_OFFSETS` in [`lib/docusign-anchors.ts`](lib/docusign-anchors.ts)) so the stamp sits on the By: / Witness underline instead of on the printed name. Positive X is right; positive Y is down. After a live production visual check (Account Base URI, often `na1.docusign.net`), re-tune those pixel strings only — do not store the agreement as a DocuSign-hosted template.
 
 **Effective Date and Expiration**
 
@@ -206,8 +206,8 @@ The DocuSign combined PDF is the signed artifact (signatures + signature-block D
 | `DOCUSIGN_SECRET_KEY` | Developer-app Secret Key (confidential client). Store it; JWT send still needs an RSA private key. |
 | `DOCUSIGN_USER_ID` | Impersonated user’s API Username (GUID). Env / Cloudflare secret only — never commit the value. |
 | `DOCUSIGN_ACCOUNT_ID` | API Account ID (GUID). Env / Cloudflare secret only — never commit the value. |
-| `DOCUSIGN_ACCOUNT_BASE_URI` | Default `https://demo.docusign.net` |
-| `DOCUSIGN_AUTH_SERVER` | Default `https://account-d.docusign.com` |
+| `DOCUSIGN_ACCOUNT_BASE_URI` | Temporary production default `https://na1.docusign.net`. Must match Apps & Keys **Account Base URI** (often `https://na1.docusign.net`, `https://na2.docusign.net`, etc.). Van provides the exact URI; Manager sets it on deploy. |
+| `DOCUSIGN_AUTH_SERVER` | Production default `https://account.docusign.com` |
 | `DOCUSIGN_PRIVATE_KEY` | RSA private key PEM for JWT grant (preferred on Workers) |
 | `DOCUSIGN_PRIVATE_KEY_PATH` | Local-only path to that PEM |
 | `DOCUSIGN_WEBHOOK_SECRET` | DocuSign Connect HMAC key for `/api/docusign/webhook` |
@@ -220,15 +220,16 @@ Copy [`.env.example`](.env.example) to `.env.local` for Node. Copy [`.dev.vars.e
 
 Van already has the **Integration Key** and **Secret Key** from the developer app. **User ID** and **Account ID** (when forwarded) go into Cloudflare secrets or local `.env.local` / `.dev.vars` only. Do not paste those GUIDs into git, client bundles, or `.env.example`.
 
-To find the IDs in DocuSign admin:
+To find the IDs in DocuSign admin (production):
 
-1. Sign in at [https://account-d.docusign.com](https://account-d.docusign.com) (demo) or [https://account.docusign.com](https://account.docusign.com) (production).
+1. Sign in at [https://account.docusign.com](https://account.docusign.com).
 2. Open **Settings → Apps and Keys** (Admin).
 3. **API Account ID** at the top of that page → inject as `DOCUSIGN_ACCOUNT_ID`.
 4. **User ID** for the impersonated sender (same page, or **Users** → the user → **API Username**) → inject as `DOCUSIGN_USER_ID`.
-5. On the same Integration Key, add an **RSA keypair** (Service Integration / JWT). Put the **private** PEM in `DOCUSIGN_PRIVATE_KEY`. The developer-app Secret Key is not the JWT key.
-6. Grant JWT consent once (the live send error will include the consent URL if this step is missing): scope `signature impersonation`.
-7. In **Connect**, add an HMAC key and a webhook to `https://canaanpreserve.com/api/docusign/webhook` (envelope completed). Store the HMAC key as `DOCUSIGN_WEBHOOK_SECRET`.
+5. Copy **Account Base URI** from the same page into `DOCUSIGN_ACCOUNT_BASE_URI` (`wrangler.jsonc` `vars` or Worker Settings). The repo’s temporary default is `https://na1.docusign.net` — it must match this value or live send fails.
+6. On the **production** Integration Key (go-live / reviewed IK, not the demo `account-d` app), add an **RSA keypair** (Service Integration / JWT). Put the **private** PEM in `DOCUSIGN_PRIVATE_KEY`. The developer-app Secret Key is not the JWT key.
+7. Grant JWT consent once **on the production IK** while signed into the production account (the live send error will include the consent URL if this step is missing): scope `signature impersonation`. Demo-account consent does not cover production.
+8. In **Connect**, add an HMAC key and a webhook to `https://canaanpreserve.com/api/docusign/webhook` (envelope completed). Store the HMAC key as `DOCUSIGN_WEBHOOK_SECRET`.
 
 ## Data
 
@@ -318,12 +319,13 @@ npx wrangler secret put GMAIL_USER
 
 For `DOCUSIGN_PRIVATE_KEY`, paste the full PEM (including `BEGIN` / `END` lines), then Ctrl-D. Wrangler stores the secret; it is never written to git.
 
-Non-secret DocuSign defaults live in `wrangler.jsonc` `vars` (`DOCUSIGN_ENABLED=false`, demo base URI and auth server). To go live after User ID + Account ID are filled in:
+Non-secret DocuSign defaults live in `wrangler.jsonc` `vars` (`DOCUSIGN_ENABLED=true`, production auth server `https://account.docusign.com`, temporary Account Base URI `https://na1.docusign.net`). After User ID + Account ID + production IK are filled in:
 
-1. Set the secrets above.
-2. Change `DOCUSIGN_ENABLED` to `true` in the Worker **Settings → Variables** (or `npx wrangler secret put DOCUSIGN_ENABLED` with value `true`).
+1. Set the secrets above (production Integration Key, User ID, Account ID, JWT private key, Connect HMAC).
+2. Confirm `DOCUSIGN_ENABLED` is `true` in the Worker **Settings → Variables**.
 3. Set `DOCUSIGN_RETURN_URL` to `https://canaanpreserve.com/api/docusign/return`.
-4. Keep the stub path by leaving `DOCUSIGN_ENABLED` unset/false until those IDs are ready.
+4. Set `DOCUSIGN_ACCOUNT_BASE_URI` to the exact Apps & Keys **Account Base URI** Van copies from the production account (replace the `na1` temporary default if it differs).
+5. Complete go-live on the production Integration Key and grant JWT consent once at `https://account.docusign.com` (scope `signature impersonation`). Local / preview stays on the stub when `DOCUSIGN_ENABLED` is unset or `false` in `.env.local` / `.dev.vars`.
 
 `STORAGE_ADAPTER=cloudflare` is already set in `wrangler.jsonc` `vars`.
 

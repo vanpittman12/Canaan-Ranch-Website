@@ -9,12 +9,17 @@ import {
   DOCUSIGN_TAB_OFFSETS,
 } from "./docusign-anchors";
 import {
+  authServerAudience,
   buildEnvelopeDefinition,
   buildEnvelopeRecipients,
   createJwtAssertion,
   dateSignedAnchorsForRole,
   dateSignedTabForRole,
+  DEFAULT_ACCOUNT_BASE_URI,
+  DEFAULT_AUTH_SERVER,
   describeDocuSignSeam,
+  docusignAccountBaseUri,
+  docusignAuthServer,
   DOCUSIGN_DATE_TAB_FONT,
   DOCUSIGN_DATE_TAB_FONT_SIZE,
   DOCUSIGN_ENV_VARS,
@@ -50,8 +55,8 @@ function liveEnv() {
   process.env.DOCUSIGN_SECRET_KEY = "ds-secret-not-a-pem";
   process.env.DOCUSIGN_USER_ID = "user-guid";
   process.env.DOCUSIGN_ACCOUNT_ID = "account-guid";
-  process.env.DOCUSIGN_ACCOUNT_BASE_URI = "https://demo.docusign.net";
-  process.env.DOCUSIGN_AUTH_SERVER = "https://account-d.docusign.com";
+  process.env.DOCUSIGN_ACCOUNT_BASE_URI = "https://na1.docusign.net";
+  process.env.DOCUSIGN_AUTH_SERVER = "https://account.docusign.com";
   process.env.DOCUSIGN_PRIVATE_KEY = privateKey;
   process.env.DOCUSIGN_RETURN_URL = "https://canaanpreserve.com/api/docusign/return";
   process.env.DOCUSIGN_WEBHOOK_SECRET = "connect-hmac";
@@ -86,7 +91,6 @@ afterEach(() => {
   delete process.env.DOCUSIGN_RETURN_URL;
   delete process.env.CANAAN_WITNESS_NAME;
   delete process.env.CANAAN_WITNESS_EMAIL;
-  delete process.env.CANAAN_BUYER_WITNESS_EMAIL;
   resetDocuSignTokenCache();
 });
 
@@ -144,6 +148,28 @@ describe("DocuSign seam", () => {
     expect(envExample).toMatch(/^DOCUSIGN_ACCOUNT_ID=$/m);
     expect(envExample).not.toMatch(guidAssignment);
     expect(devVars).not.toMatch(guidAssignment);
+  });
+
+  it("defaults env URL fallbacks to production, not demo", () => {
+    delete process.env.DOCUSIGN_ACCOUNT_BASE_URI;
+    delete process.env.DOCUSIGN_AUTH_SERVER;
+    expect(DEFAULT_ACCOUNT_BASE_URI).toBe("https://na1.docusign.net");
+    expect(DEFAULT_AUTH_SERVER).toBe("https://account.docusign.com");
+    expect(docusignAccountBaseUri()).toBe("https://na1.docusign.net");
+    expect(docusignAuthServer()).toBe("https://account.docusign.com");
+    expect(authServerAudience()).toBe("account.docusign.com");
+
+    const wrangler = readFileSync(resolve(process.cwd(), "wrangler.jsonc"), "utf8");
+    const envExample = readFileSync(resolve(process.cwd(), ".env.example"), "utf8");
+    const devVars = readFileSync(resolve(process.cwd(), ".dev.vars.example"), "utf8");
+    for (const source of [wrangler, envExample, devVars]) {
+      expect(source).toContain("https://account.docusign.com");
+      expect(source).toContain("https://na1.docusign.net");
+      expect(source).not.toContain("https://demo.docusign.net");
+      expect(source).not.toContain("https://account-d.docusign.com");
+      expect(source).not.toContain("CANAAN_BUYER_WITNESS_EMAIL");
+      expect(source).not.toMatch(/yahoo/i);
+    }
   });
 
   it("sends a live envelope with JWT auth when DOCUSIGN_ENABLED=true", async () => {
@@ -221,7 +247,7 @@ describe("DocuSign seam", () => {
     };
     expect(claims.iss).toBe("ik-test");
     expect(claims.sub).toBe("user-guid");
-    expect(claims.aud).toBe("account-d.docusign.com");
+    expect(claims.aud).toBe("account.docusign.com");
     expect(claims.scope).toBe("signature impersonation");
   });
 
@@ -262,8 +288,7 @@ describe("DocuSign seam", () => {
     });
   });
 
-  it("uses intake Buyer witness email when CANAAN_BUYER_WITNESS_EMAIL is unset", () => {
-    delete process.env.CANAAN_BUYER_WITNESS_EMAIL;
+  it("uses intake Buyer witness name and email with no env override", () => {
     const intake = {
       buyerAttention: "Avery Cole",
       buyerEmail: "avery@ridge.example",
@@ -282,35 +307,6 @@ describe("DocuSign seam", () => {
       email: "avery@ridge.example",
     });
     expect(routed.find((row) => row.role === "seller_signer")?.email).toBe(brand.email);
-  });
-
-  it("overrides Buyer witness email from CANAAN_BUYER_WITNESS_EMAIL and keeps intake name", () => {
-    process.env.CANAAN_BUYER_WITNESS_EMAIL = "vanpittman12@yahoo.com";
-    const intake = {
-      buyerAttention: "Avery Cole",
-      buyerEmail: "avery@ridge.example",
-      buyerWitnessName: "Lee Park",
-      buyerWitnessEmail: "lee@ridge.example",
-    } as IntakeFields;
-    const routed = buildEnvelopeRecipients(intake);
-    expect(routed.find((row) => row.role === "buyer_witness")).toEqual({
-      role: "buyer_witness",
-      name: "Lee Park",
-      email: "vanpittman12@yahoo.com",
-    });
-    expect(routed.find((row) => row.role === "buyer_signer")).toEqual({
-      role: "buyer_signer",
-      name: "Avery Cole",
-      email: "avery@ridge.example",
-    });
-    expect(routed.find((row) => row.role === "seller_signer")).toEqual({
-      role: "seller_signer",
-      name: brand.signatoryName,
-      email: brand.email,
-    });
-    expect(routed.find((row) => row.role === "seller_witness")?.email).not.toBe(
-      "vanpittman12@yahoo.com",
-    );
   });
 
   it("uses env-overridable Canaan witness on stub routing", () => {
