@@ -4,7 +4,7 @@ import type { IntakeFields } from "./types";
 
 export const intakeSchema = z.object({
   buyerLegalName: z.string().trim().min(2, "Buyer legal name is required."),
-  buyerAttention: z.string().trim().min(2, "Attention name is required."),
+  buyerAttention: z.string().trim().min(2, "Signatory name is required."),
   buyerTitle: z.string().trim().min(2, "Title is required."),
   buyerEmail: z.string().trim().email("Enter a valid email address."),
   buyerStreet: z.string().trim().min(3, "Street address is required."),

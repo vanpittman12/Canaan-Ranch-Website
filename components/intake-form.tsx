@@ -324,10 +324,9 @@ export function IntakeForm({
         <div>
           <h2 className="type-h2 text-forest">Buyer notice block</h2>
           <p className="mt-2 text-sm text-muted">
-            These fields become the Buyer notice in Parties and Notices. The Effective Date is
-            the Florida/Eastern calendar date you submit this intake — it is not collected here.
-            The Expiration Date is that same calendar day one year later. Both dates are typed
-            into the Word agreement and DocuSign envelope when you submit.
+            These fields are the Buyer notice on the agreement. Dates are set automatically when you
+            submit. The Effective Date is the Florida/Eastern calendar date you submit this
+            intake — it is not collected here. The Expiration Date is that same calendar day one year later.
           </p>
         </div>
         <Field
@@ -348,15 +347,15 @@ export function IntakeForm({
           <Field
             split
             name="buyerAttention"
-            label="Buyer signatory / attention"
-            hint="Appears as Attention on the notice block and as the Buyer signature name."
+            label="Buyer signatory"
+            hint="The person who signs. Also used as Attention on the notice and as the DocuSign name."
             error={errors.buyerAttention}
           >
             <input
               {...controlProps(
                 "buyerAttention",
                 errors.buyerAttention,
-                "Appears as Attention on the notice block and as the Buyer signature name.",
+                "The person who signs. Also used as Attention on the notice and as the DocuSign name.",
               )}
               value={values.buyerAttention}
               onChange={(event) => update("buyerAttention", event.target.value)}
@@ -368,14 +367,14 @@ export function IntakeForm({
             split
             name="buyerTitle"
             label="Title"
-            hint="Corporate signatory title. Appears as Its: on the buyer signature block."
+            hint="Title under the signature."
             error={errors.buyerTitle}
           >
             <input
               {...controlProps(
                 "buyerTitle",
                 errors.buyerTitle,
-                "Corporate signatory title. Appears as Its: on the buyer signature block.",
+                "Title under the signature.",
               )}
               value={values.buyerTitle}
               onChange={(event) => update("buyerTitle", event.target.value)}
@@ -471,24 +470,23 @@ export function IntakeForm({
         <div>
           <h2 className="type-h2 text-forest">Reserved capacity</h2>
           <p className="mt-2 text-sm text-muted">
-            The tortoise count becomes Paragraph 2 “up to N” reserved capacity. Adult versus
-            juvenile is classified at delivery. {formatUsd(brand.defaultPerGtRate)} per adult.{" "}
-            {formatUsd(brand.juvenileRate)} per juvenile (all-in, not added to the adult rate).
-            No deposits required.
+            How many gopher tortoises you are reserving. Adult versus juvenile is classified at
+            delivery. {formatUsd(brand.defaultPerGtRate)} per adult.{" "}
+            {formatUsd(brand.juvenileRate)} per juvenile. No deposits required.
           </p>
         </div>
         <div className="grid items-start gap-4 sm:grid-cols-2">
           <Field
             name="tortoiseCount"
             label="Reserved capacity (gopher tortoise count)"
-            hint="Maps to “up to N” in the reserved-capacity paragraph."
+            hint="How many gopher tortoises you are reserving."
             error={errors.tortoiseCount}
           >
             <input
               {...controlProps(
                 "tortoiseCount",
                 errors.tortoiseCount,
-                "Maps to “up to N” in the reserved-capacity paragraph.",
+                "How many gopher tortoises you are reserving.",
               )}
               type="number"
               min={1}
@@ -533,22 +531,21 @@ export function IntakeForm({
         <div>
           <h2 className="type-h2 text-forest">Project and operations</h2>
           <p className="mt-2 text-sm text-muted">
-            Project name is required for tracking. County of relocation and donor company
-            affiliation also appear here. Buyer’s authorized agent appears in Parties, Notices,
-            and Buyer responsibilities.
+            Project name, county of relocation, donor affiliation, and the buyer’s authorized
+            agent.
           </p>
         </div>
         <Field
           name="relocationCounty"
           label="County of relocation"
-          hint="Maps to “County of relocation” in the reserved-capacity paragraph."
+          hint="County the tortoises are relocating from."
           error={errors.relocationCounty}
         >
           <input
             {...controlProps(
               "relocationCounty",
               errors.relocationCounty,
-              "Maps to “County of relocation” in the reserved-capacity paragraph.",
+              "County the tortoises are relocating from.",
             )}
             value={values.relocationCounty}
             onChange={(event) => update("relocationCounty", event.target.value)}
@@ -560,14 +557,14 @@ export function IntakeForm({
             split
             name="authorizedAgentName"
             label="Buyer’s authorized agent name"
-            hint="First part of “Buyer’s authorized agent” on the agreement."
+            hint="Name of the buyer’s authorized agent."
             error={errors.authorizedAgentName}
           >
             <input
               {...controlProps(
                 "authorizedAgentName",
                 errors.authorizedAgentName,
-                "First part of “Buyer’s authorized agent” on the agreement.",
+                "Name of the buyer’s authorized agent.",
               )}
               value={values.authorizedAgentName}
               onChange={(event) => update("authorizedAgentName", event.target.value)}
@@ -579,14 +576,14 @@ export function IntakeForm({
             split
             name="authorizedAgentCompany"
             label="Buyer’s authorized agent company"
-            hint="Second part of “Buyer’s authorized agent” on the agreement."
+            hint="Company of the buyer’s authorized agent."
             error={errors.authorizedAgentCompany}
           >
             <input
               {...controlProps(
                 "authorizedAgentCompany",
                 errors.authorizedAgentCompany,
-                "Second part of “Buyer’s authorized agent” on the agreement.",
+                "Company of the buyer’s authorized agent.",
               )}
               value={values.authorizedAgentCompany}
               onChange={(event) => update("authorizedAgentCompany", event.target.value)}
@@ -598,14 +595,14 @@ export function IntakeForm({
         <Field
           name="donorCompanyAffiliation"
           label="Donor company affiliation"
-          hint="Maps to “Donor company affiliation” in the reserved-capacity paragraph. For example, Lennar, D.R. Horton."
+          hint="For example, Lennar, D.R. Horton."
           error={errors.donorCompanyAffiliation}
         >
           <input
             {...controlProps(
               "donorCompanyAffiliation",
               errors.donorCompanyAffiliation,
-              "Maps to “Donor company affiliation” in the reserved-capacity paragraph. For example, Lennar, D.R. Horton.",
+              "For example, Lennar, D.R. Horton.",
             )}
             value={values.donorCompanyAffiliation}
             onChange={(event) => update("donorCompanyAffiliation", event.target.value)}
@@ -616,14 +613,14 @@ export function IntakeForm({
         <Field
           name="donorSiteName"
           label="Project name"
-          hint="Required for tracking. Maps to “Donor site / project” when the Word file has a blank."
+          hint="Shows as your project name on the agreement."
           error={errors.donorSiteName}
         >
           <input
             {...controlProps(
               "donorSiteName",
               errors.donorSiteName,
-              "Required for tracking. Maps to “Donor site / project” when the Word file has a blank.",
+              "Shows as your project name on the agreement.",
             )}
             value={values.donorSiteName}
             onChange={(event) => update("donorSiteName", event.target.value)}
@@ -633,14 +630,14 @@ export function IntakeForm({
         <Field
           name="donorSiteDescription"
           label="Project description (optional)"
-          hint="Appended as “Project description” in the reserved-capacity paragraph."
+          hint="Optional extra project details on the agreement."
           error={errors.donorSiteDescription}
         >
           <textarea
             {...controlProps(
               "donorSiteDescription",
               errors.donorSiteDescription,
-              "Appended as “Project description” in the reserved-capacity paragraph.",
+              "Optional extra project details on the agreement.",
             )}
             className="field-control min-h-24"
             value={values.donorSiteDescription}
@@ -653,9 +650,7 @@ export function IntakeForm({
         <div>
           <h2 className="type-h2 text-forest">Buyer witness</h2>
           <p className="mt-2 text-sm text-muted">
-            One Buyer witness. The name appears on the Buyer signature block; the email is used
-            for DocuSign routing. The Canaan Ranch LLP witness is seller-side and is not collected
-            on this form.
+            One Buyer witness. Name and email for the Buyer signature block.
           </p>
         </div>
         <FieldRow columns={2}>
@@ -704,7 +699,7 @@ export function IntakeForm({
           onEdit={() => goTo("notice")}
           rows={[
             ["Buyer legal name", values.buyerLegalName],
-            ["Attention", values.buyerAttention],
+            ["Signatory", values.buyerAttention],
             ["Title", values.buyerTitle],
             ["Email", values.buyerEmail],
             ["Phone", values.buyerPhone],
@@ -748,7 +743,7 @@ export function IntakeForm({
                 formatBuyerWitness(values.buyerWitnessName, values.buyerWitnessEmail),
               ),
             ],
-            ["Canaan Ranch LLP witness", "Seller-side, already on file"],
+            ["Canaan Ranch LLP witness", "Already on file"],
           ]}
         />
         <div className="rounded-[12px] border border-line bg-cream/60 p-4">
@@ -775,7 +770,11 @@ export function IntakeForm({
       <div className="intake-sticky flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted">
           {step === REVIEW_STEP_ID
-            ? "Submitting drafts the Canaan Preserve / Canaan Ranch LLP relocation agreement. You will download the populated Word agreement next."
+            ? pending
+              ? engagementId
+                ? "Saving…"
+                : "Creating your agreement…"
+              : "Submit to create your agreement. You can download the Word file next."
             : "Continue or click any step to browse. Required fields are checked when you submit on Review."}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -809,10 +808,12 @@ export function IntakeForm({
             disabled={!submitReady || pending}
           >
             {pending
-              ? "Saving…"
+              ? engagementId
+                ? "Saving…"
+                : "Creating your agreement…"
               : engagementId
-                ? "Update agreement details"
-                : "Generate populated agreement"}
+                ? "Update & download agreement"
+                : "Submit & download agreement"}
           </button>
         </div>
       </div>

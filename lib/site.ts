@@ -6,7 +6,7 @@ export const CANONICAL_HOST = "canaanpreserve.com";
 export const WWW_HOST = "www.canaanpreserve.com";
 
 export const HOME_DESCRIPTION =
-  "Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site. Gopher tortoise intake, downloadable relocation agreement, signature, and internal review.";
+  "Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site. Gopher tortoise intake, downloadable relocation agreement, signature, and a review before anything closes.";
 
 export const PRIVACY_DESCRIPTION =
   "How Canaan Preserve uses intake details to prepare a relocation agreement and contact you about that reservation.";

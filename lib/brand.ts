@@ -12,7 +12,7 @@ export const brand = {
     "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
   /** Full sentence under the locked slogan. Uses site-wide Long-Term casing. */
   heroLead:
-    "Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get human review before anything closes.",
+    "Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
   /** Primary buyer-facing intake CTA. Keep nav, hero, footer, and bottom CTA in sync. */
   intakeCta: "Start intake",
   flowInvite:

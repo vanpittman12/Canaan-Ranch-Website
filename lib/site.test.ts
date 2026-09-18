@@ -62,6 +62,9 @@ describe("public site SEO and copy hygiene", () => {
     );
     expect(sitemap).not.toContain("www.canaanpreserve.com");
     expect(layout).toContain("HOME_DESCRIPTION");
+    expect(HOME_DESCRIPTION).toContain("a review before anything closes");
+    expect(HOME_DESCRIPTION).not.toContain("internal review");
+    expect(HOME_DESCRIPTION).not.toContain("human review");
     expect(privacy).toContain("pageShareMetadata");
     expect(privacy).toContain("PRIVACY_DESCRIPTION");
     expect(terms).toContain("pageShareMetadata");
@@ -96,8 +99,9 @@ describe("public site SEO and copy hygiene", () => {
     expect(intakeForm).not.toContain("before generate.");
     expect(intakePage).toContain("{brand.intakeCta}");
     expect(intakePage).not.toContain("Start relocation intake");
-    expect(intakePage).toContain("After submission, download");
+    expect(intakePage).toContain("After you submit, download");
     expect(intakePage).not.toContain("After submit you download");
+    expect(intakePage).not.toContain("After submission, download");
     expect(intakePage).toContain("We use these details to populate your relocation agreement");
     expect(intakePage).toContain('href="/privacy"');
     expect(existsSync(path.join(process.cwd(), "app/privacy/page.tsx"))).toBe(true);

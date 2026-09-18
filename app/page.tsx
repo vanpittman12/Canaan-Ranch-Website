@@ -33,7 +33,7 @@ const steps = [
   {
     n: "03",
     title: "Download your agreement",
-    body: "We populate the agreement from those details. Download the Word/DOCX file to review — there is no on-screen contract preview.",
+    body: "We fill the agreement from those details. Download the Word/DOCX file to review it.",
   },
   {
     n: "04",
