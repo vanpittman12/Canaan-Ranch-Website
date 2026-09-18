@@ -161,6 +161,7 @@ export function toIsoDate(date: Date) {
  * Preview of the dates stamped at intake submit: Florida/Eastern “today”
  * as Effective Date, and that calendar day one year later as Expiration.
  * Same rule as applySubmit (`businessDateOnly(now)` + `addOneYear`).
+ * Intake Review mounts this on the client so static HTML cannot bake a day.
  */
 export function agreementDatePreview(now: Date | string = new Date()) {
   const iso = typeof now === "string" ? now : now.toISOString();

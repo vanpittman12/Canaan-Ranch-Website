@@ -66,6 +66,16 @@ describe("Worker-safe public routes", () => {
     expect(read("components/legal-page.tsx")).not.toContain("headers(");
   });
 
+  it("mounts intake Effective/Expiration preview after hydration, not in static HTML", () => {
+    const intakeForm = read("components/intake-form.tsx");
+    expect(intake).toContain('export const dynamic = "force-static"');
+    expect(intakeForm).toContain("function IntakeAgreementDates()");
+    expect(intakeForm).toContain("setPreview(agreementDatePreview())");
+    expect(intakeForm).not.toContain("const datePreview = agreementDatePreview()");
+    expect(intakeForm).toContain('{preview?.effectiveLong ?? "—"}');
+    expect(intakeForm).toContain('{preview?.expirationLong ?? "—"}');
+  });
+
   it("ships privacy/terms through OpenNext assets instead of the dummy cache", () => {
     expect(openNextConfig).toContain("static-assets-incremental-cache");
     expect(openNextConfig).toContain("incrementalCache: staticAssetsIncrementalCache");

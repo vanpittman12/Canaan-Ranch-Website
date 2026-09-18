@@ -201,6 +201,8 @@ describe("site builder visual lock", () => {
     expect(intakeForm).not.toContain("Both dates are typed");
     expect(intakeForm).not.toContain("These fields become the Buyer notice in Parties and Notices");
     expect(intakeForm).toContain('label="Buyer signatory"');
+    expect(intakeForm).toContain('["Buyer signatory", values.buyerAttention]');
+    expect(intakeForm).not.toContain('["Signatory", values.buyerAttention]');
     expect(intakeForm).not.toContain("Buyer signatory / attention");
     expect(intakeForm).toContain("The person who signs.");
     expect(intakeForm).toContain("Title under the signature.");
@@ -225,8 +227,12 @@ describe("site builder visual lock", () => {
     expect(intakeForm).toContain("Agreement dates");
     expect(intakeForm).toContain("Preview of the dates that will be typed");
     expect(intakeForm).toContain("These are not editable fields.");
-    expect(intakeForm).toContain("{datePreview.effectiveLong}");
-    expect(intakeForm).toContain("{datePreview.expirationLong}");
+    expect(intakeForm).toContain("setPreview(agreementDatePreview())");
+    expect(intakeForm).toContain("{preview?.effectiveLong ?? \"—\"}");
+    expect(intakeForm).toContain("{preview?.expirationLong ?? \"—\"}");
+    expect(intakeForm).not.toContain("const datePreview = agreementDatePreview()");
+    expect(intakeForm).not.toContain("{datePreview.effectiveLong}");
+    expect(intakeForm).not.toContain("{datePreview.expirationLong}");
     expect(intakeForm).not.toContain('name="effectiveDate"');
     expect(intakeForm).not.toContain('name="expirationDate"');
     expect(intakeForm).not.toContain("the date the Buyer signs");
