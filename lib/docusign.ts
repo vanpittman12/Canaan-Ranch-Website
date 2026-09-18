@@ -31,8 +31,8 @@ export const DOCUSIGN_ENV_VARS = [
 
 export type { DocuSignMode, EnvelopeRecipient };
 
-export const DEFAULT_ACCOUNT_BASE_URI = "https://demo.docusign.net";
-export const DEFAULT_AUTH_SERVER = "https://account-d.docusign.com";
+export const DEFAULT_ACCOUNT_BASE_URI = "https://na1.docusign.net";
+export const DEFAULT_AUTH_SERVER = "https://account.docusign.com";
 
 import {
   DOCUSIGN_ANCHOR_UNITS,
@@ -231,8 +231,7 @@ export function buildEnvelopeRecipients(intake: IntakeFields): EnvelopeRecipient
     {
       role: "buyer_witness",
       name: intake.buyerWitnessName,
-      // TEMP Van test — remove CANAAN_BUYER_WITNESS_EMAIL (wrangler.jsonc vars) when done.
-      email: process.env.CANAAN_BUYER_WITNESS_EMAIL?.trim() || intake.buyerWitnessEmail,
+      email: intake.buyerWitnessEmail,
     },
     {
       role: "seller_witness",
