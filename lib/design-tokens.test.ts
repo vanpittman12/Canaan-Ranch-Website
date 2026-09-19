@@ -92,7 +92,7 @@ describe("site builder visual lock", () => {
     expect(header).toContain('className="flex shrink-0 items-center gap-3"');
     expect(brand.lockupLine).toBe("Recipient site");
     expect(brand.habitatLine).toBe(
-      "FWC Tier 1 lowest mitigation contribution and permanently protected conservation-easement habitat",
+      "FWC Tier 1: lowest mitigation contribution and permanently protected conservation-easement habitat",
     );
     expect(brand.habitatLine.toLowerCase()).not.toContain("ecologically pristine");
   });
@@ -102,7 +102,7 @@ describe("site builder visual lock", () => {
       expect(surface.toLowerCase()).not.toContain("pasco");
     }
     expect(brand.habitatLine).toBe(
-      "FWC Tier 1 lowest mitigation contribution and permanently protected conservation-easement habitat",
+      "FWC Tier 1: lowest mitigation contribution and permanently protected conservation-easement habitat",
     );
     expect(brand.habitatLine).toContain("FWC Tier 1");
     expect(brand.habitatLine).toContain("lowest mitigation");
