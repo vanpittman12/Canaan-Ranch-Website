@@ -244,8 +244,9 @@ export function IntakeForm({
           setStep(intent.step);
         }
       }}
-      className="space-y-8"
+      className="intake-form space-y-8"
     >
+      <div className="intake-scroll space-y-8">
       {state.error ? (
         <div className="rounded-[12px] border border-terracotta/30 bg-white px-4 py-3 text-sm text-terracotta">
           {state.error}
@@ -747,6 +748,7 @@ export function IntakeForm({
         />
         <IntakeAgreementDates />
       </section>
+      </div>
 
       <div className="intake-sticky flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted">
