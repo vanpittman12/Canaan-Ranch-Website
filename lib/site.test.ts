@@ -153,5 +153,16 @@ describe("public site SEO and copy hygiene", () => {
     expect(intakeForm).not.toContain(
       "Required fields must be complete before Continue or Review.",
     );
+    expect(intakeForm).toContain('className="intake-form space-y-8"');
+    expect(intakeForm).toContain('className="intake-scroll space-y-8"');
+    expect(css).toContain("--intake-sticky-clearance: 12rem");
+    expect(css).toContain(
+      "padding-bottom: calc(var(--intake-sticky-clearance) + env(safe-area-inset-bottom, 0px))",
+    );
+    expect(css).toContain("html:has(.intake-form)");
+    expect(css).toContain("scroll-padding-bottom");
+    expect(css).toMatch(
+      /@media \(min-width: 768px\)[\s\S]*\.intake-scroll \{\s*padding-bottom: 0;/,
+    );
   });
 });

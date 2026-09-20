@@ -35,6 +35,9 @@
   --status-declined: var(--muted);
   --status-accepted: var(--sage);
   --status-executed: var(--forest);
+
+  /* Mobile sticky Continue bar: helper + button + padding. Safe-area is added at use. */
+  --intake-sticky-clearance: 12rem;
 }
 
 @theme inline {
@@ -290,6 +293,15 @@ body {
   padding: 12px 24px calc(12px + env(safe-area-inset-bottom));
 }
 
+/* Reserve space so NOTICE (and other) fields can scroll above the sticky bar. */
+.intake-scroll {
+  padding-bottom: calc(var(--intake-sticky-clearance) + env(safe-area-inset-bottom, 0px));
+}
+
+html:has(.intake-form) {
+  scroll-padding-bottom: calc(var(--intake-sticky-clearance) + env(safe-area-inset-bottom, 0px));
+}
+
 @media (min-width: 768px) {
   .pill-row {
     display: flex;
@@ -315,6 +327,14 @@ body {
     border: 0;
     background: transparent;
     padding: 0;
+  }
+
+  .intake-scroll {
+    padding-bottom: 0;
+  }
+
+  html:has(.intake-form) {
+    scroll-padding-bottom: 0;
   }
 }
 
