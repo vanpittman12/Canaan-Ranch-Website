@@ -26,7 +26,7 @@ import {
   southOfCutoffOverlayPath,
 } from "./service-area";
 
-const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+const landing = readFileSync(path.join(process.cwd(), "components/home-page.tsx"), "utf8");
 const mapModule = readFileSync(path.join(process.cwd(), "components/service-area-map.tsx"), "utf8");
 const mapLib = readFileSync(path.join(process.cwd(), "lib/service-area.ts"), "utf8");
 const mosaicScript = readFileSync(
@@ -226,12 +226,15 @@ describe("service area map", () => {
     expect(mapModule.toLowerCase()).not.toContain("pasco");
   });
 
-  it("keeps the slogan, savings module, and What we offer", () => {
+  it("keeps the first-screen copy, savings module, and What we offer", () => {
+    expect(brand.heroBody).toBe(
+      "Don’t slow your project down - Long Term Tier 1 sites have the lowest mitigation contributions, are best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
+    );
     expect(brand.heroSlogan).toBe(
       "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
     expect(landing).toContain("<FwcSavingsModule");
     expect(landing).toContain("<ProgramOffer");
-    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.heroBody\}/g)).toHaveLength(1);
   });
 });

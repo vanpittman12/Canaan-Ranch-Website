@@ -7,12 +7,17 @@ export const brand = {
     "FWC Tier 1: lowest mitigation contribution and permanently protected conservation-easement habitat",
   shortTagline: "Reserve recipient-site capacity with a clear agreement.",
   fwcStatus: "Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site.",
-  /** Van’s exact hero slogan — do not polish. */
+  /** Van’s exact hero slogan — do not polish. Kept for locks outside the first-screen rewrite. */
   heroSlogan:
     "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
   /** Full sentence under the locked slogan. Uses site-wide Long-Term casing. */
   heroLead:
     "Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
+  /** First-screen badge — Van / Manager 2026-09-21. */
+  heroRecipientBadge: "Tier 1 Long Term Recipient Site",
+  /** First-screen body — Van / Manager 2026-09-21. One size; replaces homepage slogan + lead. */
+  heroBody:
+    "Don’t slow your project down - Long Term Tier 1 sites have the lowest mitigation contributions, are best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
   /** Primary buyer-facing intake CTA. Keep nav, hero, footer, and bottom CTA in sync. */
   intakeCta: "Start intake",
   flowInvite:

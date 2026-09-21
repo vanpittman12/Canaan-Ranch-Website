@@ -338,63 +338,52 @@ html:has(.intake-form) {
   }
 }
 
-.habitat-sky {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    118deg,
-    #16241c 0%,
-    #203328 32%,
-    #3d4a32 54%,
-    #8a7348 76%,
-    #c4a15a 92%,
-    #e0d0b4 100%
-  );
-}
-
-.habitat-sun {
-  position: absolute;
-  top: 6%;
-  right: 14%;
-  width: 14rem;
-  height: 14rem;
-  border-radius: 999px;
-  background: radial-gradient(circle, #efe6d4 0%, #c4a15a 28%, rgba(196, 161, 90, 0.28) 52%, transparent 74%);
-  opacity: 0.8;
-}
-
-.habitat-grain {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.2;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
-}
-
-.habitat-ground {
+/* Live hero: portrait savanna photo (shot 3) cropped into the headline band. */
+.hero-photo-frame {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 48%;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(138, 115, 72, 0.28) 42%,
-    rgba(224, 208, 180, 0.3) 100%
-  );
+  top: 0;
+  bottom: 40%;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.habitat-scrim {
+@media (max-width: 767px) {
+  .hero-photo-frame {
+    bottom: 46%;
+  }
+}
+
+.hero-photo {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(22, 36, 28, 0.52) 0%,
-    rgba(22, 36, 28, 0.12) 44%,
-    rgba(22, 36, 28, 0) 70%
-  );
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: 55% 54%;
+}
+
+@media (max-width: 767px) {
+  .hero-photo {
+    object-position: 50% 52%;
+  }
+}
+
+.hero-photo-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(22, 36, 28, 0.84) 0%,
+      rgba(22, 36, 28, 0.62) 24%,
+      rgba(22, 36, 28, 0.28) 46%,
+      rgba(22, 36, 28, 0.08) 66%,
+      transparent 86%
+    ),
+    linear-gradient(180deg, rgba(22, 36, 28, 0.22) 0%, transparent 34%);
 }
 
 :focus {

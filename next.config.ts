@@ -27,11 +27,6 @@ const nextConfig: NextConfig = {
         destination: "https://canaanpreserve.com/:path*",
         permanent: true,
       },
-      {
-        source: "/privacy-policy",
-        destination: "/privacy",
-        permanent: true,
-      },
     ];
   },
 };

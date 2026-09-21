@@ -14,7 +14,8 @@ import {
 } from "./brand-mark-asset";
 
 const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
-const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+const landing = readFileSync(path.join(process.cwd(), "components/home-page.tsx"), "utf8");
+const homeRoute = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
 const intakePage = readFileSync(path.join(process.cwd(), "app/intake/page.tsx"), "utf8");
 const intakeForm = readFileSync(path.join(process.cwd(), "components/intake-form.tsx"), "utf8");
 const footer = readFileSync(path.join(process.cwd(), "components/site-footer.tsx"), "utf8");
@@ -30,9 +31,9 @@ const mark = readFileSync(path.join(process.cwd(), "components/brand-mark.tsx"),
 const markAsset = readFileSync(path.join(process.cwd(), "lib/brand-mark-asset.ts"), "utf8");
 const lockup = readFileSync(path.join(process.cwd(), "components/brand-lockup.tsx"), "utf8");
 const header = readFileSync(path.join(process.cwd(), "components/site-header.tsx"), "utf8");
-const habitat = readFileSync(path.join(process.cwd(), "components/sandhill-habitat.tsx"), "utf8");
+const photoHero = readFileSync(path.join(process.cwd(), "components/photo-savanna-hero.tsx"), "utf8");
 const layout = readFileSync(path.join(process.cwd(), "app/layout.tsx"), "utf8");
-const marketingSurfaces = [landing, habitat, mark, header, layout, brand.habitatLine];
+const marketingSurfaces = [landing, photoHero, mark, header, layout, brand.habitatLine];
 
 describe("site builder visual lock", () => {
   it("retunes CSS tokens to the locked palette", () => {
@@ -56,8 +57,14 @@ describe("site builder visual lock", () => {
 
   it("removes HorizonArt hills from the landing hero", () => {
     expect(landing).not.toContain("HorizonArt");
-    expect(landing).toContain("SandhillHabitat");
-    expect(landing).toContain("habitatLine");
+    expect(landing).toContain("PhotoSavannaHero");
+    expect(landing).not.toContain("SandhillHabitat");
+    expect(landing).not.toContain("LongleafHabitat");
+    expect(landing).toContain("heroBody");
+    expect(homeRoute).toContain("<HomePage");
+    expect(homeRoute).not.toContain('hero="a"');
+    expect(homeRoute).not.toContain('hero="b"');
+    expect(homeRoute).not.toContain("PhotoSavannaHero");
   });
 
   it("uses Van’s longleaf pine and wiregrass mark and recipient-site lockup", () => {
@@ -109,12 +116,15 @@ describe("site builder visual lock", () => {
     expect(brand.habitatLine).toContain("permanently protected conservation-easement habitat");
     expect(brand.habitatLine.toLowerCase()).not.toContain("ecologically pristine");
     expect(brand.habitatLine.toLowerCase()).not.toMatch(/\bcounty\b/);
-    expect(landing).toContain("{brand.habitatLine}");
-    expect(landing).toContain("{brand.heroSlogan}");
-    expect(landing).toContain("{brand.heroLead}");
+    expect(landing).toContain("{brand.name}");
+    expect(landing).toContain("{brand.heroRecipientBadge}");
+    expect(landing).toContain("{brand.heroBody}");
+    expect(landing).not.toContain("{brand.habitatLine}");
+    expect(landing).not.toContain("{brand.heroSlogan}");
+    expect(landing).not.toContain("{brand.heroLead}");
     expect(landing).toContain("{brand.flowInvite}");
-    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
-    expect(landing.match(/\{brand\.heroLead\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.heroBody\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.heroRecipientBadge\}/g)).toHaveLength(1);
     expect(landing.match(/\{brand\.flowInvite\}/g)).toHaveLength(1);
     expect(landing).toContain("FwcSavingsModule");
     expect(landing).toContain("ProgramOffer");
@@ -142,7 +152,10 @@ describe("site builder visual lock", () => {
     expect(intakePage).toContain("{brand.intakeCta}");
     expect(intakePage).not.toContain("Start relocation intake");
     expect(landing).not.toContain("is the contracting party. Intake produces");
-    expect(landing).not.toContain("reservation letter");
+    expect(landing).toContain("Get your reservation letter");
+    expect(landing).toContain(
+      "we can issue your reservation letter — often the very same day.",
+    );
     expect(landing).toContain("Word/DOCX");
     expect(landing).not.toContain("Download the PDF");
     expect(landing).toContain("DocuSign is the usual signing path");
@@ -177,7 +190,7 @@ describe("site builder visual lock", () => {
     expect(brand.flowInvite).toContain("complete intake");
     expect(brand.flowInvite).toContain("signature-ready");
     expect(brand.flowInvite).toContain("DocuSign is the usual signing path");
-    expect(landing).toContain("{brand.habitatLine}");
+    expect(landing).toContain("{brand.heroBody}");
     expect(landing).not.toContain("ecologically pristine");
     expect(landing).not.toContain("saving our clients money");
     expect(landing).not.toContain("signature ready");
@@ -238,7 +251,7 @@ describe("site builder visual lock", () => {
     expect(intakeForm).not.toContain("the date the Buyer signs");
     expect(intakeForm).not.toContain("Buyer Date Signed");
     expect(intakeForm).not.toContain("Buyer Date Signed / Effective Date.");
-    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.heroBody\}/g)).toHaveLength(1);
     expect(footer).toContain("{brand.footerLine}");
     expect(footer).toContain("brandMailtoHref");
     expect(footer).toContain("brandTelHref");
@@ -268,18 +281,28 @@ describe("site builder visual lock", () => {
       brand.fwcBadge,
     ].join("\n");
     expect(marketingCopy).not.toMatch(/signature ready(?!-)/);
-    expect(marketingCopy.replaceAll(brand.heroSlogan, "")).not.toMatch(/Long Term/);
+    expect(
+      marketingCopy
+        .replaceAll(brand.heroSlogan, "")
+        .replaceAll(brand.heroBody, "")
+        .replaceAll(brand.heroRecipientBadge, ""),
+    ).not.toMatch(/Long Term/);
   });
 
-  it("draws longleaf pine and wiregrass on the sandhill without a cartoon tortoise", () => {
-    expect(habitat).toContain("Longleaf");
-    expect(habitat).toContain("WiregrassClump");
-    expect(habitat).not.toContain("HabitatTortoise");
-    expect(habitat).not.toContain("Burrow");
-    expect(habitat).not.toContain("Pasco");
-    expect(css).toContain(".habitat-sky");
-    expect(css).toContain(".habitat-ground");
-    expect(css).toContain(".habitat-scrim");
+  it("uses the live shot 3 photo hero with a left forest scrim and no tortoise sticker", () => {
+    expect(photoHero).toContain("HERO_PHOTO.src");
+    expect(photoHero).toContain("option-a-shot3");
+    expect(photoHero).toContain("hero-photo-frame");
+    expect(photoHero).toContain("hero-photo-scrim");
+    expect(photoHero).not.toContain("QuietTortoise");
+    expect(photoHero).not.toContain("HabitatTortoise");
+    expect(photoHero).not.toContain("longleaf-tortoise");
+    expect(photoHero).not.toContain("Pasco");
+    expect(css).toContain(".hero-photo-frame");
+    expect(css).toContain(".hero-photo");
+    expect(css).toContain(".hero-photo-scrim");
+    expect(css).not.toContain(".habitat-sky");
+    expect(css).not.toContain(".longleaf-tortoise");
   });
 
   it("links official FWC mitigation table for Tier 1 value", () => {

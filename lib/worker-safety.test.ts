@@ -14,6 +14,7 @@ const redirects = read("public/_redirects");
 const ensureLegal = read("scripts/ensure-legal-routes.mjs");
 const layout = read("app/layout.tsx");
 const landing = read("app/page.tsx");
+const homePage = read("components/home-page.tsx");
 const intake = read("app/intake/page.tsx");
 const privacy = read("app/privacy/page.tsx");
 const terms = read("app/terms/page.tsx");
@@ -50,6 +51,13 @@ describe("Worker-safe public routes", () => {
     for (const page of [landing, intake, privacy, terms]) {
       expect(page).toContain('export const dynamic = "force-static"');
     }
+    expect(landing).toContain("<HomePage");
+    expect(landing).not.toContain('hero="a"');
+    expect(landing).not.toContain('hero="b"');
+    expect(homePage).toContain("<PhotoSavannaHero");
+    expect(homePage).not.toContain("SandhillHabitat");
+    expect(homePage).not.toContain("LongleafHabitat");
+    expect(homePage).not.toContain("HeroPreviewBar");
     expect(privacy).toContain('title: "Privacy"');
     expect(terms).toContain('title: "Terms"');
     expect(privacy).toContain("pageShareMetadata");
@@ -84,6 +92,7 @@ describe("Worker-safe public routes", () => {
     expect(ensureLegal).toContain("copyFileSync(htmlSrc, path.join(assetsDir, `${route}.html`))");
     expect(nextConfig).toContain('source: "/privacy-policy"');
     expect(nextConfig).toContain('destination: "/privacy"');
+    expect(nextConfig.match(/source: "\/privacy-policy"/g)).toHaveLength(1);
     expect(redirects).toContain("/privacy-policy /privacy 308");
   });
 
@@ -109,7 +118,7 @@ describe("Worker-safe public routes", () => {
     expect(footer).toContain('href="/terms"');
     expect(footer).toContain('href="/admin/login"');
     expect(footer.match(/prefetch=\{false\}/g)?.length).toBeGreaterThanOrEqual(4);
-    expect(landing.match(/prefetch=\{false\}/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(homePage.match(/prefetch=\{false\}/g)?.length).toBeGreaterThanOrEqual(2);
     expect(intake).toContain("prefetch={false}");
   });
 
