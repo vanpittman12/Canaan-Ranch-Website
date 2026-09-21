@@ -1,17 +1,13 @@
 import Link from "next/link";
 import { FwcBadge } from "@/components/fwc-badge";
 import { FwcSavingsModule } from "@/components/fwc-savings";
-import { HeroPreviewBar } from "@/components/hero-preview-bar";
-import { LongleafHabitat } from "@/components/longleaf-habitat";
 import { PhotoSavannaHero } from "@/components/photo-savanna-hero";
 import { ProgramOffer } from "@/components/program-offer";
-import { SandhillHabitat } from "@/components/sandhill-habitat";
 import { ServiceAreaMap } from "@/components/service-area-map";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { TemplateDownloadButton } from "@/components/template-download";
 import { brand } from "@/lib/brand";
-import type { HeroVisual } from "@/lib/hero-preview";
 import { formatUsd } from "@/lib/money";
 
 const steps = [
@@ -47,23 +43,13 @@ const facts = [
   { label: "Entity", value: brand.legalName },
 ];
 
-export function HomePage({ hero = "live" }: { hero?: HeroVisual }) {
-  const habitat =
-    hero === "a" ? (
-      <PhotoSavannaHero />
-    ) : hero === "b" ? (
-      <LongleafHabitat />
-    ) : (
-      <SandhillHabitat />
-    );
-
+export function HomePage() {
   return (
     <>
       <SiteHeader />
       <main>
         <section className="relative overflow-hidden border-b border-line bg-forest-deep text-cream">
-          {habitat}
-          {hero === "live" ? null : <HeroPreviewBar active={hero} />}
+          <PhotoSavannaHero />
           <div className="relative mx-auto w-full max-w-6xl px-5 pt-16 pb-12 sm:px-8 lg:min-h-[34rem] lg:pt-24">
             <div className="max-w-3xl">
               <p className="text-[13px] font-semibold tracking-wide text-brass">

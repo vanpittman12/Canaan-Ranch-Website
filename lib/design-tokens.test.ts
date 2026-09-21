@@ -31,9 +31,9 @@ const mark = readFileSync(path.join(process.cwd(), "components/brand-mark.tsx"),
 const markAsset = readFileSync(path.join(process.cwd(), "lib/brand-mark-asset.ts"), "utf8");
 const lockup = readFileSync(path.join(process.cwd(), "components/brand-lockup.tsx"), "utf8");
 const header = readFileSync(path.join(process.cwd(), "components/site-header.tsx"), "utf8");
-const habitat = readFileSync(path.join(process.cwd(), "components/sandhill-habitat.tsx"), "utf8");
+const photoHero = readFileSync(path.join(process.cwd(), "components/photo-savanna-hero.tsx"), "utf8");
 const layout = readFileSync(path.join(process.cwd(), "app/layout.tsx"), "utf8");
-const marketingSurfaces = [landing, habitat, mark, header, layout, brand.habitatLine];
+const marketingSurfaces = [landing, photoHero, mark, header, layout, brand.habitatLine];
 
 describe("site builder visual lock", () => {
   it("retunes CSS tokens to the locked palette", () => {
@@ -57,7 +57,9 @@ describe("site builder visual lock", () => {
 
   it("removes HorizonArt hills from the landing hero", () => {
     expect(landing).not.toContain("HorizonArt");
-    expect(landing).toContain("SandhillHabitat");
+    expect(landing).toContain("PhotoSavannaHero");
+    expect(landing).not.toContain("SandhillHabitat");
+    expect(landing).not.toContain("LongleafHabitat");
     expect(landing).toContain("habitatLine");
     expect(homeRoute).toContain("<HomePage");
     expect(homeRoute).not.toContain('hero="a"');
@@ -276,15 +278,20 @@ describe("site builder visual lock", () => {
     expect(marketingCopy.replaceAll(brand.heroSlogan, "")).not.toMatch(/Long Term/);
   });
 
-  it("draws longleaf pine and wiregrass on the sandhill without a cartoon tortoise", () => {
-    expect(habitat).toContain("Longleaf");
-    expect(habitat).toContain("WiregrassClump");
-    expect(habitat).not.toContain("HabitatTortoise");
-    expect(habitat).not.toContain("Burrow");
-    expect(habitat).not.toContain("Pasco");
-    expect(css).toContain(".habitat-sky");
-    expect(css).toContain(".habitat-ground");
-    expect(css).toContain(".habitat-scrim");
+  it("uses the live shot 3 photo hero with a left forest scrim and no tortoise sticker", () => {
+    expect(photoHero).toContain("HERO_PHOTO.src");
+    expect(photoHero).toContain("option-a-shot3");
+    expect(photoHero).toContain("hero-photo-frame");
+    expect(photoHero).toContain("hero-photo-scrim");
+    expect(photoHero).not.toContain("QuietTortoise");
+    expect(photoHero).not.toContain("HabitatTortoise");
+    expect(photoHero).not.toContain("longleaf-tortoise");
+    expect(photoHero).not.toContain("Pasco");
+    expect(css).toContain(".hero-photo-frame");
+    expect(css).toContain(".hero-photo");
+    expect(css).toContain(".hero-photo-scrim");
+    expect(css).not.toContain(".habitat-sky");
+    expect(css).not.toContain(".longleaf-tortoise");
   });
 
   it("links official FWC mitigation table for Tier 1 value", () => {

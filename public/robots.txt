@@ -2,6 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /engagements
-Disallow: /preview
 
 Sitemap: https://canaanpreserve.com/sitemap.xml

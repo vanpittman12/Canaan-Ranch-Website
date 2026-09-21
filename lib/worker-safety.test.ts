@@ -15,8 +15,6 @@ const ensureLegal = read("scripts/ensure-legal-routes.mjs");
 const layout = read("app/layout.tsx");
 const landing = read("app/page.tsx");
 const homePage = read("components/home-page.tsx");
-const heroPreviewA = read("app/preview/hero-a/page.tsx");
-const heroPreviewB = read("app/preview/hero-b/page.tsx");
 const intake = read("app/intake/page.tsx");
 const privacy = read("app/privacy/page.tsx");
 const terms = read("app/terms/page.tsx");
@@ -50,15 +48,16 @@ describe("Worker-safe public routes", () => {
   });
 
   it("keeps marketing pages static and restores privacy/terms stubs", () => {
-    for (const page of [landing, intake, privacy, terms, heroPreviewA, heroPreviewB]) {
+    for (const page of [landing, intake, privacy, terms]) {
       expect(page).toContain('export const dynamic = "force-static"');
     }
     expect(landing).toContain("<HomePage");
     expect(landing).not.toContain('hero="a"');
     expect(landing).not.toContain('hero="b"');
-    expect(homePage).toContain("<SandhillHabitat");
-    expect(heroPreviewA).toContain('hero="a"');
-    expect(heroPreviewB).toContain('hero="b"');
+    expect(homePage).toContain("<PhotoSavannaHero");
+    expect(homePage).not.toContain("SandhillHabitat");
+    expect(homePage).not.toContain("LongleafHabitat");
+    expect(homePage).not.toContain("HeroPreviewBar");
     expect(privacy).toContain('title: "Privacy"');
     expect(terms).toContain('title: "Terms"');
     expect(privacy).toContain("pageShareMetadata");
@@ -93,6 +92,7 @@ describe("Worker-safe public routes", () => {
     expect(ensureLegal).toContain("copyFileSync(htmlSrc, path.join(assetsDir, `${route}.html`))");
     expect(nextConfig).toContain('source: "/privacy-policy"');
     expect(nextConfig).toContain('destination: "/privacy"');
+    expect(nextConfig.match(/source: "\/privacy-policy"/g)).toHaveLength(1);
     expect(redirects).toContain("/privacy-policy /privacy 308");
   });
 
