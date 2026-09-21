@@ -254,6 +254,7 @@ describe("DocuSign seam", () => {
       name: brand.signatoryName,
       email: "vpittman@beachparkcap.com",
     });
+    expect(brand.sellerWitnessName).toBe("Seller Witness");
     expect(brand.sellerWitnessEmail).toBe("vpittman@bourne-partners.com");
     expect(routed.find((row) => row.role === "buyer_witness")).toEqual({
       role: "buyer_witness",
