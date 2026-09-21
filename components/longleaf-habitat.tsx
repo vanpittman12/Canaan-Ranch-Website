@@ -45,9 +45,9 @@ export function LongleafHabitat() {
           <WiregrassClump x={1300} y={442} scale={1.4} color={BRASS} />
           <WiregrassClump x={1400} y={434} scale={1.3} color={WHEAT} />
         </g>
-        <QuietTortoise />
       </svg>
       <div className="longleaf-scrim" />
+      <QuietTortoise />
     </div>
   );
 }
@@ -185,8 +185,13 @@ function WiregrassClump({
 
 function QuietTortoise() {
   return (
-    <g className="longleaf-tortoise" transform="translate(1288 400) scale(0.82)">
-      <g fill={FOREST} opacity="0.78">
+    <svg
+      className="longleaf-tortoise"
+      viewBox="0 0 120 64"
+      fill="none"
+      aria-hidden="true"
+    >
+      <g fill="#3A3224" opacity="0.92">
         <ellipse cx="62" cy="30" rx="34" ry="20" />
         <path d="M28 30 C18 22 12 24 10 30 C12 36 20 38 30 34 Z" />
         <ellipse cx="14" cy="31" rx="7" ry="5" />
@@ -195,13 +200,23 @@ function QuietTortoise() {
         <ellipse cx="90" cy="44" rx="7" ry="4.5" />
         <ellipse cx="96" cy="34" rx="6" ry="3" />
       </g>
+      <ellipse
+        cx="62"
+        cy="30"
+        rx="34"
+        ry="20"
+        fill="none"
+        stroke={WHEAT}
+        strokeWidth="2.2"
+        opacity="0.82"
+      />
       <path
         d="M36 24 C50 12 78 12 92 26"
         stroke={BRASS}
-        strokeWidth="1.4"
+        strokeWidth="1.8"
         strokeLinecap="round"
-        opacity="0.45"
+        opacity="0.88"
       />
-    </g>
+    </svg>
   );
 }

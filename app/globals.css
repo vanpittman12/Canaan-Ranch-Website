@@ -499,7 +499,21 @@ html:has(.intake-form) {
 }
 
 .longleaf-tortoise {
+  position: absolute;
+  right: 8%;
+  bottom: 28%;
+  z-index: 2;
+  width: 6.75rem;
+  height: auto;
   pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .longleaf-tortoise {
+    right: 4%;
+    bottom: 56%;
+    width: 4.85rem;
+  }
 }
 
 :focus {

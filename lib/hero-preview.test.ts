@@ -148,8 +148,18 @@ describe("hero A/B preview", () => {
     expect(css).toContain(".longleaf-ground");
     expect(css).toContain(".longleaf-scrim");
     expect(css).toContain(".longleaf-tortoise");
-    expect(longleaf).toContain("translate(1288 400)");
-    expect(longleaf).toContain("scale(0.82)");
+    expect(css).toContain("right: 8%");
+    expect(css).toContain("bottom: 28%");
+    expect(css).toContain("width: 6.75rem");
+    expect(css).toContain("right: 4%");
+    expect(css).toContain("bottom: 56%");
+    expect(css).toContain("width: 4.85rem");
+    expect(longleaf).toContain("#3A3224");
+    expect(longleaf).toContain('opacity="0.92"');
+    expect(longleaf).not.toContain("translate(1288 400)");
+    expect(longleaf).not.toContain("translate(1136 408)");
+    expect(photoHero).not.toContain("QuietTortoise");
+    expect(read("components/sandhill-habitat.tsx")).not.toContain("QuietTortoise");
   });
 
   it("exposes preview routes, query redirects, and a toggle without indexing", () => {
