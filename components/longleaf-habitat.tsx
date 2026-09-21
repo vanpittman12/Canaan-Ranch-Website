@@ -13,7 +13,7 @@ const NEEDLE = "#3D5344";
 
 export function LongleafHabitat() {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <div className="hero-preview-visual" aria-hidden="true">
       <div className="longleaf-sky" />
       <div className="longleaf-ground" />
       <div className="longleaf-grain" />
@@ -21,28 +21,32 @@ export function LongleafHabitat() {
         className="absolute inset-0 h-full w-full"
         viewBox="0 0 1440 720"
         fill="none"
-        preserveAspectRatio="xMidYMax slice"
+        preserveAspectRatio="xMidYMid slice"
       >
-        <g opacity="0.42">
-          <SparsePine x={96} y={-40} height={620} trunk={5} crown={0.72} color={PINE_MID} />
-          <SparsePine x={310} y={-10} height={580} trunk={4.5} crown={0.68} color={PINE} />
-          <SparsePine x={520} y={20} height={540} trunk={4} crown={0.6} color={NEEDLE} />
-          <SparsePine x={860} y={-30} height={610} trunk={5} crown={0.7} color={PINE_MID} />
-          <SparsePine x={1120} y={-55} height={650} trunk={6} crown={0.78} color={PINE} />
-          <SparsePine x={1368} y={-20} height={590} trunk={5} crown={0.66} color={FOREST} />
+        <g opacity="0.62">
+          <SparsePine x={70} y={-80} height={520} trunk={5} crown={0.7} color={PINE_MID} />
+          <SparsePine x={210} y={-50} height={490} trunk={4.5} crown={0.62} color={PINE} />
+          <SparsePine x={390} y={-20} height={450} trunk={4} crown={0.58} color={NEEDLE} />
+          <SparsePine x={560} y={10} height={420} trunk={4} crown={0.55} color={PINE_MID} />
+          <SparsePine x={780} y={-70} height={530} trunk={5.5} crown={0.72} color={PINE} />
+          <SparsePine x={980} y={-40} height={490} trunk={5} crown={0.66} color={NEEDLE} />
+          <SparsePine x={1188} y={-90} height={560} trunk={6} crown={0.8} color={FOREST} />
+          <SparsePine x={1378} y={-30} height={480} trunk={5} crown={0.64} color={PINE} />
         </g>
         <SandWash />
         <WiregrassField />
         <g>
-          <WiregrassClump x={48} y={548} scale={1.7} color={BRASS} />
-          <WiregrassClump x={180} y={562} scale={1.45} color={WHEAT} />
-          <WiregrassClump x={980} y={540} scale={1.6} color={WHEAT} />
-          <WiregrassClump x={1140} y={556} scale={1.85} color={BRASS} />
-          <WiregrassClump x={1288} y={548} scale={1.5} color={WHEAT} />
-          <WiregrassClump x={1396} y={560} scale={1.35} color={BRASS} />
+          <WiregrassClump x={40} y={430} scale={1.55} color={BRASS} />
+          <WiregrassClump x={160} y={448} scale={1.35} color={WHEAT} />
+          <WiregrassClump x={280} y={438} scale={1.45} color={BRASS} />
+          <WiregrassClump x={900} y={420} scale={1.5} color={WHEAT} />
+          <WiregrassClump x={1040} y={438} scale={1.7} color={BRASS} />
+          <WiregrassClump x={1180} y={428} scale={1.6} color={WHEAT} />
+          <WiregrassClump x={1300} y={442} scale={1.4} color={BRASS} />
+          <WiregrassClump x={1400} y={434} scale={1.3} color={WHEAT} />
         </g>
+        <QuietTortoise />
       </svg>
-      <QuietTortoise />
       <div className="longleaf-scrim" />
     </div>
   );
@@ -52,19 +56,19 @@ function SandWash() {
   return (
     <g>
       <path
-        d="M0 390C260 350 480 372 720 348C980 320 1180 368 1440 344V720H0Z"
+        d="M0 300C260 268 480 292 720 270C980 246 1180 292 1440 268V720H0Z"
         fill={SAND}
-        opacity="0.45"
+        opacity="0.5"
       />
       <path
-        d="M0 470C240 438 520 458 820 440C1080 424 1260 478 1440 456V720H0Z"
+        d="M0 368C240 338 520 358 820 340C1080 326 1260 378 1440 356V720H0Z"
         fill={BRASS}
-        opacity="0.28"
+        opacity="0.3"
       />
       <path
-        d="M0 530C280 508 560 528 860 512C1120 498 1280 548 1440 530V720H0Z"
+        d="M0 430C280 408 560 428 860 412C1120 398 1280 448 1440 430V720H0Z"
         fill={WHEAT}
-        opacity="0.38"
+        opacity="0.42"
       />
     </g>
   );
@@ -121,14 +125,14 @@ function SparsePine({
 
 function WiregrassField() {
   const clumps: Array<[number, number, number, string]> = [];
-  for (let i = 0; i < 24; i += 1) {
-    const x = 30 + i * 58 + (i % 3) * 8;
-    const y = 508 + (i % 4) * 18;
+  for (let i = 0; i < 26; i += 1) {
+    const x = 24 + i * 54 + (i % 3) * 8;
+    const y = 390 + (i % 4) * 16;
     const scale = 0.95 + (i % 5) * 0.1;
     clumps.push([x, y, scale, i % 2 === 0 ? BRASS : WHEAT]);
   }
   return (
-    <g opacity="0.9">
+    <g opacity="0.92">
       {clumps.map(([x, y, scale, color], index) => (
         <WiregrassClump key={`${x}-${index}`} x={x} y={y} scale={scale} color={color} />
       ))}
@@ -181,12 +185,7 @@ function WiregrassClump({
 
 function QuietTortoise() {
   return (
-    <svg
-      className="longleaf-tortoise"
-      viewBox="0 0 120 64"
-      fill="none"
-      aria-hidden="true"
-    >
+    <g className="longleaf-tortoise" transform="translate(1288 400) scale(0.82)">
       <g fill={FOREST} opacity="0.78">
         <ellipse cx="62" cy="30" rx="34" ry="20" />
         <path d="M28 30 C18 22 12 24 10 30 C12 36 20 38 30 34 Z" />
@@ -203,6 +202,6 @@ function QuietTortoise() {
         strokeLinecap="round"
         opacity="0.45"
       />
-    </svg>
+    </g>
   );
 }

@@ -7,7 +7,7 @@ import { HERO_OPTION_A_PHOTO } from "@/lib/hero-preview";
  */
 export function PhotoSavannaHero() {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <div className="hero-preview-visual" aria-hidden="true">
       {/* Static public JPEG — skip image optimization on the Worker. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

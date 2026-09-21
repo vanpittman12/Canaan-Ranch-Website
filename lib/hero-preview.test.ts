@@ -107,8 +107,10 @@ describe("hero A/B preview", () => {
     expect(photoHero).not.toContain("QuietTortoise");
     expect(photoHero).not.toContain("longleaf-tortoise");
     expect(css).toContain("object-fit: cover");
-    expect(css).toContain("object-position: 50% 36%");
-    expect(css).toContain("object-position: 50% 42%");
+    expect(css).toContain("object-position: 55% 54%");
+    expect(css).toContain("object-position: 50% 52%");
+    expect(css).toContain(".hero-preview-visual");
+    expect(photoHero).toContain("hero-preview-visual");
     expect(previewA).toContain('hero="a"');
     expect(previewA).toContain("Hero preview A");
     expect(previewA).toContain("index: false");
@@ -140,13 +142,14 @@ describe("hero A/B preview", () => {
     expect(longleaf).toContain("WiregrassClump");
     expect(longleaf).toContain("QuietTortoise");
     expect(longleaf).toContain("longleaf-tortoise");
+    expect(css).toContain(".hero-preview-visual");
+    expect(longleaf).toContain("hero-preview-visual");
     expect(css).toContain(".longleaf-sky");
     expect(css).toContain(".longleaf-ground");
     expect(css).toContain(".longleaf-scrim");
     expect(css).toContain(".longleaf-tortoise");
-    expect(css).toContain("right: 5%");
-    expect(css).toContain("width: 5.25rem");
-    expect(css).toContain("width: 4.25rem");
+    expect(longleaf).toContain("translate(1288 400)");
+    expect(longleaf).toContain("scale(0.82)");
   });
 
   it("exposes preview routes, query redirects, and a toggle without indexing", () => {

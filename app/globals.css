@@ -397,7 +397,26 @@ html:has(.intake-form) {
   );
 }
 
-/* Option A preview: portrait savanna photo (shot 3) cropped into a wide hero. */
+/* Option A/B visuals sit in the headline band so a portrait photo crop
+   and the quiet tortoise are not hidden behind the facts strip. */
+.hero-preview-visual {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 40%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .hero-preview-visual {
+    bottom: 46%;
+  }
+}
+
+/* Option A preview: portrait savanna photo (shot 3) cropped into a wide hero.
+   Vertical focus is the central sapling / wiregrass, not only the canopy. */
 .hero-photo {
   position: absolute;
   inset: 0;
@@ -405,12 +424,12 @@ html:has(.intake-form) {
   height: 100%;
   max-width: none;
   object-fit: cover;
-  object-position: 50% 36%;
+  object-position: 55% 54%;
 }
 
 @media (max-width: 767px) {
   .hero-photo {
-    object-position: 50% 42%;
+    object-position: 50% 52%;
   }
 }
 
@@ -448,13 +467,13 @@ html:has(.intake-form) {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 52%;
+  height: 58%;
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(196, 161, 90, 0.32) 22%,
-    rgba(138, 115, 72, 0.5) 58%,
-    rgba(224, 208, 180, 0.62) 100%
+    rgba(196, 161, 90, 0.38) 18%,
+    rgba(138, 115, 72, 0.52) 48%,
+    rgba(224, 208, 180, 0.66) 100%
   );
 }
 
@@ -480,29 +499,7 @@ html:has(.intake-form) {
 }
 
 .longleaf-tortoise {
-  position: absolute;
-  right: 5%;
-  top: 17.5rem;
-  width: 5.25rem;
-  height: auto;
-  z-index: 1;
-}
-
-@media (min-width: 1024px) {
-  .longleaf-tortoise {
-    top: 21rem;
-    right: 7%;
-    width: 5.75rem;
-  }
-}
-
-@media (max-width: 639px) {
-  .longleaf-tortoise {
-    top: auto;
-    bottom: 36%;
-    right: 4%;
-    width: 4.25rem;
-  }
+  pointer-events: none;
 }
 
 :focus {
