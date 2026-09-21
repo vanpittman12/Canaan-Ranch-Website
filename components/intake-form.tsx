@@ -853,8 +853,8 @@ export function IntakeForm({
 }
 
 /**
- * Client-mounted so force-static `/intake` HTML (CDN s-maxage=1y) cannot bake a
- * calendar day that hydrates as a different Florida/Eastern date (React #418).
+ * Client-mounted so prerendered `/intake` HTML cannot bake a calendar day that
+ * hydrates as a different Florida/Eastern date (React #418).
  * Submit still stamps Effective/Expiration from `businessDateOnly(now)`.
  */
 function IntakeAgreementDates() {
