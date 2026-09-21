@@ -11,6 +11,18 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/",
+        has: [{ type: "query", key: "hero", value: "a" }],
+        destination: "/preview/hero-a",
+        permanent: false,
+      },
+      {
+        source: "/",
+        has: [{ type: "query", key: "hero", value: "b" }],
+        destination: "/preview/hero-b",
+        permanent: false,
+      },
+      {
         source: "/privacy-policy",
         destination: "/privacy",
         permanent: true,

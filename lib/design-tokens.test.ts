@@ -14,7 +14,8 @@ import {
 } from "./brand-mark-asset";
 
 const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
-const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+const landing = readFileSync(path.join(process.cwd(), "components/home-page.tsx"), "utf8");
+const homeRoute = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
 const intakePage = readFileSync(path.join(process.cwd(), "app/intake/page.tsx"), "utf8");
 const intakeForm = readFileSync(path.join(process.cwd(), "components/intake-form.tsx"), "utf8");
 const footer = readFileSync(path.join(process.cwd(), "components/site-footer.tsx"), "utf8");
@@ -58,6 +59,10 @@ describe("site builder visual lock", () => {
     expect(landing).not.toContain("HorizonArt");
     expect(landing).toContain("SandhillHabitat");
     expect(landing).toContain("habitatLine");
+    expect(homeRoute).toContain("<HomePage");
+    expect(homeRoute).not.toContain('hero="a"');
+    expect(homeRoute).not.toContain('hero="b"');
+    expect(homeRoute).not.toContain("PhotoSavannaHero");
   });
 
   it("uses Van’s longleaf pine and wiregrass mark and recipient-site lockup", () => {

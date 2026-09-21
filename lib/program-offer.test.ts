@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { brand } from "./brand";
 import { programOfferCopy, programOfferItems } from "./program-offer";
 
-const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+const landing = readFileSync(path.join(process.cwd(), "components/home-page.tsx"), "utf8");
 const offerModule = readFileSync(path.join(process.cwd(), "components/program-offer.tsx"), "utf8");
 const offerLib = readFileSync(path.join(process.cwd(), "lib/program-offer.ts"), "utf8");
 

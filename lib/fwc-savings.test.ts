@@ -19,7 +19,7 @@ import {
   isFwcSavingsHeroRow,
 } from "./fwc-savings";
 
-const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+const landing = readFileSync(path.join(process.cwd(), "components/home-page.tsx"), "utf8");
 const savingsModule = readFileSync(
   path.join(process.cwd(), "components/fwc-savings.tsx"),
   "utf8",

@@ -26,7 +26,7 @@ import {
   southOfCutoffOverlayPath,
 } from "./service-area";
 
-const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+const landing = readFileSync(path.join(process.cwd(), "components/home-page.tsx"), "utf8");
 const mapModule = readFileSync(path.join(process.cwd(), "components/service-area-map.tsx"), "utf8");
 const mapLib = readFileSync(path.join(process.cwd(), "lib/service-area.ts"), "utf8");
 const mosaicScript = readFileSync(
