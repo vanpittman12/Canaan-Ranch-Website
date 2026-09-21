@@ -11,8 +11,8 @@ export const BLANK_AGREEMENT_PUBLIC_PATH =
 export const BLANK_AGREEMENT_PUBLIC_FILE =
   "public/agreements/Canaan-Preserve-Relocation-Agreement-template.docx";
 export const BLANK_AGREEMENT_DOCX_SHA256 =
-  "0eb11197f8e2097ca18bab315ba557e4a3939d6eab20e354b9357aa7af0c362f";
-export const BLANK_AGREEMENT_DOCX_SIZE = 66615;
+  "0623705bb9686076b14f91bea1ec9ec2d0819d02a343e00680b6dc0923f5f174";
+export const BLANK_AGREEMENT_DOCX_SIZE = 66609;
 export const POPULATED_AGREEMENT_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 

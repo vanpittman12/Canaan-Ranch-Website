@@ -9,6 +9,7 @@ import {
   AGREEMENT_UNMAPPED_GAPS,
   EFFECTIVE_DATE_LEFTOVER,
   EXPIRATION_DATE_LEFTOVER,
+  PROJECT_SUBTITLE_LEFTOVER,
   extractDocxPlainText,
   formatEffectiveDateStamp,
   formatExpirationDateStamp,
@@ -137,6 +138,7 @@ describe("Van’s Word agreement populate", () => {
     expect(text).toContain("$6,000.00");
     expect(text).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
     expect(text).toContain("Harbour tract");
+    expect(text).not.toContain(PROJECT_SUBTITLE_LEFTOVER);
     expect(text).not.toContain("Multi-Project Relocation Agreement");
     expect(text).not.toContain("This Multi-Project Gopher Tortoise Relocation Agreement");
     expect(text).not.toContain("Canaan Ranch LLP, a Florida limited liability partnership");
@@ -295,14 +297,21 @@ describe("Van’s Word agreement populate", () => {
   it("stamps project name onto the Heading2 subtitle leftover only", () => {
     const blank = new Uint8Array(readFileSync(TEMPLATE_DOCX));
     const blankText = extractDocxPlainText(blank);
+    const blankXml = strFromU8(unzipSync(blank)["word/document.xml"]!);
     expect(blankText).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
-    expect(blankText).toContain("Multi-Project Relocation Agreement");
+    expect(blankText).toContain(PROJECT_SUBTITLE_LEFTOVER);
+    expect(blankText).not.toContain("Multi-Project Relocation Agreement");
+    expect(paragraphContaining(blankXml, PROJECT_SUBTITLE_LEFTOVER)).toContain('w:val="Heading2"');
+    expect(paragraphContaining(blankXml, PROJECT_SUBTITLE_LEFTOVER)).toContain(
+      'w:highlight w:val="yellow"',
+    );
 
     const populated = populateAgreementDocx(blank, engagement());
     const text = extractDocxPlainText(populated);
     const xml = strFromU8(unzipSync(populated)["word/document.xml"]!);
     expect(text).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
     expect(text).toContain("Harbour tract");
+    expect(text).not.toContain(PROJECT_SUBTITLE_LEFTOVER);
     expect(text).not.toContain("Multi-Project Relocation Agreement");
     expect(paragraphContaining(xml, "Harbour tract")).toContain('w:val="Heading2"');
     expect(paragraphContaining(xml, "GOPHER")).toMatch(/GOPHER[\s\S]*TORTOISE[\s\S]*RELOCATION[\s\S]*AGREEMENT/);
@@ -314,13 +323,15 @@ describe("Van’s Word agreement populate", () => {
       ),
     );
     expect(oak).toContain("Oak Grove Phase 2");
+    expect(oak).not.toContain(PROJECT_SUBTITLE_LEFTOVER);
     expect(oak).not.toContain("Multi-Project Relocation Agreement");
     expect(oak).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
 
     const emptyName = extractDocxPlainText(
       populateAgreementDocx(blank, engagement({ intake: { ...intake, donorSiteName: "   " } })),
     );
-    expect(emptyName).toContain("Multi-Project Relocation Agreement");
+    expect(emptyName).toContain(PROJECT_SUBTITLE_LEFTOVER);
+    expect(emptyName).not.toContain("Multi-Project Relocation Agreement");
     expect(emptyName).toContain("GOPHER TORTOISE RELOCATION AGREEMENT");
   });
 

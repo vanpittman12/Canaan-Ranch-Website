@@ -48,7 +48,7 @@ export const AGREEMENT_FIELD_MAP = [
   { placeholder: "Printed Name: (buyer signatory)", source: "intake.buyerAttention" },
   { placeholder: "By: (buyer)", source: "intake.buyerAttention" },
   { placeholder: "Its: (buyer)", source: "intake.buyerTitle" },
-  { placeholder: "Multi-Project Relocation Agreement", source: "intake.donorSiteName" },
+  { placeholder: "Project Name", source: "intake.donorSiteName" },
 ] as const;
 
 /** Van’s opening leftover: “entered into this  day of, 2024,” */
@@ -56,7 +56,7 @@ export const EFFECTIVE_DATE_LEFTOVER = "this  day of, 2024";
 /** Van’s Term leftover paragraph starts “, 202 , referred to herein as the “Expiration Date.”” */
 export const EXPIRATION_DATE_LEFTOVER = ", 202 ,";
 /** Van’s Heading2 subtitle under GOPHER TORTOISE RELOCATION AGREEMENT. */
-export const PROJECT_SUBTITLE_LEFTOVER = "Multi-Project Relocation Agreement";
+export const PROJECT_SUBTITLE_LEFTOVER = "Project Name";
 
 /**
  * Van’s body is Times New Roman 12pt (Normal / Body Text, w:sz 24). Filled
