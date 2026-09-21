@@ -11,6 +11,7 @@ import {
   firstStepForErrors,
   formatGopherTortoiseCount,
   intakeFormSubmitIntent,
+  intakeRejectFeedback,
   intakeValuesFromDefaults,
   nextStep,
   previousStep,
@@ -166,6 +167,12 @@ export function IntakeForm({
   const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
   const [appliedErrorKey, setAppliedErrorKey] = useState("");
   const [submitArmed, setSubmitArmed] = useState(() => Boolean(defaults));
+  const [clientError, setClientError] = useState("");
+  const [holdSubmit, setHoldSubmit] = useState(false);
+  const [rejectFocus, setRejectFocus] = useState<{
+    field: string;
+    step: IntakeWizardStep;
+  } | null>(null);
   const errors = { ...stepErrors, ...(state.fieldErrors ?? {}) };
   const errorKey = state.fieldErrors ? JSON.stringify(state.fieldErrors) : "";
   if (errorKey && errorKey !== appliedErrorKey) {
@@ -193,6 +200,9 @@ export function IntakeForm({
 
   function goTo(target: IntakeWizardStep) {
     setStepErrors({});
+    setClientError("");
+    setHoldSubmit(false);
+    setRejectFocus(null);
     setStep(target);
   }
 
@@ -222,6 +232,40 @@ export function IntakeForm({
     return () => cancelAnimationFrame(frame);
   }, [step]);
   const submitReady = step === REVIEW_STEP_ID && submitArmed;
+  const bannerMessage =
+    state.error || (clientError && Object.keys(stepErrors).length > 0 ? clientError : "");
+  // Keep Submit mounted through the reject scroll so it does not vanish
+  // in the same paint as the jump to the invalid step.
+  const showSubmit = submitReady || holdSubmit;
+
+  useEffect(() => {
+    if (!rejectFocus || step !== rejectFocus.step) {
+      return;
+    }
+    let cancelled = false;
+    let inner = 0;
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => {
+        if (cancelled) {
+          return;
+        }
+        const el = document.getElementById(rejectFocus.field);
+        if (el instanceof HTMLElement) {
+          el.scrollIntoView({ block: "center", inline: "nearest" });
+          el.focus({ preventScroll: true });
+        }
+        setHoldSubmit(false);
+        setRejectFocus(null);
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(outer);
+      if (inner) {
+        cancelAnimationFrame(inner);
+      }
+    };
+  }, [rejectFocus, step]);
 
   return (
     <form
@@ -240,16 +284,27 @@ export function IntakeForm({
         }
         if (intent.kind === "reject") {
           event.preventDefault();
+          const feedback = intakeRejectFeedback(intent.errors);
+          setClientError(feedback.message);
           setStepErrors(intent.errors);
-          setStep(intent.step);
+          setStep(feedback.step);
+          if (feedback.field) {
+            setHoldSubmit(true);
+            setRejectFocus({ field: feedback.field, step: feedback.step });
+          }
         }
       }}
       className="intake-form space-y-8"
     >
       <div className="intake-scroll space-y-8">
-      {state.error ? (
-        <div className="rounded-[12px] border border-terracotta/30 bg-white px-4 py-3 text-sm text-terracotta">
-          {state.error}
+      {bannerMessage ? (
+        <div
+          id="intake-form-error"
+          role="alert"
+          data-intake-error-banner="true"
+          className="rounded-[12px] border border-terracotta/30 bg-white px-4 py-3 text-sm text-terracotta"
+        >
+          {bannerMessage}
         </div>
       ) : null}
 
@@ -751,14 +806,19 @@ export function IntakeForm({
       </div>
 
       <div className="intake-sticky flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted">
-          {step === REVIEW_STEP_ID
-            ? pending
-              ? engagementId
-                ? "Saving…"
-                : "Creating your agreement…"
-              : "Submit to create your agreement. You can download the Word file next."
-            : "Continue or click any step to browse. Required fields are checked when you submit on Review."}
+        <p
+          className={`text-sm ${bannerMessage ? "font-medium text-terracotta" : "text-muted"}`}
+          data-intake-sticky-error={bannerMessage ? "true" : undefined}
+        >
+          {bannerMessage
+            ? bannerMessage
+            : step === REVIEW_STEP_ID
+              ? pending
+                ? engagementId
+                  ? "Saving…"
+                  : "Creating your agreement…"
+                : "Submit to create your agreement. You can download the Word file next."
+              : "Continue or click any step to browse. Required fields are checked when you submit on Review."}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           {step !== "notice" ? (
@@ -774,20 +834,20 @@ export function IntakeForm({
               next frame on Review so the Witness click cannot finish as submit. */}
           <button
             key="intake-continue"
-            className={`btn-primary ${submitReady ? "!hidden" : ""}`}
+            className={`btn-primary ${showSubmit ? "!hidden" : ""}`}
             type="button"
             data-intake-continue="true"
-            tabIndex={submitReady ? -1 : undefined}
+            tabIndex={showSubmit ? -1 : undefined}
             onClick={goNext}
           >
             {continueControlLabel(step)}
           </button>
           <button
             key="intake-submit"
-            className={`btn-primary ${submitReady ? "" : "!hidden"}`}
+            className={`btn-primary ${showSubmit ? "" : "!hidden"}`}
             type="submit"
             data-intake-submit="true"
-            tabIndex={submitReady ? undefined : -1}
+            tabIndex={showSubmit ? undefined : -1}
             disabled={!submitReady || pending}
           >
             {pending
