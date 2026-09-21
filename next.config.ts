@@ -7,6 +7,24 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "12mb",
     },
   },
+  // `/intake` is force-static. Next’s default for that is a one-year CDN
+  // s-maxage, and the live document is a CDN HIT. The HTML names the client
+  // chunks, so that HIT keeps the previous Submit bundle after a deploy.
+  // Hashed `/_next/static` files stay immutable. Do not set s-maxage here:
+  // OpenNext rewrites a numeric s-maxage into a long stale-while-revalidate.
+  async headers() {
+    return [
+      {
+        source: "/intake",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
+          },
+        ],
+      },
+    ];
+  },
   // Host-conditioned so apex `/` and `/intake` stay off the Worker proxy.
   async redirects() {
     return [

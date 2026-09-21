@@ -92,6 +92,9 @@ describe("Worker-safe public routes", () => {
     expect(ensureLegal).toContain("copyFileSync(htmlSrc, path.join(assetsDir, `${route}.html`))");
     expect(nextConfig).toContain('source: "/privacy-policy"');
     expect(nextConfig).toContain('destination: "/privacy"');
+    expect(nextConfig).toContain('source: "/intake"');
+    expect(nextConfig).toContain("public, max-age=0, must-revalidate");
+    expect(nextConfig).not.toContain("s-maxage=31536000");
     expect(nextConfig.match(/source: "\/privacy-policy"/g)).toHaveLength(1);
     expect(redirects).toContain("/privacy-policy /privacy 308");
   });
