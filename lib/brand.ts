@@ -45,7 +45,7 @@ export const brand = {
   /** All-in juvenile price; not added on top of the adult Per GT Rate. */
   juvenileRate: 3000,
   /** Seller-side witness. Same every reservation; not collected on public intake. */
-  sellerWitnessName: "Andrew Fuddy",
+  sellerWitnessName: "Seller Witness",
   sellerWitnessEmail: "vpittman@bourne-partners.com",
 } as const;
 
