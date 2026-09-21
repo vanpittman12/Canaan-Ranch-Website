@@ -140,10 +140,11 @@ describe("public site SEO and copy hygiene", () => {
     expect(intakeForm).toContain('key="intake-submit"');
     expect(intakeForm).toContain('data-intake-continue="true"');
     expect(intakeForm).toContain('data-intake-submit="true"');
-    expect(intakeForm).toContain("submitArmed");
-    expect(intakeForm).toContain("submitReady");
+    expect(intakeForm).toContain("const submitReady = step === REVIEW_STEP_ID");
+    expect(intakeForm).toContain("action={formAction}");
+    expect(intakeForm).not.toContain("submitArmed");
+    expect(intakeForm).not.toContain("if (!submitReady)");
     expect(intakeForm).toContain("requestAnimationFrame");
-    expect(intakeForm).toContain("submitReady ? formAction : undefined");
     expect(intakeForm).not.toMatch(
       /step === REVIEW_STEP_ID \?\s*\(\s*<button[\s\S]*type="submit"/,
     );

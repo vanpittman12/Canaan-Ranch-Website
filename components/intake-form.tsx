@@ -166,7 +166,6 @@ export function IntakeForm({
   const [step, setStep] = useState<IntakeWizardStep>(defaults ? REVIEW_STEP_ID : "notice");
   const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
   const [appliedErrorKey, setAppliedErrorKey] = useState("");
-  const [submitArmed, setSubmitArmed] = useState(() => Boolean(defaults));
   const [clientError, setClientError] = useState("");
   const [holdSubmit, setHoldSubmit] = useState(false);
   const [rejectFocus, setRejectFocus] = useState<{
@@ -223,15 +222,9 @@ export function IntakeForm({
     tryGoTo(nextStep(step));
   }
 
-  useEffect(() => {
-    if (step !== REVIEW_STEP_ID) {
-      setSubmitArmed(false);
-      return;
-    }
-    const frame = requestAnimationFrame(() => setSubmitArmed(true));
-    return () => cancelAnimationFrame(frame);
-  }, [step]);
-  const submitReady = step === REVIEW_STEP_ID && submitArmed;
+  // Review enables Submit in the same render. A requestAnimationFrame arm left
+  // the control disabled (and the form action unset) if that frame never ran.
+  const submitReady = step === REVIEW_STEP_ID;
   const bannerMessage =
     state.error || (clientError && Object.keys(stepErrors).length > 0 ? clientError : "");
   // Keep Submit mounted through the reject scroll so it does not vanish
@@ -269,17 +262,13 @@ export function IntakeForm({
 
   return (
     <form
-      action={submitReady ? formAction : undefined}
+      action={formAction}
       noValidate
       onSubmit={(event) => {
         const intent = intakeFormSubmitIntent(step, values);
         if (intent.kind === "advance") {
           event.preventDefault();
           goNext();
-          return;
-        }
-        if (!submitReady) {
-          event.preventDefault();
           return;
         }
         if (intent.kind === "reject") {
@@ -830,8 +819,7 @@ export function IntakeForm({
               Back
             </button>
           ) : null}
-          {/* Continue stays type="button". Submit mounts hidden/disabled until the
-              next frame on Review so the Witness click cannot finish as submit. */}
+          {/* Continue stays type="button" so a Witness click cannot finish as submit. */}
           <button
             key="intake-continue"
             className={`btn-primary ${showSubmit ? "!hidden" : ""}`}

@@ -1,6 +1,6 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
   recordDocuSignSendFailure,
@@ -49,10 +49,17 @@ export async function createEngagement(
     };
   }
 
-  const engagement = await persistAndNotifyNewEngagement(() =>
-    createEngagementRecord(publicIntakeFields(parsed.data)),
-  );
-  redirect(`/engagements/${engagement.id}`);
+  try {
+    const engagement = await persistAndNotifyNewEngagement(() =>
+      createEngagementRecord(publicIntakeFields(parsed.data)),
+    );
+    redirect(`/engagements/${engagement.id}`);
+  } catch (error) {
+    unstable_rethrow(error);
+    return {
+      error: error instanceof Error ? error.message : "Unable to create the agreement.",
+    };
+  }
 }
 
 export async function updateIntake(
@@ -76,12 +83,19 @@ export async function updateIntake(
     };
   }
 
-  await saveEngagement({
-    ...engagement,
-    intake: publicIntakeFields(parsed.data),
-  });
-  revalidatePath(`/engagements/${engagementId}`);
-  redirect(`/engagements/${engagementId}`);
+  try {
+    await saveEngagement({
+      ...engagement,
+      intake: publicIntakeFields(parsed.data),
+    });
+    revalidatePath(`/engagements/${engagementId}`);
+    redirect(`/engagements/${engagementId}`);
+  } catch (error) {
+    unstable_rethrow(error);
+    return {
+      error: error instanceof Error ? error.message : "Unable to save the agreement.",
+    };
+  }
 }
 
 export async function submitEngagement(

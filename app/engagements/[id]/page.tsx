@@ -10,6 +10,7 @@ import { SiteHeader } from "@/components/site-header";
 import { StatusBadge } from "@/components/status-badge";
 import { UploadSigned } from "@/components/upload-signed";
 import { describeDocuSignSeam } from "@/lib/docusign";
+import { docusignSendFailureMessage } from "@/lib/docusign-send";
 import { canCustomerEdit } from "@/lib/engagement";
 import { dealEconomics, formatUsd } from "@/lib/money";
 import { documentDownloadPath } from "@/lib/auth";
@@ -180,6 +181,26 @@ function StatusCopy({
   }
 
   if (engagement.status === "accepted") {
+    const docusignFailure =
+      engagement.signingMethod === "docusign"
+        ? docusignSendFailureMessage(engagement)
+        : null;
+    if (docusignFailure) {
+      return (
+        <div
+          className="mt-6 rounded-[16px] border border-terracotta/30 bg-white p-5"
+          role="alert"
+          data-docusign-send-error="true"
+        >
+          <p className="font-medium text-terracotta">DocuSign did not send</p>
+          <p className="mt-2 text-sm leading-6 text-ink">{docusignFailure}</p>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Your agreement is saved. Canaan Preserve can resend the envelope from the
+            admin page. Nothing was signed.
+          </p>
+        </div>
+      );
+    }
     return (
       <div className="mt-6 rounded-[16px] border border-sage bg-cream p-5">
         <p className="font-medium text-forest">
