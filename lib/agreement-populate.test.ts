@@ -58,7 +58,7 @@ const intake: IntakeFields = {
   donorSiteDescription: "Residential development parcel east of the county line.",
   buyerWitnessName: "Riley Chen",
   buyerWitnessEmail: "riley@suncoast.example",
-  sellerWitnessName: "Seller Witness",
+  sellerWitnessName: "Canaan Witness",
   sellerWitnessEmail: "witness@canaanpreserve.com",
 };
 
@@ -120,7 +120,7 @@ describe("Van’s Word agreement populate", () => {
     expect(text).toContain("ten (10)");
     expect(text).toContain("sixty thousand dollars ($60,000.00)");
     expect(text).toContain(`${brand.agentName} Attention: ${brand.agentContact}`);
-    expect(text).toContain("Printed Name: Seller Witness");
+    expect(text).toContain("Printed Name: Canaan Witness");
     expect(text).toContain("Printed Name: Riley Chen");
     expect(text).toContain("By: Morgan Hale");
     expect(text).toContain("Its: President");
