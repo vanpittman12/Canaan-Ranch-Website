@@ -60,7 +60,7 @@ describe("site builder visual lock", () => {
     expect(landing).toContain("PhotoSavannaHero");
     expect(landing).not.toContain("SandhillHabitat");
     expect(landing).not.toContain("LongleafHabitat");
-    expect(landing).toContain("habitatLine");
+    expect(landing).toContain("heroBody");
     expect(homeRoute).toContain("<HomePage");
     expect(homeRoute).not.toContain('hero="a"');
     expect(homeRoute).not.toContain('hero="b"');
@@ -116,12 +116,15 @@ describe("site builder visual lock", () => {
     expect(brand.habitatLine).toContain("permanently protected conservation-easement habitat");
     expect(brand.habitatLine.toLowerCase()).not.toContain("ecologically pristine");
     expect(brand.habitatLine.toLowerCase()).not.toMatch(/\bcounty\b/);
-    expect(landing).toContain("{brand.habitatLine}");
-    expect(landing).toContain("{brand.heroSlogan}");
-    expect(landing).toContain("{brand.heroLead}");
+    expect(landing).toContain("{brand.name}");
+    expect(landing).toContain("{brand.heroRecipientBadge}");
+    expect(landing).toContain("{brand.heroBody}");
+    expect(landing).not.toContain("{brand.habitatLine}");
+    expect(landing).not.toContain("{brand.heroSlogan}");
+    expect(landing).not.toContain("{brand.heroLead}");
     expect(landing).toContain("{brand.flowInvite}");
-    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
-    expect(landing.match(/\{brand\.heroLead\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.heroBody\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.heroRecipientBadge\}/g)).toHaveLength(1);
     expect(landing.match(/\{brand\.flowInvite\}/g)).toHaveLength(1);
     expect(landing).toContain("FwcSavingsModule");
     expect(landing).toContain("ProgramOffer");
@@ -149,7 +152,10 @@ describe("site builder visual lock", () => {
     expect(intakePage).toContain("{brand.intakeCta}");
     expect(intakePage).not.toContain("Start relocation intake");
     expect(landing).not.toContain("is the contracting party. Intake produces");
-    expect(landing).not.toContain("reservation letter");
+    expect(landing).toContain("Get your reservation letter");
+    expect(landing).toContain(
+      "we can issue your reservation letter — often the very same day.",
+    );
     expect(landing).toContain("Word/DOCX");
     expect(landing).not.toContain("Download the PDF");
     expect(landing).toContain("DocuSign is the usual signing path");
@@ -184,7 +190,7 @@ describe("site builder visual lock", () => {
     expect(brand.flowInvite).toContain("complete intake");
     expect(brand.flowInvite).toContain("signature-ready");
     expect(brand.flowInvite).toContain("DocuSign is the usual signing path");
-    expect(landing).toContain("{brand.habitatLine}");
+    expect(landing).toContain("{brand.heroBody}");
     expect(landing).not.toContain("ecologically pristine");
     expect(landing).not.toContain("saving our clients money");
     expect(landing).not.toContain("signature ready");
@@ -245,7 +251,7 @@ describe("site builder visual lock", () => {
     expect(intakeForm).not.toContain("the date the Buyer signs");
     expect(intakeForm).not.toContain("Buyer Date Signed");
     expect(intakeForm).not.toContain("Buyer Date Signed / Effective Date.");
-    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.heroBody\}/g)).toHaveLength(1);
     expect(footer).toContain("{brand.footerLine}");
     expect(footer).toContain("brandMailtoHref");
     expect(footer).toContain("brandTelHref");
@@ -275,7 +281,12 @@ describe("site builder visual lock", () => {
       brand.fwcBadge,
     ].join("\n");
     expect(marketingCopy).not.toMatch(/signature ready(?!-)/);
-    expect(marketingCopy.replaceAll(brand.heroSlogan, "")).not.toMatch(/Long Term/);
+    expect(
+      marketingCopy
+        .replaceAll(brand.heroSlogan, "")
+        .replaceAll(brand.heroBody, "")
+        .replaceAll(brand.heroRecipientBadge, ""),
+    ).not.toMatch(/Long Term/);
   });
 
   it("uses the live shot 3 photo hero with a left forest scrim and no tortoise sticker", () => {

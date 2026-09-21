@@ -38,11 +38,14 @@ describe("What we offer", () => {
     expect(programOfferItems.join(" ")).not.toContain("$0");
   });
 
-  it("keeps Van’s slogan and the FWC savings module", () => {
+  it("keeps Van’s first-screen copy and the FWC savings module", () => {
+    expect(brand.heroBody).toBe(
+      "Don’t slow your project down - Long Term Tier 1 sites have the lowest mitigation contributions, are best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
+    );
     expect(brand.heroSlogan).toBe(
       "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
-    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
+    expect(landing.match(/\{brand\.heroBody\}/g)).toHaveLength(1);
     expect(landing).toContain("<FwcSavingsModule");
   });
 });

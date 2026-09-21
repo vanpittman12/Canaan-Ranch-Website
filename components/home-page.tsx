@@ -14,7 +14,7 @@ const steps = [
   {
     n: "01",
     title: "Review the template",
-    body: "Download the blank Multi-Project Gopher Tortoise Relocation Agreement before you fill anything in.",
+    body: "Download the blank gopher tortoise relocation agreement before you start intake. Review the highlighted fields — those are what you’ll provide, and we fill them into a signature-ready agreement.",
   },
   {
     n: "02",
@@ -30,6 +30,11 @@ const steps = [
     n: "04",
     title: "Submit, then sign",
     body: "DocuSign is the usual signing path and emails you as soon as you submit. The fallback is to download the Word agreement and upload a signed copy. Nothing is executed until a signed copy is on file.",
+  },
+  {
+    n: "05",
+    title: "Get your reservation letter",
+    body: "After you submit, DocuSign emails you to sign right away. Once the seller countersigns, we can issue your reservation letter — often the very same day.",
   },
 ];
 
@@ -52,17 +57,12 @@ export function HomePage() {
           <PhotoSavannaHero />
           <div className="relative mx-auto w-full max-w-6xl px-5 pt-16 pb-12 sm:px-8 lg:min-h-[34rem] lg:pt-24">
             <div className="max-w-3xl">
-              <p className="text-[13px] font-semibold tracking-wide text-brass">
-                {brand.habitatLine}
-              </p>
+              <h1 className="type-h1 max-w-3xl text-cream">{brand.name}</h1>
               <div className="mt-4">
-                <FwcBadge onForest />
+                <span className="fwc-badge fwc-badge-on-forest">{brand.heroRecipientBadge}</span>
               </div>
-              <h1 className="type-h1 mt-5 max-w-3xl text-cream">
-                {brand.heroSlogan}
-              </h1>
-              <p className="mt-6 max-w-xl text-[17px] leading-[27px] text-cream/85">
-                {brand.heroLead}
+              <p className="mt-6 max-w-2xl text-[17px] leading-[27px] text-cream/85">
+                {brand.heroBody}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
@@ -108,13 +108,13 @@ export function HomePage() {
             How it works
           </p>
           <h2 className="type-h2 mt-3 max-w-xl text-forest">
-            Four steps from reserved capacity to a signed agreement.
+            Five steps from reserved capacity to a signed agreement.
           </h2>
-          <ol className="mt-10 grid gap-4 md:grid-cols-4">
+          <ol className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             {steps.map((step, index) => (
               <li key={step.n} className="surface-card relative">
                 {index < steps.length - 1 ? (
-                  <span className="pointer-events-none absolute top-8 right-[-10px] hidden h-px w-4 bg-line md:block" />
+                  <span className="pointer-events-none absolute top-8 right-[-10px] hidden h-px w-4 bg-line xl:block" />
                 ) : null}
                 <p className="text-sm font-semibold tracking-[0.18em] text-brass">{step.n}</p>
                 <h3 className="mt-3 font-serif text-2xl font-medium text-forest">{step.title}</h3>
@@ -142,7 +142,7 @@ export function HomePage() {
 
         <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
           <div className="rounded-[16px] border border-line bg-forest px-8 py-12 text-cream sm:px-14">
-            <h2 className="type-h2 max-w-xl text-cream">Start the four steps.</h2>
+            <h2 className="type-h2 max-w-xl text-cream">Start the five steps.</h2>
             <p className="mt-4 max-w-xl text-[17px] leading-[27px] text-cream/80">
               {brand.flowInvite}
             </p>

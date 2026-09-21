@@ -71,14 +71,36 @@ describe("live homepage hero", () => {
     expect(homePage).not.toContain("SandhillHabitat");
     expect(homePage).not.toContain("LongleafHabitat");
     expect(homePage).not.toContain("HeroPreviewBar");
-    expect(homePage).toContain("{brand.heroSlogan}");
-    expect(homePage.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
+    expect(homePage).toContain("{brand.name}");
+    expect(homePage).toContain("{brand.heroRecipientBadge}");
+    expect(homePage).toContain("{brand.heroBody}");
+    expect(homePage.match(/\{brand\.heroBody\}/g)).toHaveLength(1);
+    expect(homePage).not.toContain("{brand.heroSlogan}");
+    expect(homePage).not.toContain("{brand.heroLead}");
+    expect(homePage).not.toContain("{brand.habitatLine}");
+    expect(brand.heroRecipientBadge).toBe("Tier 1 Long Term Recipient Site");
+    expect(brand.heroBody).toBe(
+      "Don’t slow your project down - Long Term Tier 1 sites have the lowest mitigation contributions, are best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
+    );
     expect(brand.heroSlogan).toBe(
       "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
     expect(brand.defaultPerGtRate).toBe(6000);
     expect(brand.juvenileRate).toBe(3000);
     expect(homePage).toContain("FWC Approved Tier 1");
+    expect(homePage).toContain("Five steps from reserved capacity to a signed agreement.");
+    expect(homePage).toContain("Start the five steps.");
+    expect(homePage).toContain("Review the template");
+    expect(homePage).toContain(
+      "Download the blank gopher tortoise relocation agreement before you start intake. Review the highlighted fields — those are what you’ll provide, and we fill them into a signature-ready agreement.",
+    );
+    expect(homePage).toContain("Get your reservation letter");
+    expect(homePage).toContain(
+      "After you submit, DocuSign emails you to sign right away. Once the seller countersigns, we can issue your reservation letter — often the very same day.",
+    );
+    expect(homePage).not.toContain("Multi-Project Gopher Tortoise Relocation Agreement");
+    expect(homePage).not.toContain("Four steps");
+    expect(homePage).not.toContain("four steps");
   });
 
   it("ships Van’s shot 3 JPEG and never the rejected sunny file", () => {

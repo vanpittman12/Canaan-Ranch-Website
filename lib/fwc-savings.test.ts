@@ -30,14 +30,18 @@ const mobileCards = readFileSync(
 );
 
 describe("FWC mitigation savings", () => {
-  it("uses Van’s exact hero slogan on the homepage", () => {
+  it("uses Van’s exact first-screen copy on the homepage", () => {
+    expect(brand.heroBody).toBe(
+      "Don’t slow your project down - Long Term Tier 1 sites have the lowest mitigation contributions, are best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
+    );
     expect(brand.heroSlogan).toBe(
       "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
-    expect(landing).toContain("{brand.heroSlogan}");
-    expect(landing.match(/\{brand\.heroSlogan\}/g)).toHaveLength(1);
+    expect(landing).toContain("{brand.heroBody}");
+    expect(landing.match(/\{brand\.heroBody\}/g)).toHaveLength(1);
     expect(landing).toContain("<h1");
-    expect(landing.indexOf("{brand.heroSlogan}")).toBeLessThan(landing.indexOf("facts.map"));
+    expect(landing.indexOf("{brand.name}")).toBeLessThan(landing.indexOf("facts.map"));
+    expect(landing.indexOf("{brand.heroBody}")).toBeLessThan(landing.indexOf("facts.map"));
     expect(landing).not.toContain("fwcValueProp");
     expect(landing).not.toContain("ecologically pristine");
     expect(landing).not.toContain("saving our clients money");
