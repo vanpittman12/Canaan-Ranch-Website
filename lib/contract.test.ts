@@ -28,7 +28,7 @@ const intake: IntakeFields = {
   donorSiteDescription: "Residential development parcel east of the county line.",
   buyerWitnessName: "Riley Chen",
   buyerWitnessEmail: "riley@suncoast.example",
-  sellerWitnessName: "Seller Witness",
+  sellerWitnessName: "Canaan Witness",
   sellerWitnessEmail: "witness@canaanpreserve.com",
 };
 
@@ -134,7 +134,7 @@ describe("gopher tortoise agreement mapping", () => {
     expect(body).not.toMatch(/non-negotiable/i);
     expect(body).not.toMatch(/[Ii]nitial [Pp]ayment is due/);
     expect(contract.buyerBlock.join(" ")).toContain("Riley Chen");
-    expect(contract.sellerBlock.join(" ")).toContain("Seller Witness");
+    expect(contract.sellerBlock.join(" ")).toContain("Canaan Witness");
     expect(contract.signatureIntro).toContain("one (1) witness");
   });
 
