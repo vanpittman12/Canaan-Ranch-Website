@@ -48,7 +48,7 @@ Seller-side, the same every time, and **not** on the public intake form.
 | Variable | Default |
 | --- | --- |
 | `CANAAN_WITNESS_NAME` | `Andrew Fuddy` |
-| `CANAAN_WITNESS_EMAIL` | `witness@canaanpreserve.com` |
+| `CANAAN_WITNESS_EMAIL` | `vpittman@bourne-partners.com` |
 
 DocuSign routing always includes this fixed witness (stub and live).
 
@@ -173,7 +173,7 @@ When `DOCUSIGN_ENABLED=true`, intake submit (DocuSign path) sends a live envelop
 | `buyer_signer` | Intake: Buyer attention + email | Routing order 1 |
 | `buyer_witness` | Intake: Buyer witness name + email (`CANAAN_BUYER_WITNESS_EMAIL` overrides email when set; TEMP Van test in `wrangler.jsonc` vars) | Routing order 2 |
 | `seller_signer` | Brand: Andrew V. Pittman, Jr. / `vpittman@beachparkcap.com` | Routing order 3 |
-| `seller_witness` | Brand/env: Andrew Fuddy / `witness@canaanpreserve.com` (not on the public form) | Routing order 4 |
+| `seller_witness` | Brand/env: Andrew Fuddy / `vpittman@bourne-partners.com` (not on the public form) | Routing order 4 |
 
 The populated Word agreement is the envelope document. Hidden anchor strings (`/sn_buyer/`, `/wit_buyer/`, `/sn_seller/`, `/wit_seller/`, plus matching `/date_*` strings) are injected into the populated copy only so Sign Here and **Date Signed** tabs can place. Those date anchors are `dateSignedTabs` (auto-fill when that recipient signs) — not typed text fields.
 
@@ -294,7 +294,7 @@ npx wrangler secret put ADMIN_SESSION_SECRET
 
 Use a long random string for `ADMIN_SESSION_SECRET` (for example `openssl rand -base64 48`).
 
-Optional (defaults are Andrew Fuddy / `witness@canaanpreserve.com`):
+Optional (defaults are Andrew Fuddy / `vpittman@bourne-partners.com`):
 
 ```bash
 npx wrangler secret put CANAAN_WITNESS_NAME

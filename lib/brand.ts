@@ -46,7 +46,7 @@ export const brand = {
   juvenileRate: 3000,
   /** Seller-side witness. Same every reservation; not collected on public intake. */
   sellerWitnessName: "Andrew Fuddy",
-  sellerWitnessEmail: "witness@canaanpreserve.com",
+  sellerWitnessEmail: "vpittman@bourne-partners.com",
 } as const;
 
 export const TEMPLATE_AGREEMENT_PATH = "/api/agreement-template";
