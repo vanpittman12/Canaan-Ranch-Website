@@ -105,7 +105,7 @@ function Field({
   }
 
   return (
-    <div className="flex flex-col" data-describedby={describedBy}>
+    <div className="flex flex-col" data-field={name} data-describedby={describedBy}>
       <label htmlFor={name} className="type-label">
         {label}
       </label>
@@ -243,8 +243,19 @@ export function IntakeForm({
           return;
         }
         const el = document.getElementById(rejectFocus.field);
+        const block =
+          el?.closest("[data-field]") instanceof HTMLElement
+            ? el.closest("[data-field]")
+            : el;
+        if (block instanceof HTMLElement) {
+          // The reject leaves the viewport on the sticky bar while the new
+          // field error is above the fold. Pin that field under the top edge.
+          block.style.scrollMarginTop = "16px";
+          block.style.scrollMarginBottom =
+            "calc(var(--intake-sticky-clearance, 12rem) + env(safe-area-inset-bottom, 0px))";
+          block.scrollIntoView({ block: "start", inline: "nearest" });
+        }
         if (el instanceof HTMLElement) {
-          el.scrollIntoView({ block: "center", inline: "nearest" });
           el.focus({ preventScroll: true });
         }
         setHoldSubmit(false);

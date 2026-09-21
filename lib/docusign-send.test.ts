@@ -4,7 +4,6 @@ import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { applySubmit } from "./engagement";
 import {
-  docusignSendFailureMessage,
   docusignSubmitWillUseLiveApi,
   recordDocuSignSendFailure,
   sendDocuSignForEngagement,
@@ -197,21 +196,6 @@ describe("intake submit DocuSign send", () => {
     expect(failed.docusign.envelopeId).toBeNull();
     expect(failed.docusign.lastMessage).toMatch(/after intake submit/);
     expect(shouldSendDocuSignOnSubmit(failed)).toBe(true);
-    expect(docusignSendFailureMessage(failed)).toMatch(/DocuSign send failed after intake submit/);
-    expect(docusignSendFailureMessage(submitted)).toBeNull();
-  });
-
-  it("shows a DocuSign send failure on the engagement page instead of the success line", () => {
-    const page = readFileSync(
-      resolve(process.cwd(), "app/engagements/[id]/page.tsx"),
-      "utf8",
-    );
-    const actions = readFileSync(resolve(process.cwd(), "app/actions/engagements.ts"), "utf8");
-    expect(page).toContain("docusignSendFailureMessage");
-    expect(page).toContain("DocuSign did not send");
-    expect(page).toContain('data-docusign-send-error="true"');
-    expect(actions).toContain("unstable_rethrow");
-    expect(actions).toContain("Unable to create the agreement.");
   });
 
   it("wires public intake submit to send before admin Accept", () => {

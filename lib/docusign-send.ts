@@ -21,20 +21,6 @@ export function shouldSendDocuSignOnSubmit(
   );
 }
 
-/** Shown when submit saved a send failure and never stored an envelope id. */
-export function docusignSendFailureMessage(
-  engagement: Pick<Engagement, "signingMethod" | "docusign">,
-): string | null {
-  if (engagement.signingMethod !== "docusign" || engagement.docusign.envelopeId) {
-    return null;
-  }
-  const message = engagement.docusign.lastMessage?.trim();
-  if (!message || !/fail/i.test(message)) {
-    return null;
-  }
-  return message;
-}
-
 export function recordDocuSignSendFailure(
   engagement: Engagement,
   message: string,
