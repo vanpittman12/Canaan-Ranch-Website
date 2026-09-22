@@ -380,13 +380,13 @@ html:has(.intake-form) {
   background:
     linear-gradient(
       90deg,
-      rgba(22, 36, 28, 0.92) 0%,
-      rgba(22, 36, 28, 0.78) 26%,
-      rgba(22, 36, 28, 0.48) 48%,
-      rgba(22, 36, 28, 0.18) 68%,
-      transparent 88%
+      rgba(18, 30, 22, 0.94) 0%,
+      rgba(18, 30, 22, 0.82) 28%,
+      rgba(18, 30, 22, 0.52) 50%,
+      rgba(18, 30, 22, 0.22) 70%,
+      transparent 90%
     ),
-    linear-gradient(180deg, rgba(22, 36, 28, 0.38) 0%, transparent 42%);
+    linear-gradient(180deg, rgba(18, 30, 22, 0.42) 0%, transparent 44%);
 }
 
 /* Soft forest panel behind title/badge/body — no card border; photo still reads through. */
@@ -399,11 +399,13 @@ html:has(.intake-form) {
   background:
     linear-gradient(
       105deg,
-      rgba(22, 36, 28, 0.72) 0%,
-      rgba(22, 36, 28, 0.55) 55%,
-      rgba(22, 36, 28, 0.28) 100%
+      rgba(18, 30, 22, 0.9) 0%,
+      rgba(18, 30, 22, 0.82) 52%,
+      rgba(18, 30, 22, 0.62) 100%
     );
-  box-shadow: 0 12px 40px rgba(22, 36, 28, 0.18);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  box-shadow: 0 14px 44px rgba(14, 22, 16, 0.28);
 }
 
 @media (min-width: 640px) {
@@ -420,17 +422,17 @@ html:has(.intake-form) {
 .hero-copy-title,
 .hero-copy-body {
   text-shadow:
-    0 1px 2px rgba(22, 36, 28, 0.95),
-    0 2px 14px rgba(22, 36, 28, 0.55),
-    0 0 28px rgba(22, 36, 28, 0.35);
+    0 1px 2px rgba(10, 16, 12, 0.98),
+    0 3px 18px rgba(10, 16, 12, 0.65),
+    0 0 32px rgba(10, 16, 12, 0.4);
 }
 
 .hero-copy .fwc-badge-on-forest {
-  background: rgba(14, 24, 18, 0.92);
+  background: rgba(10, 18, 14, 0.96);
   border-color: var(--brass);
   box-shadow:
-    0 1px 2px rgba(22, 36, 28, 0.55),
-    0 4px 16px rgba(22, 36, 28, 0.28);
+    0 1px 2px rgba(10, 16, 12, 0.65),
+    0 4px 16px rgba(10, 16, 12, 0.35);
 }
 
 :focus {
