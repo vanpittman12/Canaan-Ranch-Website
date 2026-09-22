@@ -156,7 +156,7 @@ describe("public site SEO and copy hygiene", () => {
     );
     expect(intakeForm).toContain('className="intake-form space-y-8"');
     expect(intakeForm).toContain('className="intake-scroll space-y-8"');
-    expect(css).toContain("--intake-sticky-clearance: 12rem");
+    expect(css).toContain("--intake-sticky-clearance: 16rem");
     expect(css).toContain(
       "padding-bottom: calc(var(--intake-sticky-clearance) + env(safe-area-inset-bottom, 0px))",
     );
