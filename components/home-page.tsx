@@ -57,13 +57,15 @@ export function HomePage() {
           <PhotoSavannaHero />
           <div className="relative mx-auto w-full max-w-6xl px-5 pt-16 pb-12 sm:px-8 lg:min-h-[34rem] lg:pt-24">
             <div className="max-w-3xl">
-              <h1 className="type-h1 max-w-3xl text-cream">{brand.name}</h1>
-              <div className="mt-4">
-                <span className="fwc-badge fwc-badge-on-forest">{brand.heroRecipientBadge}</span>
+              <div className="hero-copy">
+                <h1 className="type-h1 hero-copy-title max-w-3xl text-cream">{brand.name}</h1>
+                <div className="mt-4">
+                  <span className="fwc-badge fwc-badge-on-forest">{brand.heroRecipientBadge}</span>
+                </div>
+                <p className="hero-copy-body mt-6 max-w-2xl text-[17px] leading-[27px] text-cream">
+                  {brand.heroBody}
+                </p>
               </div>
-              <p className="mt-6 max-w-2xl text-[17px] leading-[27px] text-cream/85">
-                {brand.heroBody}
-              </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="/intake"
