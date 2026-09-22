@@ -39,6 +39,8 @@ EXPECTED_SIZE = 73031
 
 BLANK = "____________________"
 YELLOW = WD_COLOR_INDEX.YELLOW
+PROJECT_SUBTITLE_LEFTOVER = "Multi-Project Relocation Agreement"
+PROJECT_SUBTITLE_BLANK = "Project Name"
 
 # Intake-mapped sample strings to blank. Per GT Rate ($5,750) is intentionally
 # absent — leave source text, including any existing highlight on that rate.
@@ -109,7 +111,21 @@ def rewrite_paragraph_with_yellow_blanks(paragraph, new_text: str) -> None:
             paragraph.add_run(rest)
 
 
+def apply_project_name_subtitle(paragraph) -> None:
+    """Heading2 leftover becomes a yellow Project Name fill field."""
+    style = paragraph.style.name if paragraph.style is not None else ""
+    compact = " ".join(paragraph.text.split())
+    if style != "Heading 2" or compact != PROJECT_SUBTITLE_LEFTOVER:
+        return
+    for run in paragraph.runs:
+        run.text = ""
+    run = paragraph.runs[0] if paragraph.runs else paragraph.add_run()
+    run.text = PROJECT_SUBTITLE_BLANK
+    run.font.highlight_color = YELLOW
+
+
 def blank_paragraph(paragraph, *, add_printed_name_blank: bool = False) -> None:
+    apply_project_name_subtitle(paragraph)
     text = paragraph.text
     if add_printed_name_blank:
         stripped = text.replace("\t", "").strip()
