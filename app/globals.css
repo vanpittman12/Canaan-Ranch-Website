@@ -36,8 +36,10 @@
   --status-accepted: var(--sage);
   --status-executed: var(--forest);
 
-  /* Mobile sticky Continue bar: helper + button + padding. Safe-area is added at use. */
-  --intake-sticky-clearance: 12rem;
+  /* Mobile sticky Continue bar. At 390px the helper (two lines) + gap + button + padding is ~121px.
+     16rem leaves the last Notice fields above that stack with a comfortable gap.
+     Safe-area is added at use. Desktop resets padding where the bar is static. */
+  --intake-sticky-clearance: 16rem;
 }
 
 @theme inline {
