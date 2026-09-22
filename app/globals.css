@@ -376,16 +376,63 @@ html:has(.intake-form) {
 .hero-photo-scrim {
   position: absolute;
   inset: 0;
+  /* Stronger left wash so cream type stays readable over bright pine/sky patches. */
   background:
     linear-gradient(
       90deg,
-      rgba(22, 36, 28, 0.84) 0%,
-      rgba(22, 36, 28, 0.62) 24%,
-      rgba(22, 36, 28, 0.28) 46%,
-      rgba(22, 36, 28, 0.08) 66%,
-      transparent 86%
+      rgba(18, 30, 22, 0.94) 0%,
+      rgba(18, 30, 22, 0.82) 28%,
+      rgba(18, 30, 22, 0.52) 50%,
+      rgba(18, 30, 22, 0.22) 70%,
+      transparent 90%
     ),
-    linear-gradient(180deg, rgba(22, 36, 28, 0.22) 0%, transparent 34%);
+    linear-gradient(180deg, rgba(18, 30, 22, 0.42) 0%, transparent 44%);
+}
+
+/* Soft forest panel behind title/badge/body — no card border; photo still reads through. */
+.hero-copy {
+  position: relative;
+  max-width: 42rem;
+  padding: 1.15rem 1.25rem 1.35rem;
+  margin-left: -0.65rem;
+  border-radius: 0 0 18px 0;
+  background:
+    linear-gradient(
+      105deg,
+      rgba(18, 30, 22, 0.9) 0%,
+      rgba(18, 30, 22, 0.82) 52%,
+      rgba(18, 30, 22, 0.62) 100%
+    );
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  box-shadow: 0 14px 44px rgba(14, 22, 16, 0.28);
+}
+
+@media (min-width: 640px) {
+  .hero-copy {
+    padding: 1.35rem 1.6rem 1.5rem;
+    margin-left: -0.85rem;
+  }
+}
+
+.hero-copy-title {
+  font-weight: 600;
+}
+
+.hero-copy-title,
+.hero-copy-body {
+  text-shadow:
+    0 1px 2px rgba(10, 16, 12, 0.98),
+    0 3px 18px rgba(10, 16, 12, 0.65),
+    0 0 32px rgba(10, 16, 12, 0.4);
+}
+
+.hero-copy .fwc-badge-on-forest {
+  background: rgba(10, 18, 14, 0.96);
+  border-color: var(--brass);
+  box-shadow:
+    0 1px 2px rgba(10, 16, 12, 0.65),
+    0 4px 16px rgba(10, 16, 12, 0.35);
 }
 
 :focus {
