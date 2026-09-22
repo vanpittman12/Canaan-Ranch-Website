@@ -17,7 +17,7 @@ export const brand = {
   heroRecipientBadge: "Tier 1 Long Term Recipient Site",
   /** First-screen body — Van / Manager 2026-09-21. One size; replaces homepage slogan + lead. */
   heroBody:
-    "Don’t slow your project down - Long Term Tier 1 sites have the lowest mitigation contributions, are best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
+    "Don’t slow your project down - Long Term Tier 1 sites have the lowest mitigation contributions, are the best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
   /** Primary buyer-facing intake CTA. Keep nav, hero, footer, and bottom CTA in sync. */
   intakeCta: "Start intake",
   flowInvite:
