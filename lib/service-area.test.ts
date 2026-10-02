@@ -228,10 +228,10 @@ describe("service area map", () => {
 
   it("keeps the first-screen copy, savings module, and What we offer", () => {
     expect(brand.heroBody).toBe(
-      "Don’t slow your project down - Long Term Tier 1 sites have the lowest mitigation contributions, are the best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
+      "Don’t slow your project down - Long-Term Tier 1 sites have the lowest mitigation contributions, are the best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
     );
     expect(brand.heroSlogan).toBe(
-      "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
+      "Don’t slow your project down - Long-Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
     expect(landing).toContain("<FwcSavingsModule");
     expect(landing).toContain("<ProgramOffer");

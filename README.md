@@ -164,7 +164,7 @@ Integration lives in [`lib/docusign.ts`](lib/docusign.ts). Code reads credential
 
 When `DOCUSIGN_ENABLED` is not `true` (default), `sendEnvelope()` stores a `stub-…` envelope ID and makes **no** DocuSign API call. The admin **Simulate DocuSign signed** control still works for testing.
 
-When `DOCUSIGN_ENABLED=true`, intake submit (DocuSign path) sends a live envelope: JWT grant, then `Envelopes:create` with the populated Word agreement (same bytes as the buyer download). Accept does not send again if an envelope already exists. Connect (`POST /api/docusign/webhook`) and polling (`Refresh envelope status`, plus `GET /api/docusign/return?engagementId=…`) mark the engagement executed when DocuSign reports completed.
+When `DOCUSIGN_ENABLED=true`, intake submit (DocuSign path) sends a live envelope: JWT grant, then `Envelopes:create` with the populated Word agreement (same bytes as the buyer download). Accept does not send again if an envelope already exists. Connect (`POST /api/docusign/webhook`) and polling (`Refresh envelope status`, plus `GET /api/docusign/return?engagementId=…`) mark the engagement executed when DocuSign reports completed. A Connect call with a valid `X-DocuSign-Signature-1` HMAC applies its status directly. A call with a missing or bad signature is never trusted: it only nudges the site to re-fetch that envelope from the DocuSign API (the same path as admin Refresh) and returns 200; unknown envelope IDs return 200 and do nothing. A Worker cron (`*/15 * * * *`, `worker.ts` → `scheduled` → `POST /api/docusign/poll` with an internal HMAC header) also refreshes up to 25 open (sent/delivered) envelopes every 15 minutes.
 
 ### Recipient roles
 

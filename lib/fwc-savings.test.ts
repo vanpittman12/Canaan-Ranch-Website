@@ -32,10 +32,10 @@ const mobileCards = readFileSync(
 describe("FWC mitigation savings", () => {
   it("uses Van’s exact first-screen copy on the homepage", () => {
     expect(brand.heroBody).toBe(
-      "Don’t slow your project down - Long Term Tier 1 sites have the lowest mitigation contributions, are the best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
+      "Don’t slow your project down - Long-Term Tier 1 sites have the lowest mitigation contributions, are the best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
     );
     expect(brand.heroSlogan).toBe(
-      "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
+      "Don’t slow your project down - Long-Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
     expect(landing).toContain("{brand.heroBody}");
     expect(landing.match(/\{brand\.heroBody\}/g)).toHaveLength(1);
@@ -67,14 +67,14 @@ describe("FWC mitigation savings", () => {
   });
 
   it("shows Van’s per-GT FWC schedule without public conservation", () => {
-    expect(CANAAN_FWC_LEVEL).toBe("Long-Term Level 1");
+    expect(CANAAN_FWC_LEVEL).toBe("Long-Term Tier 1");
     expect(CANAAN_FWC_PER_ADDITIONAL_GT).toBe(419);
     expect(fwcSavingsRows).toEqual([
       { insteadOf: "Unprotected", fwcPerGt: 7545, savedPerGt: 7126 },
-      { insteadOf: "Short-term Level 3", fwcPerGt: 4193, savedPerGt: 3774 },
-      { insteadOf: "Short-term Level 2", fwcPerGt: 2515, savedPerGt: 2096 },
-      { insteadOf: "Short-term Level 1", fwcPerGt: 1257, savedPerGt: 838 },
-      { insteadOf: "Long-Term Level 2", fwcPerGt: 838, savedPerGt: 419 },
+      { insteadOf: "Short-Term Tier 3", fwcPerGt: 4193, savedPerGt: 3774 },
+      { insteadOf: "Short-Term Tier 2", fwcPerGt: 2515, savedPerGt: 2096 },
+      { insteadOf: "Short-Term Tier 1", fwcPerGt: 1257, savedPerGt: 838 },
+      { insteadOf: "Long-Term Tier 2", fwcPerGt: 838, savedPerGt: 419 },
     ]);
     for (const row of fwcSavingsRows) {
       expect(row.savedPerGt).toBe(row.fwcPerGt - CANAAN_FWC_PER_ADDITIONAL_GT);

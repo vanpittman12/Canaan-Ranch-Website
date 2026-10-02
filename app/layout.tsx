@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Source_Sans_3 } from "next/font/google";
 import { brand } from "@/lib/brand";
 import { BRAND_MARK_SRC } from "@/lib/brand-mark-asset";
-import { HOME_DESCRIPTION, SITE_ORIGIN } from "@/lib/site";
+import { HOME_DESCRIPTION, OG_IMAGE, SITE_ORIGIN } from "@/lib/site";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -31,15 +31,20 @@ export const metadata: Metadata = {
     siteName: brand.name,
     title: brand.name,
     description,
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: brand.name,
     description,
+    images: [OG_IMAGE.url],
   },
   icons: {
-    icon: [{ url: BRAND_MARK_SRC, type: "image/svg+xml" }],
-    apple: BRAND_MARK_SRC,
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+      { url: BRAND_MARK_SRC, type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 
