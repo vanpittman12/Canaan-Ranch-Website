@@ -3,33 +3,95 @@ import { brand, getSellerWitness } from "./brand";
 import type { IntakeFields } from "./types";
 
 export const intakeSchema = z.object({
-  buyerLegalName: z.string().trim().min(2, "Buyer legal name is required."),
-  buyerAttention: z.string().trim().min(2, "Signatory name is required."),
-  buyerTitle: z.string().trim().min(2, "Title is required."),
-  buyerEmail: z.string().trim().email("Enter a valid email address."),
-  buyerStreet: z.string().trim().min(3, "Street address is required."),
-  buyerCity: z.string().trim().min(2, "City is required."),
-  buyerState: z.string().trim().min(2, "State is required."),
-  buyerPostalCode: z.string().trim().min(3, "Postal code is required."),
-  buyerPhone: z.string().trim().min(7, "Phone number is required."),
+  buyerLegalName: z
+    .string()
+    .trim()
+    .min(2, "Buyer legal name is required.")
+    .max(200, "Keep the Buyer legal name under 200 characters."),
+  buyerAttention: z
+    .string()
+    .trim()
+    .min(2, "Signatory name is required.")
+    .max(200, "Keep the signatory name under 200 characters."),
+  buyerTitle: z
+    .string()
+    .trim()
+    .min(2, "Title is required.")
+    .max(200, "Keep the title under 200 characters."),
+  buyerEmail: z
+    .string()
+    .trim()
+    .email("Enter a valid email address.")
+    .max(254, "Keep the email under 254 characters."),
+  buyerStreet: z
+    .string()
+    .trim()
+    .min(3, "Street address is required.")
+    .max(300, "Keep the street address under 300 characters."),
+  buyerCity: z
+    .string()
+    .trim()
+    .min(2, "City is required.")
+    .max(200, "Keep the city under 200 characters."),
+  buyerState: z
+    .string()
+    .trim()
+    .min(2, "State is required.")
+    .max(100, "Keep the state under 100 characters."),
+  buyerPostalCode: z
+    .string()
+    .trim()
+    .min(3, "Postal code is required.")
+    .max(20, "Keep the postal code under 20 characters."),
+  buyerPhone: z
+    .string()
+    .trim()
+    .min(7, "Phone number is required.")
+    .max(50, "Keep the phone number under 50 characters."),
   tortoiseCount: z.coerce
     .number({ error: "Enter the number of gopher tortoises." })
     .int("Use a whole number.")
     .min(1, "Reserve at least one gopher tortoise."),
-  relocationCounty: z.string().trim().min(2, "County of relocation is required."),
-  authorizedAgentName: z.string().trim().min(2, "Buyer’s authorized agent name is required."),
+  relocationCounty: z
+    .string()
+    .trim()
+    .min(2, "County of relocation is required.")
+    .max(200, "Keep the county under 200 characters."),
+  authorizedAgentName: z
+    .string()
+    .trim()
+    .min(2, "Buyer’s authorized agent name is required.")
+    .max(200, "Keep the authorized agent name under 200 characters."),
   authorizedAgentCompany: z
     .string()
     .trim()
-    .min(2, "Buyer’s authorized agent company is required."),
+    .min(2, "Buyer’s authorized agent company is required.")
+    .max(200, "Keep the authorized agent company under 200 characters."),
   donorCompanyAffiliation: z
     .string()
     .trim()
-    .min(2, "Donor company affiliation is required."),
-  donorSiteName: z.string().trim().min(2, "Project name is required."),
-  donorSiteDescription: z.string().trim().default(""),
-  buyerWitnessName: z.string().trim().min(2, "Buyer witness name is required."),
-  buyerWitnessEmail: z.string().trim().email("Enter a valid Buyer witness email."),
+    .min(2, "Donor company affiliation is required.")
+    .max(200, "Keep the donor company affiliation under 200 characters."),
+  donorSiteName: z
+    .string()
+    .trim()
+    .min(2, "Project name is required.")
+    .max(200, "Keep the project name under 200 characters."),
+  donorSiteDescription: z
+    .string()
+    .trim()
+    .max(5000, "Keep the project description under 5000 characters.")
+    .default(""),
+  buyerWitnessName: z
+    .string()
+    .trim()
+    .min(2, "Buyer witness name is required.")
+    .max(200, "Keep the Buyer witness name under 200 characters."),
+  buyerWitnessEmail: z
+    .string()
+    .trim()
+    .email("Enter a valid Buyer witness email.")
+    .max(254, "Keep the Buyer witness email under 254 characters."),
 });
 
 export type IntakeInput = z.infer<typeof intakeSchema>;

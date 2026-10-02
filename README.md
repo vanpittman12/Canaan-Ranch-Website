@@ -385,3 +385,9 @@ Workers Builds also needs those values as **build** variables/secrets if the Nex
 ## Stack
 
 Next.js App Router, TypeScript, Tailwind CSS, Zod, pdf-lib, cookie-based admin session, OpenNext on Cloudflare Workers, D1, R2.
+
+## Security hardening
+
+- Security headers (`X-Frame-Options`, `Content-Security-Policy: frame-ancestors 'none'`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`) are set in `next.config.ts` for Worker responses and in `public/_headers` for static assets.
+- `wrangler.jsonc` sets `workers_dev: false` and `preview_urls: false`; the site serves only on `canaanpreserve.com`.
+- Turnstile guards the public intake submit and the admin login. It is enforced only when both the site key (`NEXT_PUBLIC_TURNSTILE_SITE_KEY` at build time, or `lib/turnstile-config.ts`) and the Worker secret `TURNSTILE_SECRET_KEY` are set. Otherwise the widget is hidden and the server logs a `[turnstile] verification skipped` warning and lets the request through. To turn it on: create a Turnstile widget for `canaanpreserve.com`, put the site key in `lib/turnstile-config.ts` (or export `NEXT_PUBLIC_TURNSTILE_SITE_KEY` before `npm run deploy`), and run `npx wrangler secret put TURNSTILE_SECRET_KEY`.

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { generatePopulatedAgreement } from "@/lib/agreement-populate";
 import { ADMIN_COOKIE, canAccessEngagementDocument } from "@/lib/auth";
-import { asArrayBuffer } from "@/lib/http";
+import { asArrayBuffer, attachmentDisposition } from "@/lib/http";
 import { getEngagement } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -33,7 +33,7 @@ export async function GET(
   return new Response(asArrayBuffer(populated.bytes), {
     headers: {
       "Content-Type": populated.mimeType,
-      "Content-Disposition": `attachment; filename="${populated.filename}"`,
+      "Content-Disposition": attachmentDisposition(populated.filename),
       "Cache-Control": "no-store",
     },
   });

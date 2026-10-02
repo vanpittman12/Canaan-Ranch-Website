@@ -1,6 +1,16 @@
 import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
+// Applied to every Worker response. Static assets get the same set from
+// `public/_headers`. CSP is frame-ancestors only so no script/style breaks.
+const SECURITY_HEADERS = [
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+];
+
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
@@ -14,6 +24,10 @@ const nextConfig: NextConfig = {
   // OpenNext rewrites a numeric s-maxage into a long stale-while-revalidate.
   async headers() {
     return [
+      {
+        source: "/:path*",
+        headers: SECURITY_HEADERS,
+      },
       {
         source: "/intake",
         headers: [
