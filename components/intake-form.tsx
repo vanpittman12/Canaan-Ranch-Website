@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { createEngagement, updateIntake, type ActionState } from "@/app/actions/engagements";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import { brand } from "@/lib/brand";
 import {
   INTAKE_STEPS,
@@ -802,6 +803,9 @@ export function IntakeForm({
           ]}
         />
         <IntakeAgreementDates />
+        {!engagementId && step === REVIEW_STEP_ID ? (
+          <TurnstileWidget action="intake_submit" resetKey={state} />
+        ) : null}
       </section>
       </div>
 

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { loginAdmin, type AdminActionState } from "@/app/actions/admin";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 
 const initialState: AdminActionState = {};
 
@@ -26,6 +27,7 @@ export function LoginForm() {
           required
         />
       </label>
+      <TurnstileWidget action="admin_login" resetKey={state} />
       <button className="btn-primary w-full" type="submit" disabled={pending}>
         {pending ? "Signing in…" : "Sign in"}
       </button>

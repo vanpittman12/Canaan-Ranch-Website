@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, canAccessEngagementDocument } from "@/lib/auth";
-import { asArrayBuffer } from "@/lib/http";
+import { asArrayBuffer, attachmentDisposition } from "@/lib/http";
 import { getEngagement, getUpload } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -39,7 +39,7 @@ export async function GET(
   return new Response(asArrayBuffer(bytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Disposition": attachmentDisposition(filename, "reservation-letter.pdf"),
       "Cache-Control": "no-store",
     },
   });

@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
@@ -36,6 +36,7 @@ import {
   persistReservationLetter,
 } from "@/lib/reservation-letter-persist";
 import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
+import { verifyTurnstile } from "@/lib/turnstile";
 import type { ReviewDecision } from "@/lib/types";
 
 export type AdminActionState = {
@@ -53,6 +54,13 @@ export async function loginAdmin(
   _prev: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const human = await verifyTurnstile(formData, {
+    remoteIp: (await headers()).get("cf-connecting-ip"),
+  });
+  if (!human.ok) {
+    return { error: human.error };
+  }
+
   const password = String(formData.get("password") ?? "");
   if (!passwordsMatch(password)) {
     return { error: "That password is not recognized." };

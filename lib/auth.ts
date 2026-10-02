@@ -47,6 +47,27 @@ function base64UrlToBytes(value: string) {
   return out;
 }
 
+/** Decode a base64url signature; malformed input yields null (treated as unauthenticated). */
+function safeBase64UrlToBytes(value: string): Uint8Array | null {
+  if (!/^[A-Za-z0-9_-]*$/.test(value)) {
+    return null;
+  }
+  try {
+    return base64UrlToBytes(value);
+  } catch {
+    return null;
+  }
+}
+
+function signaturesMatch(provided: string, expected: string) {
+  const left = safeBase64UrlToBytes(provided);
+  const right = safeBase64UrlToBytes(expected);
+  if (!left || !right) {
+    return false;
+  }
+  return timingSafeEqual(left, right);
+}
+
 function timingSafeEqual(left: Uint8Array, right: Uint8Array) {
   if (left.length !== right.length) {
     return false;
@@ -79,15 +100,19 @@ export async function createAdminSession() {
 }
 
 export async function verifyAdminSession(token: string | undefined | null) {
-  if (!token) {
+  if (!token || typeof token !== "string") {
     return false;
   }
-  const [issuedAt, signature] = token.split(".");
-  if (!issuedAt || !signature) {
+  const parts = token.split(".");
+  if (parts.length !== 2) {
+    return false;
+  }
+  const [issuedAt, signature] = parts;
+  if (!issuedAt || !signature || !/^\d+$/.test(issuedAt)) {
     return false;
   }
   const expected = await sign(issuedAt);
-  if (!timingSafeEqual(base64UrlToBytes(signature), base64UrlToBytes(expected))) {
+  if (!signaturesMatch(signature, expected)) {
     return false;
   }
   const ageMs = Date.now() - Number(issuedAt);
@@ -115,7 +140,7 @@ export async function verifyDocumentToken(
   engagementId: string,
   kind: DocumentKind,
 ) {
-  if (!token) {
+  if (!token || typeof token !== "string") {
     return false;
   }
   const lastDot = token.lastIndexOf(".");
@@ -124,8 +149,11 @@ export async function verifyDocumentToken(
   }
   const payload = token.slice(0, lastDot);
   const signature = token.slice(lastDot + 1);
+  if (!signature) {
+    return false;
+  }
   const expected = await sign(payload);
-  if (!timingSafeEqual(base64UrlToBytes(signature), base64UrlToBytes(expected))) {
+  if (!signaturesMatch(signature, expected)) {
     return false;
   }
   const [doc, id, expiresAt] = payload.split(":");
