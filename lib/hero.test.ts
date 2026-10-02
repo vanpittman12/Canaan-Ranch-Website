@@ -78,12 +78,12 @@ describe("live homepage hero", () => {
     expect(homePage).not.toContain("{brand.heroSlogan}");
     expect(homePage).not.toContain("{brand.heroLead}");
     expect(homePage).not.toContain("{brand.habitatLine}");
-    expect(brand.heroRecipientBadge).toBe("Tier 1 Long Term Recipient Site");
+    expect(brand.heroRecipientBadge).toBe("FWC Approved Tier 1 Long-Term Recipient Site");
     expect(brand.heroBody).toBe(
-      "Don’t slow your project down - Long Term Tier 1 sites have the lowest mitigation contributions, are the best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
+      "Don’t slow your project down - Long-Term Tier 1 sites have the lowest mitigation contributions, are the best option for the tortoise and FWC’s preferred choice for relocations. Reserve capacity at this FWC Approved Tier 1 Long-Term site, download a signature-ready relocation agreement, and get a review before anything closes.",
     );
     expect(brand.heroSlogan).toBe(
-      "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
+      "Don’t slow your project down - Long-Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
     expect(brand.defaultPerGtRate).toBe(6000);
     expect(brand.juvenileRate).toBe(3000);

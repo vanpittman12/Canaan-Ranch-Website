@@ -8,6 +8,15 @@ export const WWW_HOST = "www.canaanpreserve.com";
 export const HOME_DESCRIPTION =
   "Canaan Preserve is an FWC Approved Tier 1 Long-Term Recipient Site. Gopher tortoise intake, downloadable relocation agreement, signature, and a review before anything closes.";
 
+/** 1200x630 share card (brand mark + FWC Approved Tier 1 Long-Term Recipient Site). */
+export const OG_IMAGE = {
+  url: "/og-image.png",
+  width: 1200,
+  height: 630,
+  alt: "Canaan Preserve — FWC Approved Tier 1 Long-Term Recipient Site",
+  type: "image/png",
+} as const;
+
 export const PRIVACY_DESCRIPTION =
   "How Canaan Preserve uses intake details to prepare a relocation agreement and contact you about that reservation.";
 
@@ -33,10 +42,12 @@ export function pageShareMetadata(
       url: canonical,
       title,
       description,
+      images: [OG_IMAGE],
     },
     twitter: {
       title,
       description,
+      images: [OG_IMAGE.url],
     },
   };
 }

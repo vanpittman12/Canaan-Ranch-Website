@@ -177,9 +177,9 @@ describe("site builder visual lock", () => {
     expect(landing).toContain("juvenile");
     expect(landing).toContain("FWC Approved Tier 1");
     expect(brand.heroSlogan).toBe(
-      "Don’t slow your project down - Long Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
+      "Don’t slow your project down - Long-Term Tier 1 sites are the best option for the tortoise and therefore FWC’s preferred choice for relocations.",
     );
-    expect(brand.heroSlogan).toContain("Long Term Tier 1");
+    expect(brand.heroSlogan).toContain("Long-Term Tier 1");
     expect(brand.heroLead).toMatch(/^[A-Z].*\.$/);
     expect(brand.heroLead).toContain("FWC Approved Tier 1 Long-Term");
     expect(brand.heroLead).toContain("signature-ready");
@@ -281,12 +281,10 @@ describe("site builder visual lock", () => {
       brand.fwcBadge,
     ].join("\n");
     expect(marketingCopy).not.toMatch(/signature ready(?!-)/);
+    // Van's wording: "FWC Approved Tier 1 Long-Term Recipient Site" — Tier, hyphenated Long-Term.
     expect(
-      marketingCopy
-        .replaceAll(brand.heroSlogan, "")
-        .replaceAll(brand.heroBody, "")
-        .replaceAll(brand.heroRecipientBadge, ""),
-    ).not.toMatch(/Long Term/);
+      [marketingCopy, brand.heroSlogan, brand.heroBody, brand.heroRecipientBadge].join("\n"),
+    ).not.toMatch(/Long Term|Level 1/);
   });
 
   it("uses the live shot 3 photo hero with a left forest scrim and no tortoise sticker", () => {
