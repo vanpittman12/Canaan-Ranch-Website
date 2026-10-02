@@ -47,8 +47,8 @@ Seller-side, the same every time, and **not** on the public intake form.
 
 | Variable | Default |
 | --- | --- |
-| `CANAAN_WITNESS_NAME` | `Andrew Fuddy` |
-| `CANAAN_WITNESS_EMAIL` | `witness@canaanpreserve.com` |
+| `CANAAN_WITNESS_NAME` | `Canaan Witness` |
+| `CANAAN_WITNESS_EMAIL` | `vpittman@bourne-partners.com` |
 
 DocuSign routing always includes this fixed witness (stub and live).
 
@@ -164,7 +164,7 @@ Integration lives in [`lib/docusign.ts`](lib/docusign.ts). Code reads credential
 
 When `DOCUSIGN_ENABLED` is not `true` (default), `sendEnvelope()` stores a `stub-…` envelope ID and makes **no** DocuSign API call. The admin **Simulate DocuSign signed** control still works for testing.
 
-When `DOCUSIGN_ENABLED=true`, intake submit (DocuSign path) sends a live envelope: JWT grant, then `Envelopes:create` with the populated Word agreement (same bytes as the buyer download). Accept does not send again if an envelope already exists. Connect (`POST /api/docusign/webhook`) and polling (`Refresh envelope status`, plus `GET /api/docusign/return?engagementId=…`) mark the engagement executed when DocuSign reports completed.
+When `DOCUSIGN_ENABLED=true`, intake submit (DocuSign path) sends a live envelope: JWT grant, then `Envelopes:create` with the populated Word agreement (same bytes as the buyer download). Accept does not send again if an envelope already exists. Connect (`POST /api/docusign/webhook`) and polling (`Refresh envelope status`, plus `GET /api/docusign/return?engagementId=…`) mark the engagement executed when DocuSign reports completed. A Connect call with a valid `X-DocuSign-Signature-1` HMAC applies its status directly. A call with a missing or bad signature is never trusted: it only nudges the site to re-fetch that envelope from the DocuSign API (the same path as admin Refresh) and returns 200; unknown envelope IDs return 200 and do nothing. A Worker cron (`*/15 * * * *`, `worker.ts` → `scheduled` → `POST /api/docusign/poll` with an internal HMAC header) also refreshes up to 25 open (sent/delivered) envelopes every 15 minutes.
 
 ### Recipient roles
 
@@ -173,7 +173,7 @@ When `DOCUSIGN_ENABLED=true`, intake submit (DocuSign path) sends a live envelop
 | `buyer_signer` | Intake: Buyer attention + email | Routing order 1 |
 | `buyer_witness` | Intake: Buyer witness name + email (no env override — the address from intake is sent) | Routing order 2 |
 | `seller_signer` | Brand: Andrew V. Pittman, Jr. / `vpittman@beachparkcap.com` | Routing order 3 |
-| `seller_witness` | Brand/env: Andrew Fuddy / `witness@canaanpreserve.com` (not on the public form) | Routing order 4 |
+| `seller_witness` | Brand/env: Canaan Witness / `vpittman@bourne-partners.com` (not on the public form) | Routing order 4 |
 
 The populated Word agreement is the envelope document. Hidden anchor strings (`/sn_buyer/`, `/wit_buyer/`, `/sn_seller/`, `/wit_seller/`, plus matching `/date_*` strings) are injected into the populated copy only so Sign Here and **Date Signed** tabs can place. Those date anchors are `dateSignedTabs` (auto-fill when that recipient signs) — not typed text fields.
 
@@ -295,7 +295,7 @@ npx wrangler secret put ADMIN_SESSION_SECRET
 
 Use a long random string for `ADMIN_SESSION_SECRET` (for example `openssl rand -base64 48`).
 
-Optional (defaults are Andrew Fuddy / `witness@canaanpreserve.com`):
+Optional (defaults are Canaan Witness / `vpittman@bourne-partners.com`):
 
 ```bash
 npx wrangler secret put CANAAN_WITNESS_NAME
@@ -387,3 +387,9 @@ Workers Builds also needs those values as **build** variables/secrets if the Nex
 ## Stack
 
 Next.js App Router, TypeScript, Tailwind CSS, Zod, pdf-lib, cookie-based admin session, OpenNext on Cloudflare Workers, D1, R2.
+
+## Security hardening
+
+- Security headers (`X-Frame-Options`, `Content-Security-Policy: frame-ancestors 'none'`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`) are set in `next.config.ts` for Worker responses and in `public/_headers` for static assets.
+- `wrangler.jsonc` sets `workers_dev: false` and `preview_urls: false`; the site serves only on `canaanpreserve.com`.
+- Turnstile guards the public intake submit and the admin login. It is enforced only when both the site key (`NEXT_PUBLIC_TURNSTILE_SITE_KEY` at build time, or `lib/turnstile-config.ts`) and the Worker secret `TURNSTILE_SECRET_KEY` are set. Otherwise the widget is hidden and the server logs a `[turnstile] verification skipped` warning and lets the request through. To turn it on: create a Turnstile widget for `canaanpreserve.com`, put the site key in `lib/turnstile-config.ts` (or export `NEXT_PUBLIC_TURNSTILE_SITE_KEY` before `npm run deploy`), and run `npx wrangler secret put TURNSTILE_SECRET_KEY`.

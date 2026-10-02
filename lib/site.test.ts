@@ -20,7 +20,7 @@ const sitemap = readFileSync(path.join(process.cwd(), "public/sitemap.xml"), "ut
 const notFound = readFileSync(path.join(process.cwd(), "app/not-found.tsx"), "utf8");
 const intakeForm = readFileSync(path.join(process.cwd(), "components/intake-form.tsx"), "utf8");
 const intakePage = readFileSync(path.join(process.cwd(), "app/intake/page.tsx"), "utf8");
-const landing = readFileSync(path.join(process.cwd(), "app/page.tsx"), "utf8");
+const landing = readFileSync(path.join(process.cwd(), "components/home-page.tsx"), "utf8");
 const adminLogin = readFileSync(path.join(process.cwd(), "app/admin/login/page.tsx"), "utf8");
 const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
 const nextConfig = readFileSync(path.join(process.cwd(), "next.config.ts"), "utf8");
@@ -114,7 +114,7 @@ describe("public site SEO and copy hygiene", () => {
     expect(proxy).toContain("301");
     expect(landing).toContain("Submit, then sign");
     expect(landing).not.toContain("Canaan Preserve accepts, then sign");
-    expect(brand.heroSlogan).toContain("Long Term");
+    expect(brand.heroSlogan).toContain("Long-Term");
     expect(brand.flowInvite).toContain("After you submit, DocuSign is the usual signing path");
     expect(adminLogin).toContain("Sign in with the team password.");
     expect(adminLogin).not.toContain("canaan-admin");
@@ -140,10 +140,11 @@ describe("public site SEO and copy hygiene", () => {
     expect(intakeForm).toContain('key="intake-submit"');
     expect(intakeForm).toContain('data-intake-continue="true"');
     expect(intakeForm).toContain('data-intake-submit="true"');
-    expect(intakeForm).toContain("submitArmed");
-    expect(intakeForm).toContain("submitReady");
+    expect(intakeForm).toContain("const submitReady = step === REVIEW_STEP_ID");
+    expect(intakeForm).toContain("action={formAction}");
+    expect(intakeForm).not.toContain("submitArmed");
+    expect(intakeForm).not.toContain("if (!submitReady)");
     expect(intakeForm).toContain("requestAnimationFrame");
-    expect(intakeForm).toContain("submitReady ? formAction : undefined");
     expect(intakeForm).not.toMatch(
       /step === REVIEW_STEP_ID \?\s*\(\s*<button[\s\S]*type="submit"/,
     );
@@ -152,6 +153,17 @@ describe("public site SEO and copy hygiene", () => {
     );
     expect(intakeForm).not.toContain(
       "Required fields must be complete before Continue or Review.",
+    );
+    expect(intakeForm).toContain('className="intake-form space-y-8"');
+    expect(intakeForm).toContain('className="intake-scroll space-y-8"');
+    expect(css).toContain("--intake-sticky-clearance: 16rem");
+    expect(css).toContain(
+      "padding-bottom: calc(var(--intake-sticky-clearance) + env(safe-area-inset-bottom, 0px))",
+    );
+    expect(css).toContain("html:has(.intake-form)");
+    expect(css).toContain("scroll-padding-bottom");
+    expect(css).toMatch(
+      /@media \(min-width: 768px\)[\s\S]*\.intake-scroll \{\s*padding-bottom: 0;/,
     );
   });
 });

@@ -35,6 +35,11 @@
   --status-declined: var(--muted);
   --status-accepted: var(--sage);
   --status-executed: var(--forest);
+
+  /* Mobile sticky Continue bar. At 390px the helper (two lines) + gap + button + padding is ~121px.
+     16rem leaves the last Notice fields above that stack with a comfortable gap.
+     Safe-area is added at use. Desktop resets padding where the bar is static. */
+  --intake-sticky-clearance: 16rem;
 }
 
 @theme inline {
@@ -290,6 +295,15 @@ body {
   padding: 12px 24px calc(12px + env(safe-area-inset-bottom));
 }
 
+/* Reserve space so NOTICE (and other) fields can scroll above the sticky bar. */
+.intake-scroll {
+  padding-bottom: calc(var(--intake-sticky-clearance) + env(safe-area-inset-bottom, 0px));
+}
+
+html:has(.intake-form) {
+  scroll-padding-bottom: calc(var(--intake-sticky-clearance) + env(safe-area-inset-bottom, 0px));
+}
+
 @media (min-width: 768px) {
   .pill-row {
     display: flex;
@@ -316,65 +330,109 @@ body {
     background: transparent;
     padding: 0;
   }
+
+  .intake-scroll {
+    padding-bottom: 0;
+  }
+
+  html:has(.intake-form) {
+    scroll-padding-bottom: 0;
+  }
 }
 
-.habitat-sky {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    118deg,
-    #16241c 0%,
-    #203328 32%,
-    #3d4a32 54%,
-    #8a7348 76%,
-    #c4a15a 92%,
-    #e0d0b4 100%
-  );
-}
-
-.habitat-sun {
-  position: absolute;
-  top: 6%;
-  right: 14%;
-  width: 14rem;
-  height: 14rem;
-  border-radius: 999px;
-  background: radial-gradient(circle, #efe6d4 0%, #c4a15a 28%, rgba(196, 161, 90, 0.28) 52%, transparent 74%);
-  opacity: 0.8;
-}
-
-.habitat-grain {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.2;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
-}
-
-.habitat-ground {
+/* Live hero: portrait savanna photo (shot 3) cropped into the headline band. */
+.hero-photo-frame {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 48%;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(138, 115, 72, 0.28) 42%,
-    rgba(224, 208, 180, 0.3) 100%
-  );
+  top: 0;
+  bottom: 40%;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.habitat-scrim {
+@media (max-width: 767px) {
+  .hero-photo-frame {
+    bottom: 46%;
+  }
+}
+
+.hero-photo {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(22, 36, 28, 0.52) 0%,
-    rgba(22, 36, 28, 0.12) 44%,
-    rgba(22, 36, 28, 0) 70%
-  );
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: 55% 54%;
+}
+
+@media (max-width: 767px) {
+  .hero-photo {
+    object-position: 50% 52%;
+  }
+}
+
+.hero-photo-scrim {
+  position: absolute;
+  inset: 0;
+  /* Stronger left wash so cream type stays readable over bright pine/sky patches. */
+  background:
+    linear-gradient(
+      90deg,
+      rgba(18, 30, 22, 0.94) 0%,
+      rgba(18, 30, 22, 0.82) 28%,
+      rgba(18, 30, 22, 0.52) 50%,
+      rgba(18, 30, 22, 0.22) 70%,
+      transparent 90%
+    ),
+    linear-gradient(180deg, rgba(18, 30, 22, 0.42) 0%, transparent 44%);
+}
+
+/* Soft forest panel behind title/badge/body — no card border; photo still reads through. */
+.hero-copy {
+  position: relative;
+  max-width: 42rem;
+  padding: 1.15rem 1.25rem 1.35rem;
+  margin-left: -0.65rem;
+  border-radius: 0 0 18px 0;
+  background:
+    linear-gradient(
+      105deg,
+      rgba(18, 30, 22, 0.9) 0%,
+      rgba(18, 30, 22, 0.82) 52%,
+      rgba(18, 30, 22, 0.62) 100%
+    );
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  box-shadow: 0 14px 44px rgba(14, 22, 16, 0.28);
+}
+
+@media (min-width: 640px) {
+  .hero-copy {
+    padding: 1.35rem 1.6rem 1.5rem;
+    margin-left: -0.85rem;
+  }
+}
+
+.hero-copy-title {
+  font-weight: 600;
+}
+
+.hero-copy-title,
+.hero-copy-body {
+  text-shadow:
+    0 1px 2px rgba(10, 16, 12, 0.98),
+    0 3px 18px rgba(10, 16, 12, 0.65),
+    0 0 32px rgba(10, 16, 12, 0.4);
+}
+
+.hero-copy .fwc-badge-on-forest {
+  background: rgba(10, 18, 14, 0.96);
+  border-color: var(--brass);
+  box-shadow:
+    0 1px 2px rgba(10, 16, 12, 0.65),
+    0 4px 16px rgba(10, 16, 12, 0.35);
 }
 
 :focus {

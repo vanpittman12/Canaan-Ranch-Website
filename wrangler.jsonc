@@ -1,14 +1,22 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "canaan-preserve",
-  "main": ".open-next/worker.js",
+  // Custom entry wraps OpenNext's fetch handler and adds the cron `scheduled` handler.
+  "main": "worker.ts",
   "compatibility_date": "2026-09-13",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // Serve only on canaanpreserve.com: no *.workers.dev route, no preview URLs.
+  "workers_dev": false,
+  "preview_urls": false,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
     // privacy.html / terms.html → `/privacy` and `/terms` without a Worker hit.
     "html_handling": "auto-trailing-slash"
+  },
+  // Backup DocuSign poll: refresh open envelopes every 15 minutes (worker.ts → scheduled).
+  "triggers": {
+    "crons": ["*/15 * * * *"]
   },
   "observability": {
     "enabled": true
@@ -21,7 +29,9 @@
     // https://na2.docusign.net, etc.).
     "DOCUSIGN_ACCOUNT_BASE_URI": "https://na1.docusign.net",
     "DOCUSIGN_AUTH_SERVER": "https://account.docusign.com",
-    "APP_URL": "https://canaanpreserve.com"
+    "APP_URL": "https://canaanpreserve.com",
+    "CANAAN_WITNESS_NAME": "Canaan Witness",
+    "CANAAN_WITNESS_EMAIL": "vpittman@bourne-partners.com"
   },
   "services": [
     {
@@ -33,8 +43,8 @@
     {
       "binding": "ENGAGEMENTS",
       "database_name": "canaan-preserve",
-      // Replace after `npx wrangler d1 create canaan-preserve` (or run scripts/cloudflare-provision.mjs).
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      // Production D1 database (not a secret).
+      "database_id": "6b019288-cb8a-432f-9d09-ef96265662e0",
       "migrations_dir": "migrations"
     }
   ],

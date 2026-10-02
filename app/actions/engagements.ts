@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
@@ -23,7 +24,9 @@ import {
   putUpload,
   saveEngagement,
 } from "@/lib/store";
+import { hasPdfMagicBytes } from "@/lib/http";
 import { originalFileName } from "@/lib/storage/names";
+import { verifyTurnstile } from "@/lib/turnstile";
 import {
   flattenZodErrors,
   formDataToObject,
@@ -47,6 +50,14 @@ export async function createEngagement(
       error: "Please correct the highlighted fields.",
       fieldErrors: flattenZodErrors(parsed.error),
     };
+  }
+
+  // Checked after field validation so a field error does not burn the token.
+  const human = await verifyTurnstile(formData, {
+    remoteIp: (await headers()).get("cf-connecting-ip"),
+  });
+  if (!human.ok) {
+    return { error: human.error };
   }
 
   const engagement = await persistAndNotifyNewEngagement(() =>
@@ -150,8 +161,13 @@ export async function uploadSignedCopy(
     return { error: "Signed PDFs must be 10 MB or smaller." };
   }
 
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (!hasPdfMagicBytes(bytes)) {
+    return { error: "That file is not a valid PDF. Upload the signed agreement as a PDF." };
+  }
+
   const storedName = `${engagement.id}-signed.pdf`;
-  await putUpload(storedName, new Uint8Array(await file.arrayBuffer()));
+  await putUpload(storedName, bytes);
 
   const next = applySignedArtifact(
     engagement,

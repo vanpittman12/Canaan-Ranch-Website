@@ -104,6 +104,9 @@ export function previousStep(step: IntakeWizardStep): IntakeWizardStep {
   return index <= 0 ? step : INTAKE_STEP_IDS[index - 1];
 }
 
+/** Same sentence as the server zod failure on create/update. */
+export const INTAKE_FIELD_ERROR_BANNER = "Please correct the highlighted fields.";
+
 export function firstStepForErrors(
   fieldErrors: Record<string, string>,
 ): IntakeWizardStep {
@@ -113,6 +116,30 @@ export function firstStepForErrors(
     }
   }
   return REVIEW_STEP_ID;
+}
+
+/** First invalid control in wizard order, for scroll and focus after a Review reject. */
+export function firstFieldForErrors(fieldErrors: Record<string, string>): string | null {
+  for (const step of INTAKE_STEPS) {
+    for (const field of step.fields) {
+      if (fieldErrors[field]) {
+        return field;
+      }
+    }
+  }
+  return null;
+}
+
+export function intakeRejectFeedback(errors: Record<string, string>): {
+  message: string;
+  step: IntakeWizardStep;
+  field: string | null;
+} {
+  return {
+    message: INTAKE_FIELD_ERROR_BANNER,
+    step: firstStepForErrors(errors),
+    field: firstFieldForErrors(errors),
+  };
 }
 
 export function isEmailValue(value: string) {

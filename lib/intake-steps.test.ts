@@ -1,5 +1,8 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  INTAKE_FIELD_ERROR_BANNER,
   INTAKE_MINUTES,
   INTAKE_STEPS,
   PREPARE_ITEMS,
@@ -7,9 +10,11 @@ import {
   canSubmitIntake,
   advanceGate,
   continueControlLabel,
+  firstFieldForErrors,
   firstStepForErrors,
   formatGopherTortoiseCount,
   intakeFormSubmitIntent,
+  intakeRejectFeedback,
   intakeValuesFromDefaults,
   nextStep,
   previousStep,
@@ -137,5 +142,90 @@ describe("intake wizard", () => {
       expect(fromReview.errors.buyerLegalName).toBe("This field is required.");
       expect(fromReview.step).toBe("notice");
     }
+  });
+
+  it("points a Review reject at the banner copy and the first invalid field", () => {
+    const complete = {
+      ...intakeValuesFromDefaults(),
+      buyerLegalName: "Cypress Ridge Holdings LLC",
+      buyerAttention: "Avery Cole",
+      buyerTitle: "President",
+      buyerEmail: "avery@cypressridge.example",
+      buyerStreet: "200 Bay Street",
+      buyerCity: "Tampa",
+      buyerState: "FL",
+      buyerPostalCode: "33602",
+      buyerPhone: "813-555-0144",
+      tortoiseCount: "2",
+      relocationCounty: "Pasco",
+      authorizedAgentName: "Riley Nguyen",
+      authorizedAgentCompany: "Nguyen Permitting",
+      donorCompanyAffiliation: "Lennar",
+      donorSiteName: "Cypress Ridge",
+      buyerWitnessName: "Jordan Blake",
+      buyerWitnessEmail: "jordan@cypressridge.example",
+    };
+    expect(intakeFormSubmitIntent("review", complete)).toEqual({ kind: "submit" });
+
+    const missingName = intakeFormSubmitIntent("review", {
+      ...complete,
+      buyerLegalName: " ",
+    });
+    expect(missingName.kind).toBe("reject");
+    if (missingName.kind === "reject") {
+      expect(intakeRejectFeedback(missingName.errors)).toEqual({
+        message: INTAKE_FIELD_ERROR_BANNER,
+        step: "notice",
+        field: "buyerLegalName",
+      });
+      expect(firstFieldForErrors(missingName.errors)).toBe("buyerLegalName");
+    }
+
+    const missingProject = intakeFormSubmitIntent("review", {
+      ...complete,
+      donorSiteName: "",
+    });
+    expect(missingProject.kind).toBe("reject");
+    if (missingProject.kind === "reject") {
+      expect(intakeRejectFeedback(missingProject.errors)).toEqual({
+        message: "Please correct the highlighted fields.",
+        step: "project",
+        field: "donorSiteName",
+      });
+    }
+
+    const missingWitness = intakeFormSubmitIntent("review", {
+      ...complete,
+      buyerWitnessEmail: "not-an-email",
+    });
+    expect(missingWitness.kind).toBe("reject");
+    if (missingWitness.kind === "reject") {
+      expect(intakeRejectFeedback(missingWitness.errors).step).toBe("witness");
+      expect(intakeRejectFeedback(missingWitness.errors).field).toBe("buyerWitnessEmail");
+    }
+
+    const actions = readFileSync(
+      path.join(process.cwd(), "app/actions/engagements.ts"),
+      "utf8",
+    );
+    expect(actions).toContain(INTAKE_FIELD_ERROR_BANNER);
+
+    const form = readFileSync(
+      path.join(process.cwd(), "components/intake-form.tsx"),
+      "utf8",
+    );
+    expect(form).toContain('type="button"');
+    expect(form).toContain('data-intake-continue="true"');
+    expect(form).toMatch(
+      /intent\.kind === "reject"[\s\S]*preventDefault\(\)[\s\S]*intakeRejectFeedback\(intent\.errors\)[\s\S]*setClientError\(feedback\.message\)[\s\S]*setStep\(feedback\.step\)[\s\S]*setRejectFocus/,
+    );
+    expect(form).toContain('data-intake-error-banner="true"');
+    expect(form).toContain("data-intake-sticky-error");
+    expect(form).toContain('role="alert"');
+    expect(form).toContain("scrollIntoView");
+    expect(form).toContain(".focus(");
+    expect(form).toContain("holdSubmit");
+    expect(form).toContain("showSubmit");
+    expect(form).not.toMatch(/data-intake-continue[\s\S]{0,80}type="submit"/);
   });
 });

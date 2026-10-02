@@ -1,8 +1,8 @@
 import { brand } from "./brand";
 import { formatUsd } from "./money";
 
-/** Canaan Preserve FWC conservation contribution: Long-Term Level 1, additional GT. */
-export const CANAAN_FWC_LEVEL = "Long-Term Level 1";
+/** Canaan Preserve FWC conservation contribution: Long-Term Tier 1, additional GT. */
+export const CANAAN_FWC_LEVEL = "Long-Term Tier 1";
 export const CANAAN_FWC_PER_ADDITIONAL_GT = 419;
 
 export const FWC_SAVINGS_HERO_INSTEAD_OF = "Unprotected";
@@ -15,10 +15,10 @@ export const fwcSavingsColumnLabels = {
 
 export const fwcSavingsRows = [
   { insteadOf: "Unprotected", fwcPerGt: 7545, savedPerGt: 7126 },
-  { insteadOf: "Short-term Level 3", fwcPerGt: 4193, savedPerGt: 3774 },
-  { insteadOf: "Short-term Level 2", fwcPerGt: 2515, savedPerGt: 2096 },
-  { insteadOf: "Short-term Level 1", fwcPerGt: 1257, savedPerGt: 838 },
-  { insteadOf: "Long-Term Level 2", fwcPerGt: 838, savedPerGt: 419 },
+  { insteadOf: "Short-Term Tier 3", fwcPerGt: 4193, savedPerGt: 3774 },
+  { insteadOf: "Short-Term Tier 2", fwcPerGt: 2515, savedPerGt: 2096 },
+  { insteadOf: "Short-Term Tier 1", fwcPerGt: 1257, savedPerGt: 838 },
+  { insteadOf: "Long-Term Tier 2", fwcPerGt: 838, savedPerGt: 419 },
 ] as const;
 
 export type FwcSavingsRow = (typeof fwcSavingsRows)[number];

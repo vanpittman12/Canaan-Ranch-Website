@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
@@ -10,12 +10,8 @@ import {
   sessionCookieOptions,
   verifyAdminSession,
 } from "@/lib/auth";
-import {
-  buildStubSignedFilename,
-  getLiveEnvelopeStatus,
-  isDocuSignEnabled,
-} from "@/lib/docusign";
-import { syncLiveEnvelope } from "@/lib/docusign-complete";
+import { buildStubSignedFilename } from "@/lib/docusign";
+import { refreshBlocker, refreshEngagementFromDocuSign } from "@/lib/docusign-refresh";
 import {
   recordDocuSignSendFailure,
   sendDocuSignForEngagement,
@@ -36,6 +32,7 @@ import {
   persistReservationLetter,
 } from "@/lib/reservation-letter-persist";
 import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
+import { verifyTurnstile } from "@/lib/turnstile";
 import type { ReviewDecision } from "@/lib/types";
 
 export type AdminActionState = {
@@ -53,6 +50,13 @@ export async function loginAdmin(
   _prev: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const human = await verifyTurnstile(formData, {
+    remoteIp: (await headers()).get("cf-connecting-ip"),
+  });
+  if (!human.ok) {
+    return { error: human.error };
+  }
+
   const password = String(formData.get("password") ?? "");
   if (!passwordsMatch(password)) {
     return { error: "That password is not recognized." };
@@ -235,22 +239,13 @@ export async function refreshDocuSignStatus(
   if (!engagement) {
     return { error: "Engagement not found." };
   }
-  if (engagement.status !== "accepted" && engagement.status !== "executed") {
-    return { error: "Envelope status can be refreshed only after accept." };
-  }
-  if (engagement.signingMethod !== "docusign") {
-    return { error: "This engagement is not on the DocuSign path." };
-  }
-  if (!engagement.docusign.envelopeId) {
-    return { error: "No envelope has been sent yet." };
-  }
-  if (!isDocuSignEnabled() || engagement.docusign.mode !== "live") {
-    return { error: "Live envelope polling is available only when DOCUSIGN_ENABLED=true." };
+  const blocker = refreshBlocker(engagement);
+  if (blocker) {
+    return { error: blocker };
   }
 
   try {
-    const snapshot = await getLiveEnvelopeStatus(engagement.docusign.envelopeId);
-    await syncLiveEnvelope(engagement, snapshot.status);
+    await refreshEngagementFromDocuSign(engagement);
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Unable to refresh DocuSign status.",

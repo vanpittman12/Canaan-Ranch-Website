@@ -8,14 +8,14 @@ import { TemplateDownloadButton } from "@/components/template-download";
 import { brand } from "@/lib/brand";
 import { INTAKE_MINUTES, PREPARE_ITEMS } from "@/lib/intake-steps";
 import { formatUsd } from "@/lib/money";
-import { canonicalPath } from "@/lib/site";
+import { canonicalPath, OG_IMAGE } from "@/lib/site";
 
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "Reserve capacity",
   alternates: { canonical: canonicalPath("/intake") },
-  openGraph: { url: canonicalPath("/intake") },
+  openGraph: { url: canonicalPath("/intake"), images: [OG_IMAGE] },
 };
 
 export default function IntakePage() {
