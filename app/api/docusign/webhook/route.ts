@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     try {
       const outcome = await refreshEngagementFromDocuSign(engagement);
       if (!outcome.refreshed) {
-        return ok(`ignored: ${outcome.reason}`);
+        return ok("ignored: not refreshable");
       }
     } catch (error) {
       console.warn(
