@@ -79,8 +79,8 @@ function liveEnv() {
   process.env.DOCUSIGN_SECRET_KEY = "ds-secret-not-a-pem";
   process.env.DOCUSIGN_USER_ID = "user-guid";
   process.env.DOCUSIGN_ACCOUNT_ID = "account-guid";
-  process.env.DOCUSIGN_ACCOUNT_BASE_URI = "https://demo.docusign.net";
-  process.env.DOCUSIGN_AUTH_SERVER = "https://account-d.docusign.com";
+  process.env.DOCUSIGN_ACCOUNT_BASE_URI = "https://na1.docusign.net";
+  process.env.DOCUSIGN_AUTH_SERVER = "https://account.docusign.com";
   process.env.DOCUSIGN_PRIVATE_KEY = privateKey;
   process.env.DOCUSIGN_RETURN_URL = "https://canaanpreserve.com/api/docusign/return";
   process.env.DOCUSIGN_WEBHOOK_SECRET = "connect-hmac";

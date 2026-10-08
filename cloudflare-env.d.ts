@@ -23,7 +23,6 @@ interface CloudflareEnv {
   ADMIN_SESSION_SECRET?: string;
   CANAAN_WITNESS_NAME?: string;
   CANAAN_WITNESS_EMAIL?: string;
-  CANAAN_BUYER_WITNESS_EMAIL?: string;
   DOCUSIGN_ENABLED?: string;
   DOCUSIGN_INTEGRATION_KEY?: string;
   DOCUSIGN_SECRET_KEY?: string;
