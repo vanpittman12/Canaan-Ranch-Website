@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { brand } from "./brand";
-import { HERO_PHOTO } from "./hero";
+import { HERO_PHOTO, HERO_PHOTO_WIDTHS, heroSrcSet } from "./hero";
 
 const root = process.cwd();
 const read = (file: string) => readFileSync(path.join(root, file), "utf8");
@@ -114,6 +114,16 @@ describe("live homepage hero", () => {
     expect(size.height).toBe(HERO_PHOTO.height);
     expect(size.height).toBeGreaterThan(size.width);
     expect(photoHero).toContain("HERO_PHOTO.src");
+    expect(photoHero).toContain("<picture>");
+    expect(photoHero).toContain('type="image/avif"');
+    expect(photoHero).toContain('type="image/webp"');
+    expect(photoHero).toContain('fetchPriority="high"');
+    for (const w of HERO_PHOTO_WIDTHS) {
+      for (const ext of ["avif", "webp"] as const) {
+        expect(existsSync(path.join(root, `public/hero/option-a-shot3-${w}.${ext}`))).toBe(true);
+        expect(heroSrcSet(ext)).toContain(`/hero/option-a-shot3-${w}.${ext} ${w}w`);
+      }
+    }
     expect(photoHero).toContain("option-a-shot3");
     expect(photoHero).toContain("shot 3");
     expect(photoHero).toContain("aa207a68");
