@@ -132,6 +132,20 @@ body {
   color: var(--cream);
 }
 
+/* Below the sm breakpoint, long badges (e.g. the hero "FWC Approved Tier 1
+   Long-Term Recipient Site") wrap inside their container instead of running
+   past its right edge. Desktop styling is unchanged. */
+@media (max-width: 639.98px) {
+  .fwc-badge {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    letter-spacing: 0.08em;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+}
+
 .btn-primary,
 .btn-secondary,
 .btn-danger {
