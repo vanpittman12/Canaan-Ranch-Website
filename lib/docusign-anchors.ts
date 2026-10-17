@@ -48,10 +48,11 @@ export type TabAnchorOffset = {
  *   twips). Seller By: already carries “Andrew V. Pittman, Jr.”, so its date
  *   X offset stays small to avoid TAB_OUT_OF_BOUNDS.
  *
- * Re-tune after a live demo.docusign.net visual check: change only the
- * strings below, send one envelope, and nudge ~8–16 px at a time. If create
- * fails with TAB_OUT_OF_BOUNDS, reduce |X|. Do not move these into a
- * DocuSign Template library — per-deal Word populate stays the source.
+ * Re-tune after a live production visual check (Account Base URI, often
+ * na1.docusign.net): change only the strings below, send one envelope, and
+ * nudge ~8–16 px at a time. If create fails with TAB_OUT_OF_BOUNDS, reduce
+ * |X|. Do not move these into a DocuSign Template library — per-deal Word
+ * populate stays the source.
  */
 export const DOCUSIGN_TAB_OFFSETS: Record<
   DocuSignRole,
