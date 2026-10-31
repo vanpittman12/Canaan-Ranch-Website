@@ -12,11 +12,12 @@ export const HERO_PHOTO = {
  * Responsive variants of shot 3 (same crop/aspect, resized from the original).
  * From 768px up the frame is wider than the portrait photo's aspect, so cover
  * renders it at the viewport width (100vw). Below 768px the frame is taller
- * than it is wide and cover scales by height, so the photo renders ~1.5–3x the
- * viewport width (cropped); 200vw keeps mobile sharp. JPEG stays as fallback.
+ * than it is wide and cover scales by height. The frame is scoped to the hero
+ * copy + CTAs (~80svh, ~700–760px at 390w), so the photo renders ~1.4–1.5x the
+ * viewport width (cropped); 150vw keeps phones sharp (DPR 3 → 1600w). JPEG stays as fallback.
  */
 export const HERO_PHOTO_WIDTHS = [640, 1080, 1600] as const;
-export const HERO_PHOTO_SIZES = "(max-width: 767px) 200vw, 100vw";
+export const HERO_PHOTO_SIZES = "(max-width: 767px) 150vw, 100vw";
 export function heroSrcSet(ext: "avif" | "webp"): string {
   return HERO_PHOTO_WIDTHS.map((w) => `/hero/option-a-shot3-${w}.${ext} ${w}w`).join(", ");
 }

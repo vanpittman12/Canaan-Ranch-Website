@@ -133,8 +133,8 @@ describe("live homepage hero", () => {
     expect(photoHero).not.toContain("QuietTortoise");
     expect(photoHero).not.toContain("longleaf-tortoise");
     expect(css).toContain("object-fit: cover");
-    expect(css).toContain("object-position: 55% 54%");
-    expect(css).toContain("object-position: 50% 52%");
+    expect(css).toContain("object-position: 55% 60%");
+    expect(css).toContain("object-position: 52% 62%");
     expect(css).toContain(".hero-photo-frame");
     expect(css).not.toContain(".hero-preview-visual");
     expect(css).not.toContain(".habitat-sky");

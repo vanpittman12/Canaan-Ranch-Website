@@ -54,37 +54,53 @@ export function HomePage() {
       <SiteHeader />
       <main>
         <section className="relative overflow-hidden border-b border-line bg-forest-deep text-cream">
-          <PhotoSavannaHero />
-          <div className="relative mx-auto w-full max-w-6xl px-5 min-h-[80svh] pt-16 pb-12 sm:px-8 md:min-h-[min(88svh,46rem)] lg:pt-24">
-            <div className="max-w-3xl">
-              <div className="hero-copy">
-                <h1 className="type-h1 hero-copy-title max-w-3xl text-cream">{brand.name}</h1>
-                <div className="mt-4">
-                  <span className="fwc-badge fwc-badge-on-forest">{brand.heroRecipientBadge}</span>
+          {/* Photo frame scoped to the hero copy + CTAs only (not the status cards) so
+              cover renders at a sensible scale on phones. */}
+          <div className="relative">
+            <PhotoSavannaHero />
+            <div className="relative mx-auto w-full max-w-6xl px-5 min-h-[80svh] pt-16 pb-16 sm:px-8 md:min-h-[min(88svh,46rem)] lg:pt-24">
+              <div className="max-w-3xl">
+                <div className="hero-copy">
+                  <h1 className="type-h1 hero-copy-title max-w-3xl text-cream">
+                    {brand.name}
+                  </h1>
+                  <div className="mt-4">
+                    <span className="fwc-badge fwc-badge-on-forest">
+                      {brand.heroRecipientBadge}
+                    </span>
+                  </div>
+                  <p className="hero-copy-body mt-6 max-w-2xl text-[17px] leading-[27px] text-cream">
+                    {brand.heroBody}
+                  </p>
                 </div>
-                <p className="hero-copy-body mt-6 max-w-2xl text-[17px] leading-[27px] text-cream">
-                  {brand.heroBody}
-                </p>
-              </div>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Link
-                  href="/intake"
-                  prefetch={false}
-                  className="btn-primary bg-cream text-forest hover:bg-white"
-                >
-                  {brand.intakeCta}
-                </Link>
-                <TemplateDownloadButton variant="dark" />
-                <a href="#how-it-works" className="btn-secondary border-cream/35 bg-transparent text-cream">
-                  How it works
-                </a>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  <Link
+                    href="/intake"
+                    prefetch={false}
+                    className="btn-primary bg-cream text-forest hover:bg-white"
+                  >
+                    {brand.intakeCta}
+                  </Link>
+                  <TemplateDownloadButton variant="dark" />
+                  <a
+                    href="#how-it-works"
+                    className="btn-secondary border-cream/35 bg-transparent text-cream"
+                  >
+                    How it works
+                  </a>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div className="mt-16 min-w-0 overflow-hidden rounded-[16px] border border-line/30">
+          <div className="relative mx-auto w-full max-w-6xl px-5 pb-12 sm:px-8">
+            <div className="min-w-0 overflow-hidden rounded-[16px] border border-line/30">
               <dl className="grid w-full min-w-0 grid-cols-2 gap-px bg-forest-deep/80 md:grid-cols-4">
                 {facts.map((fact) => (
-                  <div key={fact.label} className="min-w-0 overflow-hidden bg-forest px-3 py-4 sm:px-5 sm:py-5">
+                  <div
+                    key={fact.label}
+                    className="min-w-0 overflow-hidden bg-forest px-3 py-4 sm:px-5 sm:py-5"
+                  >
                     <dt className="text-[11px] font-semibold uppercase tracking-[0.1em] text-brass sm:text-[12px] sm:tracking-[0.12em]">
                       {fact.label}
                     </dt>
@@ -105,7 +121,10 @@ export function HomePage() {
 
         <ServiceAreaMap />
 
-        <section id="how-it-works" className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
+        <section
+          id="how-it-works"
+          className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8"
+        >
           <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
             How it works
           </p>
@@ -118,8 +137,12 @@ export function HomePage() {
                 {index < steps.length - 1 ? (
                   <span className="pointer-events-none absolute top-8 right-[-10px] hidden h-px w-4 bg-line xl:block" />
                 ) : null}
-                <p className="text-sm font-semibold tracking-[0.18em] text-brass">{step.n}</p>
-                <h3 className="mt-3 font-serif text-2xl font-medium text-forest">{step.title}</h3>
+                <p className="text-sm font-semibold tracking-[0.18em] text-brass">
+                  {step.n}
+                </p>
+                <h3 className="mt-3 font-serif text-2xl font-medium text-forest">
+                  {step.title}
+                </h3>
                 <p className="mt-3 text-sm leading-7 text-muted">{step.body}</p>
               </li>
             ))}
@@ -144,13 +167,15 @@ export function HomePage() {
 
         <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
           <div className="rounded-[16px] border border-line bg-forest px-8 py-12 text-cream sm:px-14">
-            <h2 className="type-h2 max-w-xl text-cream">Start the five steps.</h2>
+            <h2 className="type-h2 max-w-xl text-cream">
+              Start the five steps.
+            </h2>
             <p className="mt-4 max-w-xl text-[17px] leading-[27px] text-cream/80">
               {brand.flowInvite}
             </p>
             <p className="mt-4 text-sm font-medium text-cream">
-              {formatUsd(brand.defaultPerGtRate)} per adult · {formatUsd(brand.juvenileRate)} per
-              juvenile
+              {formatUsd(brand.defaultPerGtRate)} per adult ·{" "}
+              {formatUsd(brand.juvenileRate)} per juvenile
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
