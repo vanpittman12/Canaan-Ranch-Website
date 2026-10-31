@@ -357,18 +357,9 @@ html:has(.intake-form) {
 /* Live hero: portrait savanna photo (shot 3) cropped into the headline band. */
 .hero-photo-frame {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 40%;
+  inset: 0;
   overflow: hidden;
   pointer-events: none;
-}
-
-@media (max-width: 767px) {
-  .hero-photo-frame {
-    bottom: 46%;
-  }
 }
 
 .hero-photo {
@@ -378,12 +369,12 @@ html:has(.intake-form) {
   height: 100%;
   max-width: none;
   object-fit: cover;
-  object-position: 55% 54%;
+  object-position: 55% 60%;
 }
 
 @media (max-width: 767px) {
   .hero-photo {
-    object-position: 50% 52%;
+    object-position: 52% 62%;
   }
 }
 
@@ -400,7 +391,9 @@ html:has(.intake-form) {
       rgba(18, 30, 22, 0.22) 70%,
       transparent 90%
     ),
-    linear-gradient(180deg, rgba(18, 30, 22, 0.42) 0%, transparent 44%);
+    linear-gradient(180deg, rgba(18, 30, 22, 0.42) 0%, transparent 44%),
+    /* Bottom fade so the photo settles into the forest band below the hero. */
+    linear-gradient(180deg, transparent 65%, rgba(18, 30, 22, 0.85) 100%);
 }
 
 /* Soft forest panel behind title/badge/body — no card border; photo still reads through. */
