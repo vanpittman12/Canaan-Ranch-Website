@@ -243,4 +243,20 @@ describe("icons and share image", () => {
     expect(layout).toContain("/apple-touch-icon.png");
     expect(layout).toContain("OG_IMAGE");
   });
+
+  it.each([
+    ["garbage body", "not xml at all"],
+    ["no envelope id", "<?xml version=\"1.0\"?><DocuSignEnvelopeInformation/>"],
+  ])("invalid request (%s) gets a plain 200 ok", async (_label, body) => {
+    const response = await POST(webhook(body));
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("ok");
+  });
+
+  it("unsigned nudge for an unknown envelope gets a plain 200 ok", async () => {
+    store.getEngagementByEnvelopeId.mockResolvedValue(null);
+    const response = await POST(webhook(xmlBody()));
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("ok");
+  });
 });

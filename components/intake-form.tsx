@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { createEngagement, updateIntake, type ActionState } from "@/app/actions/engagements";
 import { TurnstileWidget } from "@/components/turnstile-widget";
+import { INTAKE_HONEYPOT_FIELD } from "@/lib/intake-spam";
 import { brand } from "@/lib/brand";
 import {
   INTAKE_STEPS,
@@ -298,6 +299,21 @@ export function IntakeForm({
       className="intake-form space-y-8"
     >
       <div className="intake-scroll space-y-8">
+        {/* Spam trap: hidden from people and assistive tech; bots fill it. */}
+        <div
+          aria-hidden="true"
+          style={{ position: "absolute", left: "-10000px", top: "auto", width: 1, height: 1, overflow: "hidden" }}
+        >
+          <label htmlFor={INTAKE_HONEYPOT_FIELD}>Leave this field empty</label>
+          <input
+            id={INTAKE_HONEYPOT_FIELD}
+            name={INTAKE_HONEYPOT_FIELD}
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            defaultValue=""
+          />
+        </div>
       {bannerMessage ? (
         <div
           id="intake-form-error"

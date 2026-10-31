@@ -18,11 +18,42 @@ type Ctx = { waitUntil(promise: Promise<unknown>): void; passThroughOnException(
  * reference id; Cloudflare often logs only the stack with an empty message.
  * Reject early with a clear warn so Observability stays actionable.
  */
+/**
+ * Plain-http safety net. Cloudflare's edge already 301s http:// before the
+ * Worker runs (checked 2026-10-31), but if that setting is ever turned off the
+ * Worker must not serve the site over http.
+ */
+function httpsRedirect(request: Request): Response | null {
+  const url = new URL(request.url);
+  const forwarded = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim().toLowerCase();
+  let visitorScheme: string | undefined;
+  try {
+    visitorScheme = (JSON.parse(request.headers.get("cf-visitor") ?? "{}") as { scheme?: string }).scheme;
+  } catch {
+    visitorScheme = undefined;
+  }
+  const isHttp = url.protocol === "http:" && (visitorScheme === "http" || forwarded === "http");
+  const local = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+  if (!isHttp || local) {
+    return null;
+  }
+  url.protocol = "https:";
+  url.port = "";
+  return new Response(null, {
+    status: 301,
+    headers: { Location: url.toString(), "Cache-Control": "no-store" },
+  });
+}
+
 async function fetchWithActionGuard(
   request: Request,
   env: Env,
   ctx: Ctx,
 ): Promise<Response> {
+  const upgrade = httpsRedirect(request);
+  if (upgrade) {
+    return upgrade;
+  }
   if (request.method === "POST") {
     const actionId = request.headers.get("next-action");
     if (actionId != null && !isPlausibleServerActionId(actionId)) {

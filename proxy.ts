@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { ADMIN_COOKIE, verifyAdminSession } from "@/lib/auth";
+import { ADMIN_COOKIE, verifyAdminSessionSignature } from "@/lib/auth";
 import { wwwToApexUrl } from "@/lib/site";
 
 export async function proxy(request: NextRequest) {
@@ -21,7 +21,9 @@ export async function proxy(request: NextRequest) {
   }
 
   const token = request.cookies.get(ADMIN_COOKIE)?.value;
-  if (!(await verifyAdminSession(token))) {
+  // Signature/expiry only here; the admin layout and actions also check
+  // revocation (session version in D1).
+  if (!(await verifyAdminSessionSignature(token))) {
     const login = new URL("/admin/login", request.url);
     login.searchParams.set("from", pathname);
     return NextResponse.redirect(login);

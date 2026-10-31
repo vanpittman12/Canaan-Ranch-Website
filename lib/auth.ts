@@ -1,3 +1,5 @@
+import { currentAdminSessionVersion } from "./security-state";
+
 export const ADMIN_COOKIE = "cr_admin_session";
 const MAX_AGE_SECONDS = 60 * 60 * 12;
 const DOCUMENT_TOKEN_TTL_MS = 2 * 60 * 60 * 1000;
@@ -94,29 +96,56 @@ async function sign(value: string) {
   return bytesToBase64Url(signature);
 }
 
-export async function createAdminSession() {
+/**
+ * Session token: `<version>.<issuedAt>.<hmac>`. `version` is the admin session
+ * version in D1 (lib/security-state.ts); logout bumps it, which revokes every
+ * session issued before. Legacy two-part tokens are rejected (one re-login).
+ */
+export async function createAdminSession(version?: number) {
+  const v = version ?? (await currentAdminSessionVersion());
   const issuedAt = Date.now().toString();
-  return `${issuedAt}.${await sign(issuedAt)}`;
+  const payload = `${v}.${issuedAt}`;
+  return `${payload}.${await sign(payload)}`;
+}
+
+function parseSession(token: string | undefined | null) {
+  if (!token || typeof token !== "string" || token.length > 256) {
+    return null;
+  }
+  const parts = token.split(".");
+  if (parts.length !== 3) {
+    return null;
+  }
+  const [version, issuedAt, signature] = parts;
+  if (!signature || !/^\d{1,12}$/.test(version) || !/^\d{1,16}$/.test(issuedAt)) {
+    return null;
+  }
+  return { version: Number(version), issuedAt: Number(issuedAt), payload: `${version}.${issuedAt}`, signature };
+}
+
+/**
+ * Signature + expiry only (no D1). Used by the edge proxy as a cheap pre-check;
+ * pages and actions call `verifyAdminSession`, which also checks revocation.
+ */
+export async function verifyAdminSessionSignature(token: string | undefined | null) {
+  const parsed = parseSession(token);
+  if (!parsed) {
+    return false;
+  }
+  const expected = await sign(parsed.payload);
+  if (!signaturesMatch(parsed.signature, expected)) {
+    return false;
+  }
+  const ageMs = Date.now() - parsed.issuedAt;
+  return Number.isFinite(ageMs) && ageMs >= 0 && ageMs < MAX_AGE_SECONDS * 1000;
 }
 
 export async function verifyAdminSession(token: string | undefined | null) {
-  if (!token || typeof token !== "string") {
+  if (!(await verifyAdminSessionSignature(token))) {
     return false;
   }
-  const parts = token.split(".");
-  if (parts.length !== 2) {
-    return false;
-  }
-  const [issuedAt, signature] = parts;
-  if (!issuedAt || !signature || !/^\d+$/.test(issuedAt)) {
-    return false;
-  }
-  const expected = await sign(issuedAt);
-  if (!signaturesMatch(signature, expected)) {
-    return false;
-  }
-  const ageMs = Date.now() - Number(issuedAt);
-  return Number.isFinite(ageMs) && ageMs >= 0 && ageMs < MAX_AGE_SECONDS * 1000;
+  const parsed = parseSession(token)!;
+  return parsed.version === (await currentAdminSessionVersion());
 }
 
 export function sessionCookieOptions() {
