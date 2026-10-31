@@ -71,8 +71,13 @@ for (const route of LEGAL_ROUTES) {
   }
   copyFileSync(htmlSrc, path.join(assetsDir, `${route}.html`));
 
+  // OpenNext <=1.20.6 wrote `<build>/<route>.cache`; newer releases nest it
+  // under `<build>/route-cache/APP_PAGE/<hash>/$/<route>.cache`.
   const cacheHit = cacheBuilds.some((dir) =>
-    existsSync(path.join(cacheRoot, dir.name, `${route}.cache`)),
+    existsSync(path.join(cacheRoot, dir.name, `${route}.cache`)) ||
+    readdirSync(path.join(cacheRoot, dir.name), { recursive: true }).some(
+      (entry) => path.basename(String(entry)) === `${route}.cache`,
+    ),
   );
   if (!cacheHit) {
     fail(`OpenNext cache is missing ${route}.cache`);
