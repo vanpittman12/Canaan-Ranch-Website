@@ -26,6 +26,13 @@ import {
 } from "@/lib/store";
 import { hasPdfMagicBytes } from "@/lib/http";
 import { originalFileName } from "@/lib/storage/names";
+import { honeypotTripped } from "@/lib/intake-spam";
+import {
+  clientKey,
+  INTAKE_SUBMIT_RULE,
+  rateLimitStatus,
+  recordRateLimitHit,
+} from "@/lib/security-state";
 import { verifyTurnstile } from "@/lib/turnstile";
 import {
   flattenZodErrors,
@@ -44,6 +51,15 @@ export async function createEngagement(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const rawIp = (await headers()).get("cf-connecting-ip");
+  const ip = clientKey(rawIp);
+
+  // Spam trap filled: pretend success, store nothing.
+  if (honeypotTripped(formData)) {
+    console.warn(`[intake] honeypot tripped ip=${ip}; submission dropped`);
+    redirect("/intake?received=1");
+  }
+
   const parsed = intakeSchema.safeParse(formDataToObject(formData));
   if (!parsed.success) {
     return {
@@ -53,12 +69,18 @@ export async function createEngagement(
   }
 
   // Checked after field validation so a field error does not burn the token.
-  const human = await verifyTurnstile(formData, {
-    remoteIp: (await headers()).get("cf-connecting-ip"),
-  });
+  const human = await verifyTurnstile(formData, { remoteIp: rawIp });
   if (!human.ok) {
     return { error: human.error };
   }
+
+  // 10 accepted submissions per IP per hour.
+  const limitKey = `intake:${ip}`;
+  if ((await rateLimitStatus(limitKey, INTAKE_SUBMIT_RULE)).blocked) {
+    console.warn(`[intake] rate limit reached ip=${ip}`);
+    return { error: "Too many submissions from this connection. Please try again later." };
+  }
+  await recordRateLimitHit(limitKey, INTAKE_SUBMIT_RULE);
 
   const engagement = await persistAndNotifyNewEngagement(() =>
     createEngagementRecord(publicIntakeFields(parsed.data)),

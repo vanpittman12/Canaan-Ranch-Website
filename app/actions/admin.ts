@@ -32,6 +32,14 @@ import {
   persistReservationLetter,
 } from "@/lib/reservation-letter-persist";
 import { getEngagement, putUpload, saveEngagement } from "@/lib/store";
+import {
+  ADMIN_LOGIN_RULE,
+  bumpAdminSessionVersion,
+  clearRateLimit,
+  clientKey,
+  rateLimitStatus,
+  recordRateLimitHit,
+} from "@/lib/security-state";
 import { verifyTurnstile } from "@/lib/turnstile";
 import type { ReviewDecision } from "@/lib/types";
 
@@ -46,22 +54,47 @@ export async function requireAdmin() {
   }
 }
 
+const LOGIN_FAILED_MESSAGE = "Sign-in failed. Check the password and try again later.";
+const LOGIN_FAILURE_DELAY_MS = 500;
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function loginAdmin(
   _prev: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
-  const human = await verifyTurnstile(formData, {
-    remoteIp: (await headers()).get("cf-connecting-ip"),
-  });
+  const rawIp = (await headers()).get("cf-connecting-ip");
+  const ip = clientKey(rawIp);
+  const limitKey = `admin-login:${ip}`;
+
+  // Locked out: same generic message, no password check at all.
+  const status = await rateLimitStatus(limitKey, ADMIN_LOGIN_RULE);
+  if (status.blocked) {
+    console.warn(
+      `[admin-login] blocked ip=${ip} failures=${status.count} until=${new Date(status.resetAt).toISOString()}`,
+    );
+    await delay(LOGIN_FAILURE_DELAY_MS);
+    return { error: LOGIN_FAILED_MESSAGE };
+  }
+
+  const human = await verifyTurnstile(formData, { remoteIp: rawIp });
   if (!human.ok) {
     return { error: human.error };
   }
 
   const password = String(formData.get("password") ?? "");
   if (!passwordsMatch(password)) {
-    return { error: "That password is not recognized." };
+    const after = await recordRateLimitHit(limitKey, ADMIN_LOGIN_RULE);
+    console.warn(
+      `[admin-login] failed attempt ip=${ip} failures=${after.count}/${ADMIN_LOGIN_RULE.limit}${after.blocked ? " (now locked)" : ""}`,
+    );
+    await delay(LOGIN_FAILURE_DELAY_MS);
+    return { error: LOGIN_FAILED_MESSAGE };
   }
 
+  await clearRateLimit(limitKey);
   const jar = await cookies();
   jar.set(ADMIN_COOKIE, await createAdminSession(), sessionCookieOptions());
   redirect("/admin");
@@ -69,6 +102,10 @@ export async function loginAdmin(
 
 export async function logoutAdmin() {
   const jar = await cookies();
+  // Only a valid session may revoke (prevents anonymous logout-spam).
+  if (await verifyAdminSession(jar.get(ADMIN_COOKIE)?.value)) {
+    await bumpAdminSessionVersion();
+  }
   jar.delete(ADMIN_COOKIE);
   redirect("/admin/login");
 }
