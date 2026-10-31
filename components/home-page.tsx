@@ -55,7 +55,7 @@ export function HomePage() {
       <main>
         <section className="relative overflow-hidden border-b border-line bg-forest-deep text-cream">
           <PhotoSavannaHero />
-          <div className="relative mx-auto w-full max-w-6xl px-5 pt-16 pb-12 sm:px-8 lg:min-h-[34rem] lg:pt-24">
+          <div className="relative mx-auto w-full max-w-6xl px-5 min-h-[80svh] pt-16 pb-12 sm:px-8 md:min-h-[min(88svh,46rem)] lg:pt-24">
             <div className="max-w-3xl">
               <div className="hero-copy">
                 <h1 className="type-h1 hero-copy-title max-w-3xl text-cream">{brand.name}</h1>
