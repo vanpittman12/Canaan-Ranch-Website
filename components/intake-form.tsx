@@ -894,7 +894,15 @@ function IntakeAgreementDates() {
   );
 
   useEffect(() => {
-    setPreview(agreementDatePreview());
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setPreview(agreementDatePreview());
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (

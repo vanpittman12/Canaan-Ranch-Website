@@ -125,7 +125,7 @@ export function HomePage() {
           id="how-it-works"
           className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8"
         >
-          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
             How it works
           </p>
           <h2 className="type-h2 mt-3 max-w-xl text-forest">
@@ -137,7 +137,7 @@ export function HomePage() {
                 {index < steps.length - 1 ? (
                   <span className="pointer-events-none absolute top-8 right-[-10px] hidden h-px w-4 bg-line xl:block" />
                 ) : null}
-                <p className="text-sm font-semibold tracking-[0.18em] text-brass">
+                <p className="text-sm font-semibold tracking-[0.18em] text-brass-ink">
                   {step.n}
                 </p>
                 <h3 className="mt-3 font-serif text-2xl font-medium text-forest">

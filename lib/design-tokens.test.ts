@@ -47,6 +47,7 @@ describe("site builder visual lock", () => {
     expect(css).toContain("--forest-deep: #16241c");
     expect(css).toContain("--sage: #7a8f6a");
     expect(css).toContain("--brass: #c4a15a");
+    expect(css).toContain("--brass-ink: #7a5e22");
     expect(css).toContain("--terracotta: #9c4b32");
     expect(css).toContain("--white: #fffcf7");
     expect(css).toContain('--focus-ring: 2px solid var(--brass)');
@@ -318,5 +319,11 @@ describe("site builder visual lock", () => {
     expect(header).not.toContain("FWC sites");
     expect(footer).not.toContain("FWC recipient-site guidance");
     expect(landing).toContain("whitespace-normal text-center xl:whitespace-nowrap");
+  });
+
+  it("uses WCAG AA brass-ink on light surfaces and readable footer text", () => {
+    expect(landing).toContain("text-brass-ink");
+    expect(intakePage).toContain("text-brass-ink");
+    expect(footer).not.toContain("text-cream/50");
   });
 });

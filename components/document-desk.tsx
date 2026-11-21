@@ -9,7 +9,7 @@ export function DocumentDesk({
 }) {
   return (
     <section className="surface-card border-forest/25">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
         Document desk
       </p>
       <h2 className="type-h2 mt-2 text-forest">Download the populated agreement</h2>
