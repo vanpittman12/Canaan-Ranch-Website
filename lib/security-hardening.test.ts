@@ -174,6 +174,8 @@ describe("worker config hardening", () => {
       expect(src).toContain("nosniff");
       expect(src).toContain("strict-origin-when-cross-origin");
       expect(src).toContain("camera=(), microphone=(), geolocation=()");
+      expect(src).toContain("https://static.cloudflareinsights.com");
+      expect(src).toContain("https://cloudflareinsights.com");
     }
   });
 });

@@ -44,7 +44,7 @@ export default async function AdminQueuePage({
       <main className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
               Internal
             </p>
             <h1 className="type-h1 mt-2 text-forest">Review ledger</h1>

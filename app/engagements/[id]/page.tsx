@@ -54,7 +54,7 @@ export default async function EngagementPage({
       <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8">
         <div className="flex flex-col gap-4 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
               {engagement.reference}
             </p>
             <h1 className="type-h1 mt-2 text-forest">{dealTitle(engagement.intake)}</h1>
@@ -113,7 +113,7 @@ function ConfirmationCard({ engagement }: { engagement: Engagement }) {
 
   return (
     <section className="mt-6 rounded-[16px] border border-line bg-cream p-5">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
         Confirmation
       </p>
       <h2 className="type-h2 mt-2 text-forest">{engagement.reference}</h2>

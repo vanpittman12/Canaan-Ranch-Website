@@ -11,6 +11,7 @@
   --forest-deep: #16241c;
   --sage: #7a8f6a;
   --brass: #c4a15a;
+  --brass-ink: #7a5e22;
   --terracotta: #9c4b32;
   --white: #fffcf7;
 
@@ -51,6 +52,7 @@
   --color-paper: var(--paper);
   --color-wheat: var(--wheat);
   --color-brass: var(--brass);
+  --color-brass-ink: var(--brass-ink);
   --color-terracotta: var(--terracotta);
   --color-muted: var(--muted);
   --color-line: var(--line);

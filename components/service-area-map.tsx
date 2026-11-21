@@ -30,7 +30,7 @@ export function ServiceAreaMap() {
   return (
     <section id="service-area" className="border-b border-line bg-paper">
       <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
-        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
           {serviceAreaCopy.heading}
         </p>
         <h2 className="type-h2 mt-3 max-w-3xl text-forest">{serviceAreaCopy.title}</h2>

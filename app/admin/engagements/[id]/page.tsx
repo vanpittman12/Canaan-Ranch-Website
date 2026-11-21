@@ -47,7 +47,7 @@ export default async function AdminEngagementPage({
         </Link>
         <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
               {engagement.reference}
             </p>
             <h1 className="type-h1 mt-2 text-forest">

@@ -11,7 +11,7 @@ import {
 export function FwcSavingsModule() {
   return (
     <div id="fwc-savings" className="min-w-0 overflow-x-hidden">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
         FWC mitigation contribution
       </p>
       <h2 className="type-h2 mt-3 max-w-3xl text-forest">{fwcSavingsCopy.heading}</h2>

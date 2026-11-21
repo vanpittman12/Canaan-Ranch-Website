@@ -57,7 +57,7 @@ export function SiteFooter() {
           >
             Team sign in
           </Link>
-          <p className="pt-2 text-xs text-cream/50">
+          <p className="pt-2 text-xs text-cream/70">
             Standard relocation agreement form. Not a substitute for legal counsel.
           </p>
         </div>

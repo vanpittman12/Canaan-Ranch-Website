@@ -4,7 +4,7 @@ export function ProgramOffer() {
   return (
     <section id="what-we-offer" className="border-b border-line bg-cream">
       <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8">
-        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
           {programOfferCopy.heading}
         </p>
         <h2 className="type-h2 mt-3 max-w-xl text-forest">{programOfferCopy.intro}</h2>

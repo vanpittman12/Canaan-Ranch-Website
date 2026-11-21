@@ -23,7 +23,7 @@ export default function IntakePage() {
     <>
       <SiteHeader />
       <main className="mx-auto w-full max-w-3xl px-5 py-12 sm:px-8">
-        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
           Buyer intake
         </p>
         <h1 className="type-h1 mt-3 text-forest">{brand.intakeCta}.</h1>
@@ -48,7 +48,7 @@ export default function IntakePage() {
         </div>
 
         <aside className="surface-card mt-10">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-brass-ink">
             Before you start
           </p>
           <h2 className="type-h2 mt-2 text-forest">About {INTAKE_MINUTES} minutes</h2>
